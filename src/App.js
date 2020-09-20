@@ -31,33 +31,70 @@ function Box(props) {
     </mesh>
   );
 }
-function Combat(props) {
-  const [selected, setSelected] = useState({});
-  const heroes = props.data.heroes;
+
+
+function PartySelector({data, startCombat}) {
+  // TODO: let the user set the party
+  const [party, setParty] = useState([
+    data.heroes[0].id,
+    data.heroes[0].id,
+    data.heroes[0].id,
+    data.heroes[0].id,
+    data.heroes[0].id
+  ]);
 
   return (
     <div>
-      <Canvas>
-        <ambientLight />
-        <pointLight position={[10, 10, 10]} />
-        <Box position={[-1.2, 0, 0]} />
-        <Box position={[1.2, 0, 0]} />
-      </Canvas>
-      ;
-      <div>
-        {heroes.map((h) => (
-          <Hero
-            onClick={() => {
-              setSelected({ ...selected, [h.id]: !selected[h.id] });
-            }}
-            key={h.id}
-            hero={h}
-            selected={selected[h.id]}
-          ></Hero>
-        ))}
-      </div>
+      {party.map((id) => {
+        const h = data.heroes.find(hero => hero.id === id);
+        return <Hero hero={h} key={id}/>
+      })}
+      <button onClick={() => startCombat(party)}>Gooooooooooooo!</button>
     </div>
-  );
+  )
+}
+
+function BattleRenderer() {
+  return (
+    <Canvas>
+      <ambientLight />
+      <pointLight position={[10, 10, 10]} />
+      <Box position={[-1.2, 0, 0]} />
+      <Box position={[1.2, 0, 0]} />
+    </Canvas>
+  )
+}
+
+
+function Spinner() {
+  return <div/>
+}
+
+
+function Combat({data}) {
+  const [state, setState] = useState('selectParty');
+  const [party, setParty] = useState(null);
+
+  function startCombat(party) {
+    setParty(party);
+    setState('simulate');
+  }
+
+  useEffect(() => {
+    if (state === 'simulate') {
+      // TODO: fetch results here
+      console.log(party);
+      setState('renderBattle');
+    }
+  }, [state])
+
+  return (
+    <div>
+      { state === 'selectParty' && <PartySelector data={data} startCombat={startCombat}/> }
+      { state === 'simulate' && <Spinner/> }
+      { state === 'renderBattle' && <BattleRenderer/> }
+    </div>
+  )
 }
 
 function Map(props) {

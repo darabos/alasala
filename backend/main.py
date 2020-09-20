@@ -4,8 +4,11 @@ import sqlite3
 app = flask.Flask('backend')
 
 def init_table(c, test, commands):
-  print(query(c, test))
-  if not query(c, test):
+  try:
+    test_success = query(c, test)
+  except sqlite3.OperationalError:
+    test_success = False
+  if not test_success:
     for s in commands.strip().split('\n'):
       print(s)
       c.execute(s)
@@ -15,18 +18,19 @@ def db():
   if db is None:
     db = flask.g._database = sqlite3.connect('db')
     c = db.cursor()
-    print(query(c, 'select * from users'))
-    print(query(c, 'SELECT name FROM sqlite_master WHERE type="table"'))
     init_table(c, 'select * from users where email = "test"', '''
       drop table if exists users
       create table users (email text, stage int, day int)
       insert into users values ("test", 0, 1)
       ''')
+
     init_table(c, 'select * from heroes where user = "test"', '''
       drop table if exists heroes
       create table heroes (name text, level int, user text)
       insert into heroes values ("cube", 1, "test")
       ''')
+    print(query(c, 'select * from users'))
+    print(query(c, 'SELECT name FROM sqlite_master WHERE type="table"'))
   return db.cursor()
 
 @app.teardown_appcontext
