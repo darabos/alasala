@@ -39,18 +39,26 @@ function Combat() {
 }
 
 function Map(props) {
-  console.log(props);
   return <div>
-    current stage: {props.data.progress.stage}
+    <p>day {props.data.progress.day}</p>
+    <p>current stage: {props.data.progress.stage}</p>
+    <p><button onClick={props.searchBeach}>search the beach</button></p>
   </div>;
 }
 
 function Heroes(props) {
   return <div>
-    { props.data.heroes.map(h =>
-    <div key={h.hero}>
-      {h.hero}, level {h.level}
-    </div>) }
+    { props.data.heroes.map(h => <Hero key={h.id} hero={h}></Hero>) }
+  </div>;
+}
+
+function Hero(props) {
+  return <div>{props.hero.name}, level {props.hero.level}</div>;
+}
+
+function Searched(props) {
+  return <div>
+    <Hero hero={props.data.just_found}></Hero>
   </div>;
 }
 
@@ -65,6 +73,16 @@ function App() {
       res => setData(res),
       error => setError(error))
   }, []);
+  function searchBeach() {
+    fetch('/searchbeach', { method: 'POST', headers: { 'Content-Type': 'application/json' },body: JSON.stringify({user: 'test'}) })
+    .then(res => res.json())
+    .then(
+      res => {
+        setData(res);
+        setCurrentPage('searched');
+      },
+      error => setError(error))
+  }
 
   return (
     <div>
@@ -72,9 +90,10 @@ function App() {
       { error && <div>{error}</div> }
       { data && <div>
           { JSON.stringify(data) }
-          { currentPage === 'combat' && <Combat setPage={setCurrentPage} data={data}></Combat> }
-          { currentPage === 'map' && <Map setPage={setCurrentPage} data={data}></Map> }
-          { currentPage === 'heroes' && <Heroes setPage={setCurrentPage} data={data}></Heroes> }
+          { currentPage === 'combat' && <Combat data={data}></Combat> }
+          { currentPage === 'map' && <Map searchBeach={searchBeach} data={data}></Map> }
+          { currentPage === 'heroes' && <Heroes data={data}></Heroes> }
+          { currentPage === 'searched' && <Searched data={data}></Searched> }
         </div> }
       <div>
         <button onClick={() => setCurrentPage('heroes')}>heroes</button>
