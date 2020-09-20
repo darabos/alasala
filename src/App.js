@@ -1,5 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from 'react-three-fiber';
+import { Extrude } from 'drei';
+import * as THREE from 'three';
 import './App.css';
 
 // Copied from example.
@@ -32,46 +34,45 @@ function Box(props) {
   );
 }
 
-
-function PartySelector({data, startCombat}) {
+function PartySelector({ data, startCombat }) {
   // TODO: let the user set the party
   const [party, setParty] = useState([
     data.heroes[0].id,
     data.heroes[0].id,
     data.heroes[0].id,
     data.heroes[0].id,
-    data.heroes[0].id
+    data.heroes[0].id,
   ]);
 
   return (
     <div>
       {party.map((id) => {
-        const h = data.heroes.find(hero => hero.id === id);
-        return <Hero hero={h} key={id}/>
+        const h = data.heroes.find((hero) => hero.id === id);
+        return <Hero hero={h} key={id} />;
       })}
       <button onClick={() => startCombat(party)}>Gooooooooooooo!</button>
     </div>
-  )
+  );
 }
 
 function BattleRenderer() {
   return (
-    <Canvas>
-      <ambientLight />
-      <pointLight position={[10, 10, 10]} />
-      <Box position={[-1.2, 0, 0]} />
-      <Box position={[1.2, 0, 0]} />
-    </Canvas>
-  )
+    <div style={{ height: '50vh' }}>
+      <Canvas>
+        <ambientLight />
+        <pointLight position={[10, 10, 10]} />
+        <Box position={[-1.2, 0, 0]} />
+        <Box position={[1.2, 0, 0]} />
+      </Canvas>
+    </div>
+  );
 }
-
 
 function Spinner() {
-  return <div/>
+  return <div />;
 }
 
-
-function Combat({data}) {
+function Combat({ data }) {
   const [state, setState] = useState('selectParty');
   const [party, setParty] = useState(null);
 
@@ -86,15 +87,17 @@ function Combat({data}) {
       console.log(party);
       setState('renderBattle');
     }
-  }, [state])
+  }, [state]);
 
   return (
     <div>
-      { state === 'selectParty' && <PartySelector data={data} startCombat={startCombat}/> }
-      { state === 'simulate' && <Spinner/> }
-      { state === 'renderBattle' && <BattleRenderer/> }
+      {state === 'selectParty' && (
+        <PartySelector data={data} startCombat={startCombat} />
+      )}
+      {state === 'simulate' && <Spinner />}
+      {state === 'renderBattle' && <BattleRenderer />}
     </div>
-  )
+  );
 }
 
 function Map(props) {
@@ -102,11 +105,69 @@ function Map(props) {
     <div>
       <p>day {props.data.progress.day}</p>
       <p>current stage: {props.data.progress.stage}</p>
+      <div style={{ height: '80vh' }}>
+        <Canvas>
+          <MapDiorama />
+        </Canvas>
+      </div>
       <p>
         <button onClick={props.searchBeach}>search the beach</button>
         <button onClick={() => props.setPage('combat')}>attack</button>
       </p>
     </div>
+  );
+}
+
+function useStatic(fn) {
+  const ref = useRef();
+  if (!ref.current) {
+    ref.current = fn();
+  }
+  return ref.current;
+}
+
+function MapDiorama() {
+  function randomShape(r, n) {
+    const s = new THREE.Shape();
+    const start = r;
+    s.moveTo(r, 0);
+    for (let i = 1; i < n; ++i) {
+      const phi = (i * Math.PI * 2) / n;
+      r = (start * (9 + Math.sin(7 * phi) + Math.sin(8 * phi))) / 9;
+      s.lineTo(r * Math.cos(phi), r * Math.sin(phi));
+    }
+    s.lineTo(start, 0);
+    console.log(s);
+    return s;
+  }
+  const shape = useStatic(() => randomShape(100, 100));
+  const mesh = useRef();
+  useFrame(({ camera }) => {
+    camera.position.z = -200;
+    camera.position.y = 100;
+    camera.lookAt(0, 0, 0);
+    mesh.current.rotation.z += 0.01;
+    mesh.current.rotation.x = Math.PI / 2;
+  });
+  const extrudeSettings = useStatic(() => ({
+    steps: 1,
+    depth: 1,
+    bevelThickness: 5,
+    bevelSize: 5,
+    bevelSegments: 2,
+  }));
+  return (
+    <>
+      <ambientLight />
+      <pointLight position={[0, 100, 0]} />
+      <Extrude
+        ref={mesh}
+        args={[shape, extrudeSettings]}
+        position={new THREE.Vector3(0, 0, 0)}
+      >
+        <meshPhongMaterial attach="material" color="#691" />
+      </Extrude>
+    </>
   );
 }
 
