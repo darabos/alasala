@@ -13,7 +13,8 @@
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.3",
     "react-three-fiber": "^4.2.21",
-    "three": "^0.120.1"
+    "three": "^0.120.1",
+    "use-cannon": "^0.5.2"
   },
   "scripts": {
     "start": "react-scripts start",
