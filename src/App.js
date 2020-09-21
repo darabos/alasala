@@ -14,7 +14,7 @@ import { EffectComposer, DepthOfField, Bloom } from 'react-postprocessing';
 import './App.css';
 
 function BasePlane(props) {
-  const ref = usePlane(() => ({
+  usePlane(() => ({
     material: {
       friction: 0.2,
     },
@@ -36,7 +36,7 @@ function Box(props) {
   const masterZ = -3;
   const springLength = 0.3;
 
-  const [ref, api] = useBox(() => ({
+  const [ref] = useBox(() => ({
     mass: 1,
     material: {
       friction: 0.01,
@@ -108,20 +108,17 @@ function Box(props) {
   );
 }
 
-function PartySelector({ data, startCombat }) {
-  // TODO: let the user set the party
-  console.log(data);
-  const [party, setParty] = useState([
-    data.heroes[0].id,
-    data.heroes[1].id,
-    data.heroes[2].id,
-  ]);
+function PartySelector({ data, party, setParty, startCombat }) {
+  function toggleHero(h) {
+    // TODO: let the user set the party
+    setParty(party);
+  }
 
   return (
     <div>
       {party.map((id) => {
         const h = data.heroes.find((hero) => hero.id === id);
-        return <Hero hero={h} key={id} />;
+        return <Hero onClick={() => toggleHero(h)} hero={h} key={id} />;
       })}
       <button onClick={() => startCombat(party)}>Gooooooooooooo!</button>
     </div>
@@ -168,31 +165,25 @@ function Spinner() {
 
 function Combat({ data }) {
   const [state, setState] = useState('selectParty');
-  const [party, setParty] = useState(null);
+  const [party, setParty] = useState([data.heroes[0].id, data.heroes[1].id, data.heroes[2].id]);
   const [journal, setJournal] = useState(null);
 
   function startCombat(party) {
-    setParty(party);
     setState('simulate');
+    fetch(
+      `/computecombat?user=test&stage=${data.stage}&party=${party.join()}`
+    )
+      .then((res) => res.json())
+      .then((res) => {
+        setState('renderBattle');
+        setJournal(res);
+      });
   }
-
-  useEffect(() => {
-    if (state === 'simulate') {
-      fetch(
-        `/computecombat?user=test&stage=${data.stage}&party=${party.join()}`
-      )
-        .then((res) => res.json())
-        .then((res) => {
-          setState('renderBattle');
-          setJournal(res);
-        });
-    }
-  }, [state]);
 
   return (
     <div>
       {state === 'selectParty' && (
-        <PartySelector data={data} startCombat={startCombat} />
+        <PartySelector party={party} setParty={setParty} data={data} startCombat={startCombat} />
       )}
       {state === 'simulate' && <Spinner />}
       {state === 'renderBattle' && <BattleRenderer journal={journal} />}
@@ -306,7 +297,7 @@ function MapDiorama({ effects }) {
       p.add(dir);
     }
     return stones;
-  });
+  }, []);
 
   const stoneInstances = useCallback(
     (mesh) => {
