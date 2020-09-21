@@ -217,14 +217,6 @@ function Map(props) {
   );
 }
 
-function useStatic(fn) {
-  const ref = useRef();
-  if (!ref.current) {
-    ref.current = fn();
-  }
-  return ref.current;
-}
-
 const tmpo = new THREE.Object3D();
 
 function MapDiorama({ effects }) {
@@ -240,15 +232,24 @@ function MapDiorama({ effects }) {
     s.lineTo(start, 0);
     return s;
   }
-  const shape = useStatic(() => randomShape(100, 100));
-  const mesh = useRef();
-  const extrudeSettings = useStatic(() => ({
-    steps: 1,
-    depth: 1,
-    bevelThickness: 5,
-    bevelSize: 5,
-    bevelSegments: 2,
-  }));
+  const layers = useMemo(
+    () => [
+      { shape: randomShape(100, 100), y: 0, color: '#691' },
+      { shape: randomShape(60, 60), y: 5, color: '#562' },
+      { shape: randomShape(30, 30), y: 15, color: '#999' },
+    ],
+    []
+  );
+  const extrudeSettings = useMemo(
+    () => ({
+      steps: 1,
+      depth: 10,
+      bevelThickness: 5,
+      bevelSize: 5,
+      bevelSegments: 2,
+    }),
+    []
+  );
   const treeInstances = useRef();
   const trees = useMemo(
     () =>
@@ -327,15 +328,18 @@ function MapDiorama({ effects }) {
       >
         <WaterMaterial />
       </Plane>
-      <Extrude
-        castShadow
-        receiveShadow
-        ref={mesh}
-        args={[shape, extrudeSettings]}
-        rotation={[Math.PI / 2, 0, 4]}
-      >
-        <meshStandardMaterial attach="material" color="#691" />
-      </Extrude>
+      {layers.map((l) => (
+        <Extrude
+          key={l.y}
+          castShadow
+          receiveShadow
+          args={[l.shape, extrudeSettings]}
+          rotation={[Math.PI / 2, 0, 4]}
+          position={[0, l.y, 0]}
+        >
+          <meshStandardMaterial attach="material" color={l.color} />
+        </Extrude>
+      ))}
       <instancedMesh
         castShadow
         ref={treeInstances}
