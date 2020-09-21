@@ -129,17 +129,8 @@ function Map(props) {
   );
 }
 
-function useStatic(fn) {
-  const ref = useRef();
-  if (!ref.current) {
-    ref.current = fn();
-  }
-  return ref.current;
-}
-
-function MapDiorama() {
-  function randomShape(r, n) {
-    const s = new THREE.Shape();
+function randomShape(r, n) {
+  const s = new THREE.Shape();
     const start = r;
     s.moveTo(r, 0);
     for (let i = 1; i < n; ++i) {
@@ -151,7 +142,17 @@ function MapDiorama() {
     console.log(s);
     return s;
   }
-  const shape = useStatic(() => randomShape(100, 100));
+
+const shape = randomShape(100, 100);
+const extrudeSettings = {
+    steps: 1,
+    depth: 1,
+    bevelThickness: 5,
+    bevelSize: 5,
+    bevelSegments: 2,
+};
+
+function MapDiorama() {
   const mesh = useRef();
   useFrame(({ camera }) => {
     camera.position.z = -200;
@@ -160,13 +161,6 @@ function MapDiorama() {
     mesh.current.rotation.z += 0.01;
     mesh.current.rotation.x = Math.PI / 2;
   });
-  const extrudeSettings = useStatic(() => ({
-    steps: 1,
-    depth: 1,
-    bevelThickness: 5,
-    bevelSize: 5,
-    bevelSegments: 2,
-  }));
   return (
     <>
       <ambientLight />
