@@ -12,21 +12,21 @@ function BasePlane(props) {
     material: {
       friction: 0.2,
     },
-    //    rotation: [-Math.PI / 2, 0, 0]
   }));
 
   return (
-    <mesh ref={ref}>
-      <planeBufferGeometry attach="geometry" args={[10, 10]} />
-      <meshStandardMaterial attach="material" color="red" />
+    <mesh>
+      <planeBufferGeometry attach="geometry" args={[100, 100]} />
+      <meshStandardMaterial attach="material" color="yellow" />
     </mesh>
   );
 }
 
 function Box(props) {
   var current = useRef({ time: 0 }).current;
-  const x = props.trajectory[0][0];
-  const y = props.trajectory[0][1];
+  var mat = useRef();
+  const x = props.trajectory[0].x;
+  const y = props.trajectory[0].y;
   const masterZ = -3;
   const springLength = 0.3;
 
@@ -55,25 +55,31 @@ function Box(props) {
   const [active, setActive] = useState(false);
 
   const lastStage = props.trajectory.length - 2;
-  const stageLength = 300;
+  const stageLength = 60;
 
   // Rotate mesh every frame, this is outside of React without overhead
   useFrame(({ camera }) => {
+    camera.position.x = 12;
+    camera.position.y = 6;
+    camera.position.z = 15;
     current.time += 1;
-    var aX, aY;
-    const stage = Math.floor(current.time / stageLength);
+    var stage = Math.floor(current.time / stageLength);
+    var phase = (current.time % stageLength) / stageLength;
+
     if (stage > lastStage) {
-      aX = props.trajectory[lastStage + 1][0];
-      aY = props.trajectory[lastStage + 1][1];
-    } else {
-      const sX = props.trajectory[stage][0];
-      const sY = props.trajectory[stage][1];
-      const tX = props.trajectory[stage + 1][0];
-      const tY = props.trajectory[stage + 1][1];
-      const phase = (current.time % stageLength) / stageLength;
-      aX = sX * (1 - phase) + tX * phase;
-      aY = sY * (1 - phase) + tY * phase;
+      stage = lastStage;
+      phase = 1;
     }
+    const sX = props.trajectory[stage].x;
+    const sY = props.trajectory[stage].y;
+    const tX = props.trajectory[stage + 1].x;
+    const tY = props.trajectory[stage + 1].y;
+    const aX = sX * (1 - phase) + tX * phase;
+    const aY = sY * (1 - phase) + tY * phase;
+    const l = (props.trajectory[stage].loyalty + 5) / 10;
+    mat.current.color.r = 1 - l;
+    mat.current.color.b = l;
+    mat.current.color.g = 0;
     masterApi.position.set(aX, aY, masterZ);
     masterApi.velocity.set(0, 0, 0);
   });
@@ -88,6 +94,7 @@ function Box(props) {
     >
       <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
       <meshStandardMaterial
+        ref={mat}
         attach="material"
         color={hovered ? 'hotpink' : 'orange'}
       />
@@ -96,8 +103,8 @@ function Box(props) {
 }
 
 function PartySelector({ data, startCombat }) {
-    // TODO: let the user set the party
-    console.log(data);
+  // TODO: let the user set the party
+  console.log(data);
   const [party, setParty] = useState([
     data.heroes[0].id,
     data.heroes[1].id,
@@ -115,7 +122,24 @@ function PartySelector({ data, startCombat }) {
   );
 }
 
-function BattleRenderer() {
+function BattleRenderer(props) {
+  const journal = props.journal;
+  const heroStories = [];
+  console.log('journal', journal);
+  journal &&
+    Object.entries(journal[0]).forEach(([id, value]) => {
+      heroStories.push({
+        id: id,
+        trajectory: journal.map((step) => ({
+          x: step[id].x * 3,
+          y: step[id].y * 3,
+          loyalty: step[id].loyalty,
+        })),
+      });
+    });
+  console.log('stories');
+  console.log(heroStories);
+
   return (
     <div style={{ height: '50vh' }}>
       <Canvas>
@@ -123,33 +147,9 @@ function BattleRenderer() {
         <pointLight position={[10, 10, 10]} />
         <Physics gravity={[0, 0, -10]}>
           <BasePlane />
-          <Box
-            trajectory={[
-              [3, 3],
-              [3, -3],
-              [-3, -3],
-              [-3, 3],
-              [3, 3],
-            ]}
-          />
-          <Box
-            trajectory={[
-              [-5, 0],
-              [5, 0],
-              [-5, 0],
-              [5, 0],
-              [-5, 0],
-            ]}
-          />
-          <Box
-            trajectory={[
-              [0, -3],
-              [0, 3],
-              [0, -3],
-              [0, 3],
-              [0, -3],
-            ]}
-          />
+          {heroStories.map((hero) => (
+            <Box key={hero.id} trajectory={hero.trajectory} />
+          ))}
         </Physics>
       </Canvas>
     </div>
@@ -163,6 +163,7 @@ function Spinner() {
 function Combat({ data }) {
   const [state, setState] = useState('selectParty');
   const [party, setParty] = useState(null);
+  const [journal, setJournal] = useState(null);
 
   function startCombat(party) {
     setParty(party);
@@ -176,8 +177,8 @@ function Combat({ data }) {
       )
         .then((res) => res.json())
         .then((res) => {
-          console.log(res);
           setState('renderBattle');
+          setJournal(res);
         });
     }
   }, [state]);
@@ -188,7 +189,7 @@ function Combat({ data }) {
         <PartySelector data={data} startCombat={startCombat} />
       )}
       {state === 'simulate' && <Spinner />}
-      {state === 'renderBattle' && <BattleRenderer />}
+      {state === 'renderBattle' && <BattleRenderer journal={journal} />}
     </div>
   );
 }
