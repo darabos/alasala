@@ -1,5 +1,6 @@
 import flask
 import sqlite3
+import backend.battle_simulator as bs
 
 app = flask.Flask('backend')
 
@@ -45,12 +46,33 @@ def query(cursor, q, args=()):
   res = cursor.execute(q, args)
   return [dict(zip([c[0] for c in res.description], row)) for row in res]
 
+@app.route('/computecombat')
+def computecombat():
+  user = flask.request.args['user']
+  party = list(map(int, flask.request.args['party'].split(',')))
+  stage = flask.request.args['stage']
+  c = db()
+  heroes = get_heroes_of_user(c, user)
+
+  def find_hero_by_id(id):
+    for h in heroes:
+      if h['id'] == id:
+        return h
+
+  heroes_in_party = [find_hero_by_id(hero_id) for hero_id in party]
+  log = bs.simulate_battle(heroes_in_party, stage)
+  return flask.jsonify(log)
+
+def get_heroes_of_user(c, user):
+  return query(c, 'select rowid as id, * from heroes where user = ?', (user,))
+
+
 @app.route('/getuserdata')
 def getuserdata():
   user = flask.request.args['user']
   c = db()
   progress = query(c, 'select * from users where email = ?', (user,))[0]
-  heroes = query(c, 'select rowid as id, * from heroes where user = ?', (user,))
+  heroes = get_heroes_of_user(c, user)
   return flask.jsonify({'progress': progress, 'heroes': heroes})
 
 @app.route('/searchbeach', methods=['POST'])

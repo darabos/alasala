@@ -82,9 +82,12 @@ function Combat({data}) {
 
   useEffect(() => {
     if (state === 'simulate') {
-      // TODO: fetch results here
-      console.log(party);
-      setState('renderBattle');
+      fetch(
+        `/computecombat?user=test&stage=${data.stage}&party=${party.join()}`
+      ).then(res => {
+        console.log(res);
+        setState('renderBattle');
+      })
     }
   }, [state])
 
