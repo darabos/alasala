@@ -49,10 +49,10 @@ function PartySelector({ data, startCombat }) {
   // TODO: let the user set the party
   const [party, setParty] = useState([
     data.heroes[0].id,
-    data.heroes[0].id,
-    data.heroes[0].id,
-    data.heroes[0].id,
-    data.heroes[0].id,
+    data.heroes[1].id,
+    data.heroes[2].id,
+    data.heroes[3].id,
+    data.heroes[4].id,
   ]);
 
   return (
@@ -96,6 +96,7 @@ function Combat({ data }) {
     if (state === 'simulate') {
       fetch(
         `/computecombat?user=test&stage=${data.stage}&party=${party.join()}`
+      ).then((res) => res.json()
       ).then((res) => {
         console.log(res);
         setState('renderBattle');
