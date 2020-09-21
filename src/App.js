@@ -96,10 +96,10 @@ function Combat({ data }) {
     if (state === 'simulate') {
       fetch(
         `/computecombat?user=test&stage=${data.stage}&party=${party.join()}`
-      ).then(res => {
+      ).then((res) => {
         console.log(res);
         setState('renderBattle');
-      })
+      });
     }
   }, [state]);
 
