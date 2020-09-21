@@ -17,13 +17,14 @@ function BasePlane(props) {
   return (
     <mesh>
       <planeBufferGeometry attach="geometry" args={[100, 100]} />
-      <meshStandardMaterial attach="material" color="black" />
+      <meshStandardMaterial attach="material" color="yellow" />
     </mesh>
   );
 }
 
 function Box(props) {
   var current = useRef({ time: 0 }).current;
+  var mat = useRef();
   const x = props.trajectory[0].x;
   const y = props.trajectory[0].y;
   const masterZ = -3;
@@ -62,20 +63,23 @@ function Box(props) {
     camera.position.y = 6;
     camera.position.z = 15;
     current.time += 1;
-    var aX, aY;
-    const stage = Math.floor(current.time / stageLength);
+    var stage = Math.floor(current.time / stageLength);
+    var phase = (current.time % stageLength) / stageLength;
+
     if (stage > lastStage) {
-      aX = props.trajectory[lastStage + 1].x;
-      aY = props.trajectory[lastStage + 1].y;
-    } else {
-      const sX = props.trajectory[stage].x;
-      const sY = props.trajectory[stage].y;
-      const tX = props.trajectory[stage + 1].x;
-      const tY = props.trajectory[stage + 1].y;
-      const phase = (current.time % stageLength) / stageLength;
-      aX = sX * (1 - phase) + tX * phase;
-      aY = sY * (1 - phase) + tY * phase;
+      stage = lastStage;
+      phase = 1;
     }
+    const sX = props.trajectory[stage].x;
+    const sY = props.trajectory[stage].y;
+    const tX = props.trajectory[stage + 1].x;
+    const tY = props.trajectory[stage + 1].y;
+    const aX = sX * (1 - phase) + tX * phase;
+    const aY = sY * (1 - phase) + tY * phase;
+    const l = (props.trajectory[stage].loyalty + 5) / 10;
+    mat.current.color.r = 1 - l;
+    mat.current.color.b = l;
+    mat.current.color.g = 0;
     masterApi.position.set(aX, aY, masterZ);
     masterApi.velocity.set(0, 0, 0);
   });
@@ -90,6 +94,7 @@ function Box(props) {
     >
       <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
       <meshStandardMaterial
+        ref={mat}
         attach="material"
         color={hovered ? 'hotpink' : 'orange'}
       />
