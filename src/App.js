@@ -131,25 +131,25 @@ function Map(props) {
 
 function randomShape(r, n) {
   const s = new THREE.Shape();
-    const start = r;
-    s.moveTo(r, 0);
-    for (let i = 1; i < n; ++i) {
-      const phi = (i * Math.PI * 2) / n;
-      r = (start * (9 + Math.sin(7 * phi) + Math.sin(8 * phi))) / 9;
-      s.lineTo(r * Math.cos(phi), r * Math.sin(phi));
-    }
-    s.lineTo(start, 0);
-    console.log(s);
-    return s;
+  const start = r;
+  s.moveTo(r, 0);
+  for (let i = 1; i < n; ++i) {
+    const phi = (i * Math.PI * 2) / n;
+    r = (start * (9 + Math.sin(7 * phi) + Math.sin(8 * phi))) / 9;
+    s.lineTo(r * Math.cos(phi), r * Math.sin(phi));
   }
+  s.lineTo(start, 0);
+  console.log(s);
+  return s;
+}
 
 const shape = randomShape(100, 100);
 const extrudeSettings = {
-    steps: 1,
-    depth: 1,
-    bevelThickness: 5,
-    bevelSize: 5,
-    bevelSegments: 2,
+  steps: 1,
+  depth: 1,
+  bevelThickness: 5,
+  bevelSize: 5,
+  bevelSegments: 2,
 };
 
 function MapDiorama() {
