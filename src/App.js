@@ -3,36 +3,84 @@ import { Canvas, useFrame } from 'react-three-fiber';
 import { Plane, Extrude } from 'drei';
 import WaterMaterial from './WaterMaterial.js';
 import * as THREE from 'three';
+import { Physics, useBox, usePlane, useSpring } from 'use-cannon';
 import { EffectComposer, DepthOfField, Bloom } from 'react-postprocessing';
 import './App.css';
 
-// Copied from example.
+function BasePlane(props) {
+  const ref = usePlane(() => ({
+    material: {
+      friction: 0.2,
+    },
+    //    rotation: [-Math.PI / 2, 0, 0]
+  }));
+
+  return (
+    <mesh ref={ref}>
+      <planeBufferGeometry attach="geometry" args={[10, 10]} />
+      <meshStandardMaterial attach="material" color="red" />
+    </mesh>
+  );
+}
+
 function Box(props) {
-  // This reference will give us direct access to the mesh
-  const mesh = useRef();
-  var stage = useRef({ x: 0 });
+  var current = useRef({ time: 0 }).current;
+  const x = props.trajectory[0][0];
+  const y = props.trajectory[0][1];
+  const masterZ = -3;
+  const springLength = 0.3;
+
+  const [ref, api] = useBox(() => ({
+    mass: 1,
+    material: {
+      friction: 0.01,
+    },
+    position: [x, y, 0.5],
+  }));
+
+  const [masterRef, masterApi] = useBox(() => ({
+    type: 'Kinematic',
+    position: [x, y, masterZ],
+  }));
+
+  useSpring(ref, masterRef, {
+    restLength: springLength,
+    stiffness: 12,
+    damping: 2,
+    localAnchorA: [0.9, 0, masterZ + springLength - 0.5],
+  });
 
   // Set up state for the hovered and active state
   const [hovered, setHover] = useState(false);
   const [active, setActive] = useState(false);
 
+  const lastStage = props.trajectory.length - 2;
+  const stageLength = 300;
+
   // Rotate mesh every frame, this is outside of React without overhead
-  useFrame(() => {
-    if (active) {
-      stage.current.x += 1;
+  useFrame(({ camera }) => {
+    current.time += 1;
+    var aX, aY;
+    const stage = Math.floor(current.time / stageLength);
+    if (stage > lastStage) {
+      aX = props.trajectory[lastStage + 1][0];
+      aY = props.trajectory[lastStage + 1][1];
     } else {
-      stage.current.x = 0;
+      const sX = props.trajectory[stage][0];
+      const sY = props.trajectory[stage][1];
+      const tX = props.trajectory[stage + 1][0];
+      const tY = props.trajectory[stage + 1][1];
+      const phase = (current.time % stageLength) / stageLength;
+      aX = sX * (1 - phase) + tX * phase;
+      aY = sY * (1 - phase) + tY * phase;
     }
-    mesh.current.position.y = Math.abs(
-      Math.sin((Math.PI * stage.current.x) / 60) * 2
-    );
-    mesh.current.rotation.x = mesh.current.rotation.y += 0.01;
+    masterApi.position.set(aX, aY, masterZ);
+    masterApi.velocity.set(0, 0, 0);
   });
 
   return (
     <mesh
-      {...props}
-      ref={mesh}
+      ref={ref}
       scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}
       onClick={(e) => setActive(!active)}
       onPointerOver={(e) => setHover(true)}
@@ -48,13 +96,12 @@ function Box(props) {
 }
 
 function PartySelector({ data, startCombat }) {
-  // TODO: let the user set the party
+    // TODO: let the user set the party
+    console.log(data);
   const [party, setParty] = useState([
     data.heroes[0].id,
     data.heroes[1].id,
     data.heroes[2].id,
-    data.heroes[3].id,
-    data.heroes[4].id,
   ]);
 
   return (
@@ -74,8 +121,36 @@ function BattleRenderer() {
       <Canvas>
         <ambientLight />
         <pointLight position={[10, 10, 10]} />
-        <Box position={[-1.2, 0, 0]} />
-        <Box position={[1.2, 0, 0]} />
+        <Physics gravity={[0, 0, -10]}>
+          <BasePlane />
+          <Box
+            trajectory={[
+              [3, 3],
+              [3, -3],
+              [-3, -3],
+              [-3, 3],
+              [3, 3],
+            ]}
+          />
+          <Box
+            trajectory={[
+              [-5, 0],
+              [5, 0],
+              [-5, 0],
+              [5, 0],
+              [-5, 0],
+            ]}
+          />
+          <Box
+            trajectory={[
+              [0, -3],
+              [0, 3],
+              [0, -3],
+              [0, 3],
+              [0, -3],
+            ]}
+          />
+        </Physics>
       </Canvas>
     </div>
   );
