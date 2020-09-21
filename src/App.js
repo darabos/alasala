@@ -96,8 +96,8 @@ function Box(props) {
 }
 
 function PartySelector({ data, startCombat }) {
-    // TODO: let the user set the party
-    console.log(data);
+  // TODO: let the user set the party
+  console.log(data);
   const [party, setParty] = useState([
     data.heroes[0].id,
     data.heroes[1].id,
@@ -280,9 +280,17 @@ function MapDiorama() {
     camera.position.x = 5 * Math.sin(0.2 * t);
     camera.lookAt(0, 0, -50);
     for (let i = 0; i < treeCount; ++i) {
-      tmpo.position.fromArray(treePositions[i]);
-      tmpo.rotation.z = 0.1 * Math.sin(t);
+      const tp = treePositions[i];
+      tmpo.position.fromArray(tp);
       tmpo.scale.setScalar(treeSizes[i]);
+      tmpo.position.x +=
+        0.05 *
+        treeSizes[i] *
+        Math.sin(
+          5 * t +
+            0.1 * Math.cos(0.1 * t) * tp[0] +
+            0.1 * Math.sin(0.1 * t) * tp[2]
+        );
       tmpo.position.y += treeSizes[i] - 5;
       tmpo.updateMatrix();
       trees.current.setMatrixAt(i, tmpo.matrix);
