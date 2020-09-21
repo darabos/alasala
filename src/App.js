@@ -206,7 +206,7 @@ function Map(props) {
             gl.setClearColor(new THREE.Color('#fff'));
           }}
         >
-          <MapDiorama />
+          <MapDiorama effects />
         </Canvas>
       </div>
       <p>
@@ -227,7 +227,7 @@ function useStatic(fn) {
 
 const tmpo = new THREE.Object3D();
 
-function MapDiorama() {
+function MapDiorama({ effects }) {
   function randomShape(r, n) {
     const s = new THREE.Shape();
     const start = r;
@@ -249,29 +249,37 @@ function MapDiorama() {
     bevelSize: 5,
     bevelSegments: 2,
   }));
-  const treeCount = 200;
-  const trees = useRef();
-  const treeColors = useMemo(
+  const treeInstances = useRef();
+  const trees = useMemo(
     () =>
-      Float32Array.from(
-        new Array(treeCount)
-          .fill()
-          .flatMap((_, i) => [
-            Math.random(),
-            Math.random() * 0.5 + 0.5,
-            Math.random() * 0.5,
-          ])
+      [
+        // prettier-ignore
+        { pos: [80, 5, -20], r: 20, w: 1, h: 1, count: 20, color: [[0, 0.5], [0.2, 0.7], [0, 0.2]] },
+        // prettier-ignore
+        { pos: [20, 5, -80], r: 20, w: 0.7, h: 1, count: 50, color: [[0.2, 0.3], [0.5, 0.7], [0, 0.2]] },
+      ].flatMap((forest) =>
+        new Array(forest.count).fill().map(() => {
+          const phi = Math.random() * Math.PI * 2;
+          const r = forest.r * (0.5 + Math.tan(Math.random() - 0.5));
+          const w = forest.w * (1 + 4 * Math.random());
+          return {
+            position: [
+              forest.pos[0] + Math.cos(phi) * r,
+              forest.pos[1] + (w * forest.h) / forest.w,
+              forest.pos[2] + Math.sin(phi) * r,
+            ],
+            size: [w, (w * forest.h) / forest.w, w],
+            color: forest.color.map(
+              (c) => c[0] + Math.random() * (c[1] - c[0])
+            ),
+          };
+        })
       ),
     []
   );
-  const treePositions = useMemo(() => {
-    return new Array(treeCount)
-      .fill()
-      .map((_) => [Math.random() * 100 - 50, 10, -Math.random() * 100]);
-  }, []);
-  const treeSizes = useMemo(
-    () => new Array(treeCount).fill().map((_) => Math.random() * 5 + 1),
-    []
+  const treeColors = useMemo(
+    () => Float32Array.from(trees.flatMap((t) => t.color)),
+    [trees]
   );
 
   useFrame(({ camera, clock }) => {
@@ -280,34 +288,37 @@ function MapDiorama() {
     camera.position.y = 50 + 2 * Math.cos(0.19 * t);
     camera.position.x = 5 * Math.sin(0.2 * t);
     camera.lookAt(0, 0, -50);
-    for (let i = 0; i < treeCount; ++i) {
-      const tp = treePositions[i];
+    for (let i = 0; i < trees.length; ++i) {
+      const tree = trees[i];
+      const tp = tree.position;
       tmpo.position.fromArray(tp);
-      tmpo.scale.setScalar(treeSizes[i]);
+      tmpo.scale.fromArray(tree.size);
       tmpo.position.x +=
         0.05 *
-        treeSizes[i] *
+        tree.size[0] *
         Math.sin(
           5 * t +
             0.1 * Math.cos(0.1 * t) * tp[0] +
             0.1 * Math.sin(0.1 * t) * tp[2]
         );
-      tmpo.position.y += treeSizes[i] - 5;
       tmpo.updateMatrix();
-      trees.current.setMatrixAt(i, tmpo.matrix);
+      treeInstances.current.setMatrixAt(i, tmpo.matrix);
     }
-    trees.current.instanceMatrix.needsUpdate = true;
+    treeInstances.current.instanceMatrix.needsUpdate = true;
   });
 
   return (
     <>
-      <hemisphereLight intensity={0.35} />
+      <hemisphereLight intensity={0.5} />
       <spotLight
         position={[0, 200, 0]}
         angle={1}
-        penumbra={1}
-        intensity={2}
+        penumbra={0.1}
+        intensity={1.5}
         castShadow
+        shadow-bias={0.000001}
+        shadow-mapSize-height={1024}
+        shadow-mapSize-width={1024}
       />
       <Plane
         args={[500, 500, 100, 100]}
@@ -325,7 +336,11 @@ function MapDiorama() {
       >
         <meshStandardMaterial attach="material" color="#691" />
       </Extrude>
-      <instancedMesh castShadow ref={trees} args={[null, null, treeCount]}>
+      <instancedMesh
+        castShadow
+        ref={treeInstances}
+        args={[null, null, trees.length]}
+      >
         <sphereBufferGeometry attach="geometry" args={[]}>
           <instancedBufferAttribute
             attachObject={['attributes', 'color']}
@@ -338,15 +353,17 @@ function MapDiorama() {
         />
       </instancedMesh>
 
-      <EffectComposer>
-        <DepthOfField
-          focusDistance={0.1}
-          focalLength={0.1}
-          bokehScale={10}
-          height={480}
-        />
-        <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
-      </EffectComposer>
+      {effects && (
+        <EffectComposer>
+          <DepthOfField
+            focusDistance={0.1}
+            focalLength={0.15}
+            bokehScale={10}
+            height={480}
+          />
+          <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
+        </EffectComposer>
+      )}
     </>
   );
 }
