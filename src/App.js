@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from 'react-three-fiber';
-import { Extrude } from 'drei';
+import { Plane, Extrude } from 'drei';
+import WaterMaterial from './WaterMaterial.js';
 import * as THREE from 'three';
 import './App.css';
 
@@ -117,7 +118,7 @@ function Map(props) {
       <p>day {props.data.progress.day}</p>
       <p>current stage: {props.data.progress.stage}</p>
       <div style={{ height: '80vh' }}>
-        <Canvas>
+        <Canvas shadowMap>
           <MapDiorama />
         </Canvas>
       </div>
@@ -148,17 +149,14 @@ function MapDiorama() {
       s.lineTo(r * Math.cos(phi), r * Math.sin(phi));
     }
     s.lineTo(start, 0);
-    console.log(s);
     return s;
   }
   const shape = useStatic(() => randomShape(100, 100));
   const mesh = useRef();
   useFrame(({ camera }) => {
-    camera.position.z = -200;
-    camera.position.y = 100;
-    camera.lookAt(0, 0, 0);
-    mesh.current.rotation.z += 0.01;
-    mesh.current.rotation.x = Math.PI / 2;
+    camera.position.z = -140;
+    camera.position.y = 50;
+    camera.lookAt(0, 0, -30);
   });
   const extrudeSettings = useStatic(() => ({
     steps: 1,
@@ -169,14 +167,29 @@ function MapDiorama() {
   }));
   return (
     <>
-      <ambientLight />
-      <pointLight position={[0, 100, 0]} />
+      <hemisphereLight intensity={0.35} />
+      <spotLight
+        position={[0, 200, 0]}
+        angle={1}
+        penumbra={1}
+        intensity={2}
+        castShadow
+      />
+      <Plane
+        args={[500, 500, 100, 100]}
+        rotation-x={-Math.PI / 2}
+        receiveShadow
+      >
+        <WaterMaterial />
+      </Plane>
       <Extrude
+        castShadow
+        receiveShadow
         ref={mesh}
         args={[shape, extrudeSettings]}
-        position={new THREE.Vector3(0, 0, 0)}
+        rotation={[Math.PI / 2, 0, 4]}
       >
-        <meshPhongMaterial attach="material" color="#691" />
+        <meshStandardMaterial attach="material" color="#691" />
       </Extrude>
     </>
   );
