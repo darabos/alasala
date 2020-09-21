@@ -122,24 +122,13 @@ function BattleRenderer(props) {
   const heroStories = [];
   console.log('journal', journal);
   journal &&
-    Object.entries(journal[0].enemy).forEach(([id, value]) => {
+    Object.entries(journal[0]).forEach(([id, value]) => {
       heroStories.push({
-        id: 'Enemy ' + id,
+        id: id,
         trajectory: journal.map((step) => ({
-          x: step.enemy[id].x * 3,
-          y: step.enemy[id].y * 3,
-          loyalty: step.enemy[id].loyalty,
-        })),
-      });
-    });
-  journal &&
-    Object.entries(journal[0].player).forEach(([id, value]) => {
-      heroStories.push({
-        id: 'Player ' + id,
-        trajectory: journal.map((step) => ({
-          x: step.player[id].x * 3,
-          y: step.player[id].y * 3,
-          loyalty: step.player[id].loyalty,
+          x: step[id].x * 3,
+          y: step[id].y * 3,
+          loyalty: step[id].loyalty,
         })),
       });
     });
