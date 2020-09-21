@@ -3,13 +3,14 @@ from math import sqrt
 class Hero:
   hero_classes = {}
 
-  def __init__(self, level, id, owner, x, y):
+  def __init__(self, level, id, owner, x, y, speed, loyalty_factor, actions):
     self.level = level
     self.id = id
     self.x = x
     self.y = y
-    self.speed = 1
-    self.actions = {'base_attack': {'name': 'base_attack', 'range': 1, 'damage': 1}}
+    self.speed = speed
+    self.loyalty_factor = loyalty_factor
+    self.actions = actions
     self.loyalty = 5 * (-1 if owner == 'enemy' else 1)
     self.actions_in_turn = []
     self.status = []
@@ -25,7 +26,17 @@ class Hero:
   def speak(self):
     return 'hero'
 
+  def increase_loyalty(self):
+    if self.loyalty >= 0:
+      self.loyalty += self.loyalty_factor
+      self.loyalty = min(5, self.loyalty)
+    else:
+      self.loyalty -= self.loyalty_factor
+      self.loyalty = max(-5, self.loyalty)
+
+
   def step(self, stage, state):
+    self.increase_loyalty()
     target = self.find_closest_opponent(state)
     if target is not None:
       attack = self.actions['base_attack']
@@ -75,7 +86,8 @@ class Cube(Hero):
   name = 'cube'
 
   def __init__(self, level, id, owner, x, y):
-    super().__init__(level, id, owner, x, y)
+    actions = {'base_attack': {'name': 'base_attack', 'range': 1, 'damage': 1}}
+    super().__init__(level, id, owner, x, y, 1, 0.5, actions)
 
   def speak(self):
     return 'cube'
