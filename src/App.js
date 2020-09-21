@@ -1,4 +1,10 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import React, {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+} from 'react';
 import { Canvas, useFrame } from 'react-three-fiber';
 import { Plane, Extrude } from 'drei';
 import WaterMaterial from './WaterMaterial.js';
@@ -250,6 +256,7 @@ function MapDiorama({ effects }) {
     }),
     []
   );
+
   const treeInstances = useRef();
   const trees = useMemo(
     () =>
@@ -257,7 +264,9 @@ function MapDiorama({ effects }) {
         // prettier-ignore
         { pos: [80, 5, -20], r: 20, w: 1, h: 1, count: 20, color: [[0, 0.5], [0.2, 0.7], [0, 0.2]] },
         // prettier-ignore
-        { pos: [20, 5, -80], r: 20, w: 0.7, h: 1, count: 50, color: [[0.2, 0.3], [0.5, 0.7], [0, 0.2]] },
+        { pos: [10, 5, -80], r: 18, w: 0.7, h: 1, count: 50, color: [[0.2, 0.3], [0.5, 0.7], [0, 0.2]] },
+        // prettier-ignore
+        { pos: [40, 5, -105], r: 10, w: 0.5, h: 0.5, count: 10, color: [[0.2, 0.3], [0.5, 0.7], [0, 0.2]] },
       ].flatMap((forest) =>
         new Array(forest.count).fill().map(() => {
           const phi = Math.random() * Math.PI * 2;
@@ -281,6 +290,38 @@ function MapDiorama({ effects }) {
   const treeColors = useMemo(
     () => Float32Array.from(trees.flatMap((t) => t.color)),
     [trees]
+  );
+
+  const stones = useMemo(() => {
+    const p = new THREE.Vector3(41, 2, -112);
+    const dir = new THREE.Vector3(-1, 0, -1);
+    dir.normalize();
+    dir.multiplyScalar(5);
+    const up = new THREE.Vector3(0, 1, 0);
+    const stones = [];
+    const turns = [5, 4, 3, 4, 5, 6, 6, 5, 4, -2, -4, -8, -5, -1, 0, 0, 0, 0];
+    for (let i = 0; i < turns.length; ++i) {
+      stones.push({ position: p.toArray() });
+      dir.applyAxisAngle(up, 0.1 * turns[i]);
+      p.add(dir);
+    }
+    return stones;
+  });
+
+  const stoneInstances = useCallback(
+    (mesh) => {
+      if (!mesh) return;
+      for (let i = 0; i < stones.length; ++i) {
+        const s = stones[i];
+        tmpo.position.fromArray(s.position);
+        tmpo.rotation.set(0, Math.random(), 0);
+        tmpo.scale.set(1, 1, 1);
+        tmpo.updateMatrix();
+        mesh.setMatrixAt(i, tmpo.matrix);
+      }
+      mesh.instanceMatrix.needsUpdate = true;
+    },
+    [stones]
   );
 
   useFrame(({ camera, clock }) => {
@@ -340,6 +381,7 @@ function MapDiorama({ effects }) {
           <meshStandardMaterial attach="material" color={l.color} />
         </Extrude>
       ))}
+
       <instancedMesh
         castShadow
         ref={treeInstances}
@@ -355,6 +397,18 @@ function MapDiorama({ effects }) {
           attach="material"
           vertexColors={THREE.VertexColors}
         />
+      </instancedMesh>
+
+      <instancedMesh
+        ref={stoneInstances}
+        castShadow
+        args={[null, null, stones.length]}
+      >
+        <boxBufferGeometry
+          attach="geometry"
+          args={[3, 10, 3]}
+        ></boxBufferGeometry>
+        <meshLambertMaterial attach="material" color="#fff" />
       </instancedMesh>
 
       {effects && (
