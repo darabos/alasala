@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from 'react-three-fiber';
 import { Plane, Extrude } from 'drei';
 import WaterMaterial from './WaterMaterial.js';
@@ -149,6 +149,8 @@ function useStatic(fn) {
   return ref.current;
 }
 
+const tmpo = new THREE.Object3D();
+
 function MapDiorama() {
   function randomShape(r, n) {
     const s = new THREE.Shape();
@@ -164,12 +166,6 @@ function MapDiorama() {
   }
   const shape = useStatic(() => randomShape(100, 100));
   const mesh = useRef();
-  useFrame(({ camera, clock }) => {
-    camera.position.z = -140;
-    camera.position.y = 50 + 2 * Math.cos(0.19 * clock.getElapsedTime());
-    camera.position.x = 5 * Math.sin(0.2 * clock.getElapsedTime());
-    camera.lookAt(0, 0, -50);
-  });
   const extrudeSettings = useStatic(() => ({
     steps: 1,
     depth: 1,
@@ -177,6 +173,48 @@ function MapDiorama() {
     bevelSize: 5,
     bevelSegments: 2,
   }));
+  const treeCount = 200;
+  const trees = useRef();
+  const treeColors = useMemo(
+    () =>
+      Float32Array.from(
+        new Array(treeCount)
+          .fill()
+          .flatMap((_, i) => [
+            Math.random(),
+            Math.random() * 0.5 + 0.5,
+            Math.random() * 0.5,
+          ])
+      ),
+    []
+  );
+  const treePositions = useMemo(() => {
+    return new Array(treeCount)
+      .fill()
+      .map((_) => [Math.random() * 100 - 50, 10, -Math.random() * 100]);
+  }, []);
+  const treeSizes = useMemo(
+    () => new Array(treeCount).fill().map((_) => Math.random() * 5 + 1),
+    []
+  );
+
+  useFrame(({ camera, clock }) => {
+    const t = clock.getElapsedTime();
+    camera.position.z = -140;
+    camera.position.y = 50 + 2 * Math.cos(0.19 * t);
+    camera.position.x = 5 * Math.sin(0.2 * t);
+    camera.lookAt(0, 0, -50);
+    for (let i = 0; i < treeCount; ++i) {
+      tmpo.position.fromArray(treePositions[i]);
+      tmpo.rotation.z = 0.1 * Math.sin(t);
+      tmpo.scale.setScalar(treeSizes[i]);
+      tmpo.position.y += treeSizes[i] - 5;
+      tmpo.updateMatrix();
+      trees.current.setMatrixAt(i, tmpo.matrix);
+    }
+    trees.current.instanceMatrix.needsUpdate = true;
+  });
+
   return (
     <>
       <hemisphereLight intensity={0.35} />
@@ -203,6 +241,19 @@ function MapDiorama() {
       >
         <meshStandardMaterial attach="material" color="#691" />
       </Extrude>
+      <instancedMesh castShadow ref={trees} args={[null, null, treeCount]}>
+        <sphereBufferGeometry attach="geometry" args={[]}>
+          <instancedBufferAttribute
+            attachObject={['attributes', 'color']}
+            args={[treeColors, 3]}
+          />
+        </sphereBufferGeometry>
+        <meshLambertMaterial
+          attach="material"
+          vertexColors={THREE.VertexColors}
+        />
+      </instancedMesh>
+
       <EffectComposer>
         <DepthOfField
           focusDistance={0.1}
