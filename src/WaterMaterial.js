@@ -28,7 +28,7 @@ export default React.forwardRef(({ ...props }: Props, ref) => {
       shader.fragmentShader = shader.fragmentShader.replace(
         '#include <alphamap_fragment>',
         `
-        diffuseColor.a = atan(0.02 * (150.0 - dist)) + 0.9;
+        totalEmissiveRadiance += 0.5 * PI - atan(0.05 * (250.0 - dist));
       `
       );
     };
