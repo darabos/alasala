@@ -25,7 +25,7 @@ function BasePlane(props) {
 function Box(props) {
   var current = useRef({ time: 0 }).current;
   const x = props.trajectory[0].x;
-    const y = props.trajectory[0].y;
+  const y = props.trajectory[0].y;
   const masterZ = -3;
   const springLength = 0.3;
 
@@ -58,12 +58,12 @@ function Box(props) {
 
   // Rotate mesh every frame, this is outside of React without overhead
   useFrame(({ camera }) => {
-      camera.position.x = 12;
-      camera.position.y = 6;
-      camera.position.z = 15;
+    camera.position.x = 12;
+    camera.position.y = 6;
+    camera.position.z = 15;
     current.time += 1;
     var aX, aY;
-      const stage = Math.floor(current.time / stageLength);
+    const stage = Math.floor(current.time / stageLength);
     if (stage > lastStage) {
       aX = props.trajectory[lastStage + 1].x;
       aY = props.trajectory[lastStage + 1].y;
@@ -98,8 +98,8 @@ function Box(props) {
 }
 
 function PartySelector({ data, startCombat }) {
-    // TODO: let the user set the party
-    console.log(data);
+  // TODO: let the user set the party
+  console.log(data);
   const [party, setParty] = useState([
     data.heroes[0].id,
     data.heroes[1].id,
@@ -118,30 +118,34 @@ function PartySelector({ data, startCombat }) {
 }
 
 function BattleRenderer(props) {
-    const journal = props.journal;
-    const heroStories = [];
-    console.log('journal', journal);
-    journal && Object.entries(journal[0].enemy).forEach(([id, value]) => {
-	heroStories.push({
-	    id: 'Enemy ' + id,
-	    trajectory: journal.map((step) => ({
-		x: step.enemy[id].x * 3,
-		y: step.enemy[id].y * 3,
-		loyalty: step.enemy[id].loyalty
-	    }))});
+  const journal = props.journal;
+  const heroStories = [];
+  console.log('journal', journal);
+  journal &&
+    Object.entries(journal[0].enemy).forEach(([id, value]) => {
+      heroStories.push({
+        id: 'Enemy ' + id,
+        trajectory: journal.map((step) => ({
+          x: step.enemy[id].x * 3,
+          y: step.enemy[id].y * 3,
+          loyalty: step.enemy[id].loyalty,
+        })),
+      });
     });
-    journal && Object.entries(journal[0].player).forEach(([id, value]) => {
-	heroStories.push({
-	    id: 'Player ' + id,
-	    trajectory: journal.map((step) => ({
-		'x': step.player[id].x * 3,
-		'y': step.player[id].y * 3,
-		'loyalty': step.player[id].loyalty
-	    }))});
+  journal &&
+    Object.entries(journal[0].player).forEach(([id, value]) => {
+      heroStories.push({
+        id: 'Player ' + id,
+        trajectory: journal.map((step) => ({
+          x: step.player[id].x * 3,
+          y: step.player[id].y * 3,
+          loyalty: step.player[id].loyalty,
+        })),
+      });
     });
-    console.log('stories')
-    console.log(heroStories)
-    
+  console.log('stories');
+  console.log(heroStories);
+
   return (
     <div style={{ height: '50vh' }}>
       <Canvas>
@@ -149,9 +153,9 @@ function BattleRenderer(props) {
         <pointLight position={[10, 10, 10]} />
         <Physics gravity={[0, 0, -10]}>
           <BasePlane />
-	  {heroStories.map((hero) => 
-			   <Box key={hero.id}
-			   trajectory={hero.trajectory} />)}
+          {heroStories.map((hero) => (
+            <Box key={hero.id} trajectory={hero.trajectory} />
+          ))}
         </Physics>
       </Canvas>
     </div>
@@ -164,8 +168,8 @@ function Spinner() {
 
 function Combat({ data }) {
   const [state, setState] = useState('selectParty');
-    const [party, setParty] = useState(null);
-    const [journal, setJournal] = useState(null);
+  const [party, setParty] = useState(null);
+  const [journal, setJournal] = useState(null);
 
   function startCombat(party) {
     setParty(party);
@@ -179,8 +183,8 @@ function Combat({ data }) {
       )
         .then((res) => res.json())
         .then((res) => {
-            setState('renderBattle');
-	    setJournal(res);
+          setState('renderBattle');
+          setJournal(res);
         });
     }
   }, [state]);
@@ -191,7 +195,7 @@ function Combat({ data }) {
         <PartySelector data={data} startCombat={startCombat} />
       )}
       {state === 'simulate' && <Spinner />}
-      {state === 'renderBattle' && <BattleRenderer journal={journal}/>}
+      {state === 'renderBattle' && <BattleRenderer journal={journal} />}
     </div>
   );
 }
