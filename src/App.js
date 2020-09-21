@@ -8,12 +8,11 @@ import './App.css';
 function Box(props) {
   // This reference will give us direct access to the mesh
   const mesh = useRef();
-  var stage = useRef({x: 0});
+  var stage = useRef({ x: 0 });
 
   // Set up state for the hovered and active state
   const [hovered, setHover] = useState(false);
   const [active, setActive] = useState(false);
-
 
   // Rotate mesh every frame, this is outside of React without overhead
   useFrame(() => {
@@ -22,8 +21,10 @@ function Box(props) {
     } else {
       stage.current.x = 0;
     }
-    mesh.current.position.y = Math.abs(Math.sin(Math.PI * stage.current.x / 60) * 2);  
-    mesh.current.rotation.x = mesh.current.rotation.y += 0.01
+    mesh.current.position.y = Math.abs(
+      Math.sin((Math.PI * stage.current.x) / 60) * 2
+    );
+    mesh.current.rotation.x = mesh.current.rotation.y += 0.01;
   });
 
   return (
