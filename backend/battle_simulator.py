@@ -16,7 +16,7 @@ def get_enemy_state(stage):
   return [Hero.create_by_name(
   name='cube',
   level=1,
-  id=i,
+  id=-(i + 1),
   owner='enemy',
   x= 10 - 0.5 * (i + 1),
   y= 0.5 * (i + 1)) for i in range(5)]
@@ -28,16 +28,9 @@ def battle_is_over(turn):
 
 def simulate_battle(heroes, stage):
   state = get_player_state(heroes) + get_enemy_state(stage)
-  turns = []
-  player_turn = {hero.id: hero.get_log_entry() for hero in state[:5]}
-  enemy_turn = {hero.id: hero.get_log_entry() for hero in state[5:]}
-  turn = {'player': player_turn, 'enemy': enemy_turn}
-  turns.append(turn)
+  turns = [{hero.id: hero.get_log_entry() for hero in state}]
   while not battle_is_over(turns[-1]) and len(turns) < 5 * 4:
     for hero in state:
       hero.step(stage, state)
-    player_turn = {hero.id: hero.get_log_entry() for hero in state[:5]}
-    enemy_turn = {hero.id: hero.get_log_entry() for hero in state[5:]}
-    turn = {'player': player_turn, 'enemy': enemy_turn}
-    turns.append(turn)
+    turns.append({hero.id: hero.get_log_entry() for hero in state})
   return turns
