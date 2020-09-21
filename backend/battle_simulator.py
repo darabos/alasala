@@ -32,6 +32,7 @@ def battle_is_over(turn):
       return False
   return True
 
+
 def simulate_battle(heroes, stage):
   state = get_player_state(heroes) + get_enemy_state(stage)
   turns = [{hero.id: hero.get_log_entry() for hero in state}]
