@@ -86,7 +86,7 @@ class Cube(Hero):
   name = 'cube'
 
   def __init__(self, level, id, owner, x, y):
-    actions = {'base_attack': {'name': 'base_attack', 'range': 1, 'damage': 1}}
+    actions = {'base_attack': {'name': 'base_attack', 'range': 3, 'damage': 1}}
     super().__init__(level, id, owner, x, y, 1, 0.5, actions)
 
   def speak(self):
