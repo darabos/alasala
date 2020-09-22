@@ -118,8 +118,9 @@ function SimpleAttack(props) {
     mesh.current && mesh.current.position.set(aX, aY, 2);
     if (props.turnClock.time === turnFrames && props.attackTurn === 0) {
       const force = new THREE.Vector3(tX - sX, tY - sY, 0);
-      force.normalize().multiplyScalar(40);
-      targetHero.physicsApi.applyLocalForce(force.toArray(), [0, 0, 1]);
+      force.normalize().multiplyScalar(25);
+      const localForce = targetHero.worldToLocal(force);
+      targetHero.physicsApi.applyLocalForce(localForce.toArray(), [0, 0, 1]);
     }
   });
   return (
