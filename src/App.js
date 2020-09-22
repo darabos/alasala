@@ -152,25 +152,22 @@ function BattleSimulation(props) {
   const heroStories = props.heroStories;
 
   const [turn, setTurn] = useState(0);
-  var turnClock = useRef({ time: 0, turn: -1 }).current;
+  const turnClock = useRef({ time: 0, turn: -1 }).current;
   useFrame(() => {
-    if (turnClock.turn != turn) {
-      turnClock.turn = turn;
-      turnClock.time = 0;
+    if (journal) {
+      if (turnClock.turn != turn) {
+        turnClock.turn = turn;
+        turnClock.time = 0;
+      }
+      turnClock.time += 1;
+      turnClock.phase = Math.min(1, turnClock.time / turnFrames);
+      if (turnClock.time == turnFrames) {
+        if (journal && turn < journal.length - 2) {
+          setTurn(turn + 1);
+        }
+      }
     }
-    turnClock.time += 1;
-    turnClock.phase = Math.min(1, turnClock.time / turnFrames);
   });
-
-  useEffect(() => {
-    if (journal && turn < journal.length - 2) {
-      const timeout = setTimeout(() => {
-        setTurn(turn + 1);
-      }, turnMS);
-      return () => clearTimeout(timeout);
-    }
-  }, [turn, journal]);
-
   return (
     <>
       <BasePlane />
