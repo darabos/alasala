@@ -1,4 +1,10 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import React, {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+} from 'react';
 import { Canvas, useFrame } from 'react-three-fiber';
 import { Plane, Extrude } from 'drei';
 import WaterMaterial from './WaterMaterial.js';
@@ -8,7 +14,7 @@ import { EffectComposer, DepthOfField, Bloom } from 'react-postprocessing';
 import './App.css';
 
 function BasePlane(props) {
-  const ref = usePlane(() => ({
+  usePlane(() => ({
     material: {
       friction: 0.2,
     },
@@ -30,7 +36,7 @@ function Box(props) {
   const masterZ = -3;
   const springLength = 0.3;
 
-  const [ref, api] = useBox(() => ({
+  const [ref] = useBox(() => ({
     mass: 1,
     material: {
       friction: 0.01,
@@ -102,20 +108,17 @@ function Box(props) {
   );
 }
 
-function PartySelector({ data, startCombat }) {
-  // TODO: let the user set the party
-  console.log(data);
-  const [party, setParty] = useState([
-    data.heroes[0].id,
-    data.heroes[1].id,
-    data.heroes[2].id,
-  ]);
+function PartySelector({ data, party, setParty, startCombat }) {
+  function toggleHero(h) {
+    // TODO: let the user set the party
+    setParty(party);
+  }
 
   return (
     <div>
       {party.map((id) => {
         const h = data.heroes.find((hero) => hero.id === id);
-        return <Hero hero={h} key={id} />;
+        return <Hero onClick={() => toggleHero(h)} hero={h} key={id} />;
       })}
       <button onClick={() => startCombat(party)}>Gooooooooooooo!</button>
     </div>
@@ -162,31 +165,25 @@ function Spinner() {
 
 function Combat({ data }) {
   const [state, setState] = useState('selectParty');
-  const [party, setParty] = useState(null);
+  const [party, setParty] = useState([data.heroes[0].id, data.heroes[1].id, data.heroes[2].id]);
   const [journal, setJournal] = useState(null);
 
   function startCombat(party) {
-    setParty(party);
     setState('simulate');
+    fetch(
+      `/computecombat?user=test&stage=${data.stage}&party=${party.join()}`
+    )
+      .then((res) => res.json())
+      .then((res) => {
+        setState('renderBattle');
+        setJournal(res);
+      });
   }
-
-  useEffect(() => {
-    if (state === 'simulate') {
-      fetch(
-        `/computecombat?user=test&stage=${data.stage}&party=${party.join()}`
-      )
-        .then((res) => res.json())
-        .then((res) => {
-          setState('renderBattle');
-          setJournal(res);
-        });
-    }
-  }, [state]);
 
   return (
     <div>
       {state === 'selectParty' && (
-        <PartySelector data={data} startCombat={startCombat} />
+        <PartySelector party={party} setParty={setParty} data={data} startCombat={startCombat} />
       )}
       {state === 'simulate' && <Spinner />}
       {state === 'renderBattle' && <BattleRenderer journal={journal} />}
@@ -206,7 +203,7 @@ function Map(props) {
             gl.setClearColor(new THREE.Color('#fff'));
           }}
         >
-          <MapDiorama />
+          <MapDiorama effects />
         </Canvas>
       </div>
       <p>
@@ -217,17 +214,9 @@ function Map(props) {
   );
 }
 
-function useStatic(fn) {
-  const ref = useRef();
-  if (!ref.current) {
-    ref.current = fn();
-  }
-  return ref.current;
-}
-
 const tmpo = new THREE.Object3D();
 
-function MapDiorama() {
+function MapDiorama({ effects }) {
   function randomShape(r, n) {
     const s = new THREE.Shape();
     const start = r;
@@ -240,38 +229,90 @@ function MapDiorama() {
     s.lineTo(start, 0);
     return s;
   }
-  const shape = useStatic(() => randomShape(100, 100));
-  const mesh = useRef();
-  const extrudeSettings = useStatic(() => ({
-    steps: 1,
-    depth: 1,
-    bevelThickness: 5,
-    bevelSize: 5,
-    bevelSegments: 2,
-  }));
-  const treeCount = 200;
-  const trees = useRef();
-  const treeColors = useMemo(
+  const layers = useMemo(
+    () => [
+      { shape: randomShape(100, 100), y: 0, color: '#691' },
+      { shape: randomShape(60, 60), y: 5, color: '#562' },
+      { shape: randomShape(30, 30), y: 15, color: '#999' },
+    ],
+    []
+  );
+  const extrudeSettings = useMemo(
+    () => ({
+      steps: 1,
+      depth: 10,
+      bevelThickness: 5,
+      bevelSize: 5,
+      bevelSegments: 2,
+    }),
+    []
+  );
+
+  const treeInstances = useRef();
+  const trees = useMemo(
     () =>
-      Float32Array.from(
-        new Array(treeCount)
-          .fill()
-          .flatMap((_, i) => [
-            Math.random(),
-            Math.random() * 0.5 + 0.5,
-            Math.random() * 0.5,
-          ])
+      [
+        // prettier-ignore
+        { pos: [80, 5, -20], r: 20, w: 1, h: 1, count: 20, color: [[0, 0.5], [0.2, 0.7], [0, 0.2]] },
+        // prettier-ignore
+        { pos: [10, 5, -80], r: 18, w: 0.7, h: 1, count: 50, color: [[0.2, 0.3], [0.5, 0.7], [0, 0.2]] },
+        // prettier-ignore
+        { pos: [40, 5, -105], r: 10, w: 0.5, h: 0.5, count: 10, color: [[0.2, 0.3], [0.5, 0.7], [0, 0.2]] },
+      ].flatMap((forest) =>
+        new Array(forest.count).fill().map(() => {
+          const phi = Math.random() * Math.PI * 2;
+          const r = forest.r * (0.5 + Math.tan(Math.random() - 0.5));
+          const w = forest.w * (1 + 4 * Math.random());
+          return {
+            position: [
+              forest.pos[0] + Math.cos(phi) * r,
+              forest.pos[1] + (w * forest.h) / forest.w,
+              forest.pos[2] + Math.sin(phi) * r,
+            ],
+            size: [w, (w * forest.h) / forest.w, w],
+            color: forest.color.map(
+              (c) => c[0] + Math.random() * (c[1] - c[0])
+            ),
+          };
+        })
       ),
     []
   );
-  const treePositions = useMemo(() => {
-    return new Array(treeCount)
-      .fill()
-      .map((_) => [Math.random() * 100 - 50, 10, -Math.random() * 100]);
+  const treeColors = useMemo(
+    () => Float32Array.from(trees.flatMap((t) => t.color)),
+    [trees]
+  );
+
+  const stones = useMemo(() => {
+    const p = new THREE.Vector3(41, 2, -112);
+    const dir = new THREE.Vector3(-1, 0, -1);
+    dir.normalize();
+    dir.multiplyScalar(5);
+    const up = new THREE.Vector3(0, 1, 0);
+    const stones = [];
+    const turns = [5, 4, 3, 4, 5, 6, 6, 5, 4, -2, -4, -8, -5, -1, 0, 0, 0, 0];
+    for (let i = 0; i < turns.length; ++i) {
+      stones.push({ position: p.toArray() });
+      dir.applyAxisAngle(up, 0.1 * turns[i]);
+      p.add(dir);
+    }
+    return stones;
   }, []);
-  const treeSizes = useMemo(
-    () => new Array(treeCount).fill().map((_) => Math.random() * 5 + 1),
-    []
+
+  const stoneInstances = useCallback(
+    (mesh) => {
+      if (!mesh) return;
+      for (let i = 0; i < stones.length; ++i) {
+        const s = stones[i];
+        tmpo.position.fromArray(s.position);
+        tmpo.rotation.set(0, Math.random(), 0);
+        tmpo.scale.set(1, 1, 1);
+        tmpo.updateMatrix();
+        mesh.setMatrixAt(i, tmpo.matrix);
+      }
+      mesh.instanceMatrix.needsUpdate = true;
+    },
+    [stones]
   );
 
   useFrame(({ camera, clock }) => {
@@ -280,26 +321,37 @@ function MapDiorama() {
     camera.position.y = 50 + 2 * Math.cos(0.19 * t);
     camera.position.x = 5 * Math.sin(0.2 * t);
     camera.lookAt(0, 0, -50);
-    for (let i = 0; i < treeCount; ++i) {
-      tmpo.position.fromArray(treePositions[i]);
-      tmpo.rotation.z = 0.1 * Math.sin(t);
-      tmpo.scale.setScalar(treeSizes[i]);
-      tmpo.position.y += treeSizes[i] - 5;
+    for (let i = 0; i < trees.length; ++i) {
+      const tree = trees[i];
+      const tp = tree.position;
+      tmpo.position.fromArray(tp);
+      tmpo.scale.fromArray(tree.size);
+      tmpo.position.x +=
+        0.05 *
+        tree.size[0] *
+        Math.sin(
+          5 * t +
+            0.1 * Math.cos(0.1 * t) * tp[0] +
+            0.1 * Math.sin(0.1 * t) * tp[2]
+        );
       tmpo.updateMatrix();
-      trees.current.setMatrixAt(i, tmpo.matrix);
+      treeInstances.current.setMatrixAt(i, tmpo.matrix);
     }
-    trees.current.instanceMatrix.needsUpdate = true;
+    treeInstances.current.instanceMatrix.needsUpdate = true;
   });
 
   return (
     <>
-      <hemisphereLight intensity={0.35} />
+      <hemisphereLight intensity={0.5} />
       <spotLight
         position={[0, 200, 0]}
         angle={1}
-        penumbra={1}
-        intensity={2}
+        penumbra={0.1}
+        intensity={1.5}
         castShadow
+        shadow-bias={0.000001}
+        shadow-mapSize-height={1024}
+        shadow-mapSize-width={1024}
       />
       <Plane
         args={[500, 500, 100, 100]}
@@ -308,16 +360,24 @@ function MapDiorama() {
       >
         <WaterMaterial />
       </Plane>
-      <Extrude
+      {layers.map((l) => (
+        <Extrude
+          key={l.y}
+          castShadow
+          receiveShadow
+          args={[l.shape, extrudeSettings]}
+          rotation={[Math.PI / 2, 0, 4]}
+          position={[0, l.y, 0]}
+        >
+          <meshStandardMaterial attach="material" color={l.color} />
+        </Extrude>
+      ))}
+
+      <instancedMesh
         castShadow
-        receiveShadow
-        ref={mesh}
-        args={[shape, extrudeSettings]}
-        rotation={[Math.PI / 2, 0, 4]}
+        ref={treeInstances}
+        args={[null, null, trees.length]}
       >
-        <meshStandardMaterial attach="material" color="#691" />
-      </Extrude>
-      <instancedMesh castShadow ref={trees} args={[null, null, treeCount]}>
         <sphereBufferGeometry attach="geometry" args={[]}>
           <instancedBufferAttribute
             attachObject={['attributes', 'color']}
@@ -330,15 +390,29 @@ function MapDiorama() {
         />
       </instancedMesh>
 
-      <EffectComposer>
-        <DepthOfField
-          focusDistance={0.1}
-          focalLength={0.1}
-          bokehScale={10}
-          height={480}
-        />
-        <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
-      </EffectComposer>
+      <instancedMesh
+        ref={stoneInstances}
+        castShadow
+        args={[null, null, stones.length]}
+      >
+        <boxBufferGeometry
+          attach="geometry"
+          args={[3, 10, 3]}
+        ></boxBufferGeometry>
+        <meshLambertMaterial attach="material" color="#fff" />
+      </instancedMesh>
+
+      {effects && (
+        <EffectComposer>
+          <DepthOfField
+            focusDistance={0.1}
+            focalLength={0.15}
+            bokehScale={10}
+            height={480}
+          />
+          <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
+        </EffectComposer>
+      )}
     </>
   );
 }
