@@ -1,4 +1,5 @@
 import React, {
+  createRef,
   useCallback,
   useMemo,
   useRef,
@@ -9,7 +10,7 @@ import { Canvas, useFrame } from 'react-three-fiber';
 import { Plane, Extrude } from 'drei';
 import WaterMaterial from './WaterMaterial.js';
 import * as THREE from 'three';
-import { Physics, useBox, usePlane, useSpring } from 'use-cannon';
+import { Physics, useBox, usePlane, useSpring, useSphere } from 'use-cannon';
 import { EffectComposer, DepthOfField, Bloom } from 'react-postprocessing';
 import './App.css';
 
@@ -30,20 +31,23 @@ function BasePlane(props) {
   );
 }
 
-function Box(props) {
+const HeroBox = React.forwardRef((props, ref) => {
   var mat = useRef();
   const x = props.trajectory[0].x;
   const y = props.trajectory[0].y;
   const masterZ = -3;
   const springLength = 0.3;
   const turn = props.turn;
-  const [ref] = useBox(() => ({
-    mass: 1,
-    material: {
-      friction: 0.01,
-    },
-    position: [x, y, 0.5],
-  }));
+  useBox(
+    () => ({
+      mass: 1,
+      material: {
+        friction: 0.01,
+      },
+      position: [x, y, 0.5],
+    }),
+    ref
+  );
 
   const [masterRef, masterApi] = useBox(() => ({
     type: 'Static',
@@ -62,10 +66,7 @@ function Box(props) {
   const [active, setActive] = useState(false);
 
   // Rotate mesh every frame, this is outside of React without overhead
-  useFrame(({ camera }) => {
-    camera.position.x = 12;
-    camera.position.y = 6;
-    camera.position.z = 15;
+  useFrame(() => {
     const phase = props.turnClock.phase;
     const sX = props.trajectory[turn].x;
     const sY = props.trajectory[turn].y;
@@ -97,6 +98,54 @@ function Box(props) {
       />
     </mesh>
   );
+});
+
+function SimpleAttack(props) {
+  //const [ref, api] = useSphere(() => ({type: 'Static', radius: 0.2}));
+  const mesh = useRef();
+  const sourceHero = props.sourceHero.current;
+  const targetHero = props.targetHero.current;
+  useFrame(() => {
+    const phase = props.turnClock.phase;
+    const sX = sourceHero.position.x;
+    const sY = sourceHero.position.y;
+    const tX = targetHero.position.x;
+    const tY = targetHero.position.y;
+    const aX = sX * (1 - phase) + tX * phase;
+    const aY = sY * (1 - phase) + tY * phase;
+    mesh.current && mesh.current.position.set(aX, aY, 2);
+  });
+  return (
+    <mesh ref={mesh}>
+      <sphereBufferGeometry attach="geometry" args={[0.2, 32, 32]} />
+      <meshStandardMaterial attach="material" color="black" />
+    </mesh>
+  );
+}
+function renderAction(
+  heroRef,
+  actionHeroId,
+  actionTurn,
+  turn,
+  turnClock,
+  action,
+  key
+) {
+  const attackTurn = turn - actionTurn;
+  const defaultProps = {
+    sourceHero: heroRef(actionHeroId),
+    attackTurn: attackTurn,
+    turnClock: turnClock,
+    key: key,
+  };
+  if (action.name === 'base_attack' && attackTurn >= -1 && attackTurn <= 0) {
+    return (
+      <SimpleAttack
+        targetHero={heroRef(action.target_hero)}
+        {...defaultProps}
+      />
+    );
+  }
 }
 
 function PartySelector({ data, party, setParty, startCombat }) {
@@ -119,8 +168,9 @@ function PartySelector({ data, party, setParty, startCombat }) {
 function BattleRenderer(props) {
   const journal = props.journal;
   const heroStories = [];
+  const actionEntries = [];
   console.log('journal', journal);
-  journal &&
+  if (journal) {
     Object.entries(journal[0]).forEach(([id, value]) => {
       heroStories.push({
         id: id,
@@ -131,15 +181,36 @@ function BattleRenderer(props) {
         })),
       });
     });
+    for (let turn = 0; turn < journal.length; turn++) {
+      const turnData = journal[turn];
+      Object.entries(turnData).forEach(([heroId, { actions }]) => {
+        actions.forEach((action) => {
+          actionEntries.push({
+            action: action,
+            actionHeroId: parseInt(heroId),
+            actionTurn: turn,
+            actionKey: 'action' + actionEntries.length,
+          });
+        });
+      });
+    }
+  }
   console.log('stories');
   console.log(heroStories);
+  console.log('actions');
+  console.log(actionEntries);
+
   return (
     <div style={{ height: '50vh' }}>
       <Canvas>
         <ambientLight />
         <pointLight position={[10, 10, 10]} />
         <Physics gravity={[0, 0, -10]}>
-          <BattleSimulation journal={journal} heroStories={heroStories} />
+          <BattleSimulation
+            journal={journal}
+            heroStories={heroStories}
+            actionEntries={actionEntries}
+          />
         </Physics>
       </Canvas>
     </div>
@@ -149,18 +220,26 @@ function BattleRenderer(props) {
 function BattleSimulation(props) {
   const journal = props.journal;
   const heroStories = props.heroStories;
+  const actionEntries = props.actionEntries;
+  const heroRefs = useRef({}).current;
+  function heroRef(id) {
+    return heroRefs[id] || (heroRefs[id] = createRef());
+  }
 
   const [turn, setTurn] = useState(0);
   const turnClock = useRef({ time: 0, turn: -1 }).current;
-  useFrame(() => {
+  useFrame(({ camera }) => {
     if (journal) {
-      if (turnClock.turn != turn) {
+      camera.position.x = 12;
+      camera.position.y = 6;
+      camera.position.z = 15;
+      if (turnClock.turn !== turn) {
         turnClock.turn = turn;
         turnClock.time = 0;
       }
       turnClock.time += 1;
       turnClock.phase = Math.min(1, turnClock.time / turnFrames);
-      if (turnClock.time == turnFrames) {
+      if (turnClock.time === turnFrames) {
         if (journal && turn < journal.length - 2) {
           setTurn(turn + 1);
         }
@@ -171,13 +250,25 @@ function BattleSimulation(props) {
     <>
       <BasePlane />
       {heroStories.map((hero) => (
-        <Box
+        <HeroBox
           key={hero.id}
+          ref={heroRef(hero.id)}
           trajectory={hero.trajectory}
           turn={turn}
           turnClock={turnClock}
         />
       ))}
+      {actionEntries.map((entry) => {
+        return renderAction(
+          heroRef,
+          entry.actionHeroId,
+          entry.actionTurn,
+          turn,
+          turnClock,
+          entry.action,
+          entry.actionKey
+        );
+      })}
     </>
   );
 }
@@ -433,8 +524,8 @@ function MapDiorama({ effects }) {
         ref={setStoneInstances}
         castShadow
         args={[null, null, stones.length]}
-        onPointerMove={e => colorStone(e.instanceId, '#f00')}
-        onPointerOut={e => colorStone(e.instanceId, '#fff')}
+        onPointerMove={(e) => colorStone(e.instanceId, '#f00')}
+        onPointerOut={(e) => colorStone(e.instanceId, '#fff')}
       >
         <boxBufferGeometry
           attach="geometry"
