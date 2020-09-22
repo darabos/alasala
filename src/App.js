@@ -11,7 +11,7 @@ import { Canvas, useFrame } from 'react-three-fiber';
 import { Plane, Extrude } from 'drei';
 import WaterMaterial from './WaterMaterial.js';
 import * as THREE from 'three';
-import { Physics, useBox, usePlane, useSpring, useSphere } from 'use-cannon';
+import { Physics, useBox, usePlane, useSpring } from 'use-cannon';
 import { EffectComposer, DepthOfField, Bloom } from 'react-postprocessing';
 import './App.css';
 
