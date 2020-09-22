@@ -230,6 +230,7 @@ function Map(props) {
       <div style={{ height: '80vh' }}>
         <Canvas
           shadowMap
+          gl={{ antialias: false, alpha: false }}
           onCreated={({ gl }) => {
             gl.setClearColor(new THREE.Color('#fff'));
           }}
@@ -330,7 +331,8 @@ function MapDiorama({ effects }) {
     return stones;
   }, []);
 
-  const stoneInstances = useCallback(
+  const stoneInstances = useRef();
+  const setStoneInstances = useCallback(
     (mesh) => {
       if (!mesh) return;
       for (let i = 0; i < stones.length; ++i) {
@@ -340,11 +342,18 @@ function MapDiorama({ effects }) {
         tmpo.scale.set(1, 1, 1);
         tmpo.updateMatrix();
         mesh.setMatrixAt(i, tmpo.matrix);
+        mesh.setColorAt(i, new THREE.Color('#fff'));
       }
       mesh.instanceMatrix.needsUpdate = true;
+      stoneInstances.current = mesh;
     },
     [stones]
   );
+  function colorStone(i, c) {
+    const mesh = stoneInstances.current;
+    mesh.setColorAt(i, new THREE.Color(c));
+    mesh.instanceColor.needsUpdate = true;
+  }
 
   useFrame(({ camera, clock }) => {
     const t = clock.getElapsedTime();
@@ -422,9 +431,11 @@ function MapDiorama({ effects }) {
       </instancedMesh>
 
       <instancedMesh
-        ref={stoneInstances}
+        ref={setStoneInstances}
         castShadow
         args={[null, null, stones.length]}
+        onPointerMove={e => colorStone(e.instanceId, '#f00')}
+        onPointerOut={e => colorStone(e.instanceId, '#fff')}
       >
         <boxBufferGeometry
           attach="geometry"
