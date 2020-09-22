@@ -39,7 +39,7 @@ function Box(props) {
   }));
 
   const [masterRef, masterApi] = useBox(() => ({
-    type: 'Kinematic',
+    type: 'Static',
     position: [x, y, masterZ],
   }));
 
