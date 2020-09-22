@@ -39,7 +39,7 @@ const HeroBox = React.forwardRef((props, ref) => {
   const masterZ = -3;
   const springLength = 0.3;
   const turn = props.turn;
-  useBox(
+  const [, api] = useBox(
     () => ({
       mass: 1,
       material: {
@@ -68,6 +68,7 @@ const HeroBox = React.forwardRef((props, ref) => {
 
   // Rotate mesh every frame, this is outside of React without overhead
   useFrame(() => {
+    ref.current.physicsApi = api;
     const phase = props.turnClock.phase;
     const sX = props.trajectory[turn].x;
     const sY = props.trajectory[turn].y;
@@ -115,6 +116,11 @@ function SimpleAttack(props) {
     const aX = sX * (1 - phase) + tX * phase;
     const aY = sY * (1 - phase) + tY * phase;
     mesh.current && mesh.current.position.set(aX, aY, 2);
+    if (props.turnClock.time === turnFrames && props.attackTurn === 0) {
+      const force = new THREE.Vector3(tX - sX, tY - sY, 0);
+      force.normalize().multiplyScalar(40);
+      targetHero.physicsApi.applyLocalForce(force.toArray(), [0, 0, 1]);
+    }
   });
   return (
     <mesh ref={mesh}>
