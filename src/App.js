@@ -13,6 +13,8 @@ import { Physics, useBox, usePlane, useSpring } from 'use-cannon';
 import { EffectComposer, DepthOfField, Bloom } from 'react-postprocessing';
 import './App.css';
 
+const turnFrames = 60;
+
 function BasePlane(props) {
   usePlane(() => ({
     material: {
@@ -29,13 +31,12 @@ function BasePlane(props) {
 }
 
 function Box(props) {
-  var current = useRef({ time: 0 }).current;
   var mat = useRef();
   const x = props.trajectory[0].x;
   const y = props.trajectory[0].y;
   const masterZ = -3;
   const springLength = 0.3;
-
+  const turn = props.turn;
   const [ref] = useBox(() => ({
     mass: 1,
     material: {
@@ -45,7 +46,7 @@ function Box(props) {
   }));
 
   const [masterRef, masterApi] = useBox(() => ({
-    type: 'Kinematic',
+    type: 'Static',
     position: [x, y, masterZ],
   }));
 
@@ -60,29 +61,19 @@ function Box(props) {
   const [hovered, setHover] = useState(false);
   const [active, setActive] = useState(false);
 
-  const lastStage = props.trajectory.length - 2;
-  const stageLength = 60;
-
   // Rotate mesh every frame, this is outside of React without overhead
   useFrame(({ camera }) => {
     camera.position.x = 12;
     camera.position.y = 6;
     camera.position.z = 15;
-    current.time += 1;
-    var stage = Math.floor(current.time / stageLength);
-    var phase = (current.time % stageLength) / stageLength;
-
-    if (stage > lastStage) {
-      stage = lastStage;
-      phase = 1;
-    }
-    const sX = props.trajectory[stage].x;
-    const sY = props.trajectory[stage].y;
-    const tX = props.trajectory[stage + 1].x;
-    const tY = props.trajectory[stage + 1].y;
+    const phase = props.turnClock.phase;
+    const sX = props.trajectory[turn].x;
+    const sY = props.trajectory[turn].y;
+    const tX = props.trajectory[turn + 1].x;
+    const tY = props.trajectory[turn + 1].y;
     const aX = sX * (1 - phase) + tX * phase;
     const aY = sY * (1 - phase) + tY * phase;
-    const l = (props.trajectory[stage].loyalty + 5) / 10;
+    const l = (props.trajectory[turn].loyalty + 5) / 10;
     mat.current.color.r = 1 - l;
     mat.current.color.b = l;
     mat.current.color.g = 0;
@@ -142,20 +133,52 @@ function BattleRenderer(props) {
     });
   console.log('stories');
   console.log(heroStories);
-
   return (
     <div style={{ height: '50vh' }}>
       <Canvas>
         <ambientLight />
         <pointLight position={[10, 10, 10]} />
         <Physics gravity={[0, 0, -10]}>
-          <BasePlane />
-          {heroStories.map((hero) => (
-            <Box key={hero.id} trajectory={hero.trajectory} />
-          ))}
+          <BattleSimulation journal={journal} heroStories={heroStories} />
         </Physics>
       </Canvas>
     </div>
+  );
+}
+
+function BattleSimulation(props) {
+  const journal = props.journal;
+  const heroStories = props.heroStories;
+
+  const [turn, setTurn] = useState(0);
+  const turnClock = useRef({ time: 0, turn: -1 }).current;
+  useFrame(() => {
+    if (journal) {
+      if (turnClock.turn != turn) {
+        turnClock.turn = turn;
+        turnClock.time = 0;
+      }
+      turnClock.time += 1;
+      turnClock.phase = Math.min(1, turnClock.time / turnFrames);
+      if (turnClock.time == turnFrames) {
+        if (journal && turn < journal.length - 2) {
+          setTurn(turn + 1);
+        }
+      }
+    }
+  });
+  return (
+    <>
+      <BasePlane />
+      {heroStories.map((hero) => (
+        <Box
+          key={hero.id}
+          trajectory={hero.trajectory}
+          turn={turn}
+          turnClock={turnClock}
+        />
+      ))}
+    </>
   );
 }
 
@@ -165,14 +188,16 @@ function Spinner() {
 
 function Combat({ data }) {
   const [state, setState] = useState('selectParty');
-  const [party, setParty] = useState([data.heroes[0].id, data.heroes[1].id, data.heroes[2].id]);
+  const [party, setParty] = useState([
+    data.heroes[0].id,
+    data.heroes[1].id,
+    data.heroes[2].id,
+  ]);
   const [journal, setJournal] = useState(null);
 
   function startCombat(party) {
     setState('simulate');
-    fetch(
-      `/computecombat?user=test&stage=${data.stage}&party=${party.join()}`
-    )
+    fetch(`/computecombat?user=test&stage=${data.stage}&party=${party.join()}`)
       .then((res) => res.json())
       .then((res) => {
         setState('renderBattle');
@@ -183,7 +208,12 @@ function Combat({ data }) {
   return (
     <div>
       {state === 'selectParty' && (
-        <PartySelector party={party} setParty={setParty} data={data} startCombat={startCombat} />
+        <PartySelector
+          party={party}
+          setParty={setParty}
+          data={data}
+          startCombat={startCombat}
+        />
       )}
       {state === 'simulate' && <Spinner />}
       {state === 'renderBattle' && <BattleRenderer journal={journal} />}
