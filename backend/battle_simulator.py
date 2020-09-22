@@ -28,7 +28,7 @@ def battle_is_over(turn):
     if first:
       loyal_to_player = log_entry['loyalty'] >= 0
       first = False
-    elif loyal_to_player != log_entry['loyalty'] >= 0:
+    elif loyal_to_player != (log_entry['loyalty'] >= 0):
       return False
   return True
 
