@@ -6,6 +6,7 @@ import React, {
   useState,
   useEffect,
 } from 'react';
+import { useSpring as useReactSpring, animated } from 'react-spring';
 import { Canvas, useFrame } from 'react-three-fiber';
 import { Plane, Extrude } from 'drei';
 import WaterMaterial from './WaterMaterial.js';
@@ -568,10 +569,49 @@ function Hero(props) {
   );
 }
 
+function HeroCard(props) {
+  const portrait =
+    'url(/portraits/' +
+    props.hero.name.toLowerCase().replace(' ', '-') +
+    '.png)';
+  const config = { tension: 100 };
+  const [reveal, setReveal] = useState(false);
+  console.log({
+    config,
+    transform: `rotate3d(0, 1, 0, ${reveal ? 0 : 180}deg)`,
+    from: { transform: 'rotate3d(0, 1, 0, 180deg)' },
+  });
+  const flip = useReactSpring({
+    config,
+    transform: `rotate3d(0, 1, 0, ${reveal ? 0 : 180}deg)`,
+    from: { transform: 'rotate3d(0, 1, 0, 180deg)' },
+  });
+  const backflip = useReactSpring({
+    config,
+    transform: `rotate3d(0, 1, 0, ${reveal ? 180 : 360}deg)`,
+    from: { transform: 'rotate3d(0, 1, 0, 360deg)' },
+  });
+  return (
+    <>
+      <animated.div
+        style={backflip}
+        className="CardBack"
+        onClick={() => setReveal(true)}
+      />
+      <animated.div style={flip} className="HeroCard">
+        <div className="CardBackground" />
+        <div className="CardPortrait" style={{ backgroundImage: portrait }} />
+        <div className="CardName"> {props.hero.name} </div>
+      </animated.div>
+    </>
+  );
+}
+
 function Searched(props) {
+  props.data.just_found = { name: 'Professor Hark' };
   return (
     <div>
-      <Hero hero={props.data.just_found}></Hero>
+      <HeroCard hero={props.data.just_found}></HeroCard>
     </div>
   );
 }
