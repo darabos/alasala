@@ -14,7 +14,6 @@ import { EffectComposer, DepthOfField, Bloom } from 'react-postprocessing';
 import './App.css';
 
 const turnFrames = 60;
-const turnMS = (1000 / 60) * turnFrames;
 
 function BasePlane(props) {
   usePlane(() => ({
