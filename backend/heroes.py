@@ -46,7 +46,7 @@ class Hero:
         self.actions_in_turn = [{**attack, 'target_hero': target.id}]
       else:
         direction_x, direction_y = self.direction_to_hero(target)
-        step_size = min(self.speed, distance - attack['range'])
+        step_size = min(self.speed, distance + target.speed - attack['range'])
         self.x += direction_x * step_size
         self.y += direction_y * step_size
 
