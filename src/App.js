@@ -76,9 +76,10 @@ const HeroBox = React.forwardRef((props, ref) => {
     const tY = props.trajectory[turn + 1].y;
     const aX = sX * (1 - phase) + tX * phase;
     const aY = sY * (1 - phase) + tY * phase;
-    const l = (props.trajectory[turn].loyalty + 5) / 10;
-    mat.current.color.r = 1 - l;
-    mat.current.color.b = l;
+    const l = props.trajectory[turn].loyalty;
+    const scaled = (l + Math.sign(l) * 2 + 7) / 14;
+    mat.current.color.r = 1 - scaled;
+    mat.current.color.b = scaled;
     mat.current.color.g = 0;
     masterApi.position.set(aX, aY, masterZ);
     masterApi.velocity.set(0, 0, 0);
@@ -145,6 +146,7 @@ function renderAction(
     attackTurn: attackTurn,
     turnClock: turnClock,
     key: key,
+    action: action,
   };
   if (action.name === 'base_attack' && attackTurn >= -1 && attackTurn <= 0) {
     return (
