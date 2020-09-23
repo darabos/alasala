@@ -27,10 +27,12 @@ function BasePlane(props) {
   }));
 
   return (
-    <mesh>
-      <planeBufferGeometry attach="geometry" args={[100, 100]} />
-      <meshStandardMaterial attach="material" color="yellow" />
-    </mesh>
+      <Plane
+        args={[100, 100]}
+        receiveShadow
+      >
+      <meshStandardMaterial attach="material" color="#691" />
+    </Plane>
   );
 }
 
@@ -228,10 +230,19 @@ function BattleRenderer(props) {
   console.log(actionEntries);
 
   return (
-    <div style={{ height: '50vh' }}>
+    <div className="CombatCanvas">
       <Canvas>
+      <spotLight
+        position={[0, 0, 10]}
+        angle={1}
+        penumbra={0.1}
+        intensity={1.5}
+        castShadow
+        shadow-bias={0.000001}
+        shadow-mapSize-height={1024}
+        shadow-mapSize-width={1024}
+      />
         <ambientLight />
-        <pointLight position={[10, 10, 10]} />
         <Physics gravity={[0, 0, -10]}>
           <BattleSimulation
             journal={journal}
@@ -307,7 +318,7 @@ function Spinner() {
 function Combat({ data }) {
   const [state, setState] = useState('selectParty');
   const [party, setParty] = useState(new Array(5).fill());
-  const [journal, setJournal] = useState(null);
+  const [journal, setJournal] = useState();
   useEffect(() => window.scrollTo(0, 0), []);
 
   function startCombat(party) {

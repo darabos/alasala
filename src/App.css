@@ -4,6 +4,7 @@ body {
   background: radial-gradient(#fca, #da6);
   text-align: center;
 }
+.CombatCanvas,
 .MapCanvas {
   overflow: hidden;
   border-radius: 20px;

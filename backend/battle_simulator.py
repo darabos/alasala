@@ -1,5 +1,7 @@
 from backend.heroes import Hero
 
+STARTX = [4, 4, 5, 5, 5]
+STARTY = [-0.5, 0.5, -1, 0, 1]
 
 def get_player_state(heroes):
   print(heroes)
@@ -8,8 +10,8 @@ def get_player_state(heroes):
   level=hero['level'],
   id=hero['id'],
   owner='player',
-  x=0.5 * (i + 1),
-  y=0.5 * (i + 1)) for (i, hero) in enumerate(heroes)]
+  x=-STARTX[i],
+  y=STARTY[i]) for (i, hero) in enumerate(heroes)]
 
 
 def get_enemy_state(stage):
@@ -18,8 +20,8 @@ def get_enemy_state(stage):
   level=1,
   id=-(i + 1),
   owner='enemy',
-  x= 10 - 0.5 * (i + 1),
-  y= 0.5 * (i + 1)) for i in range(3)]
+  x= STARTX[i],
+  y= STARTY[i]) for i in range(3)]
 
 
 def battle_is_over(turn):
