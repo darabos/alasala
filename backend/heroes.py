@@ -40,13 +40,15 @@ class Hero:
     target = self.find_closest_opponent(state)
     if target is not None:
       attack = self.actions['base_attack']
-      if sqrt(self.sq_distance(target)) < attack['range']:
+      distance = sqrt(self.sq_distance(target))
+      if distance <= attack['range']:
         target.take_attack(attack)
         self.actions_in_turn = [{**attack, 'target_hero': target.id}]
       else:
         direction_x, direction_y = self.direction_to_hero(target)
-        self.x += direction_x * self.speed
-        self.y += direction_y * self.speed
+        step_size = min(self.speed, distance + target.speed - attack['range'])
+        self.x += direction_x * step_size
+        self.y += direction_y * step_size
 
   def take_attack(self, attack):
     if self.loyalty >= 0:
@@ -86,7 +88,7 @@ class Cube(Hero):
   name = 'cube'
 
   def __init__(self, level, id, owner, x, y):
-    actions = {'base_attack': {'name': 'base_attack', 'range': 1, 'damage': 1}}
+    actions = {'base_attack': {'name': 'base_attack', 'range': 3, 'damage': 1}}
     super().__init__(level, id, owner, x, y, 1, 0.5, actions)
 
   def speak(self):

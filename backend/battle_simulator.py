@@ -19,7 +19,7 @@ def get_enemy_state(stage):
   id=-(i + 1),
   owner='enemy',
   x= 10 - 0.5 * (i + 1),
-  y= 0.5 * (i + 1)) for i in range(5)]
+  y= 0.5 * (i + 1)) for i in range(3)]
 
 
 def battle_is_over(turn):
@@ -28,7 +28,7 @@ def battle_is_over(turn):
     if first:
       loyal_to_player = log_entry['loyalty'] >= 0
       first = False
-    elif loyal_to_player != log_entry['loyalty'] >= 0:
+    elif loyal_to_player != (log_entry['loyalty'] >= 0):
       return False
   return True
 
