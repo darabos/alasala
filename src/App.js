@@ -38,10 +38,10 @@ function BasePlane(props) {
 
 const HeroBox = React.forwardRef((props, ref) => {
   var mat = useRef();
-  const masterZ = -3;
-  const springLength = 0.3;
+  const keelZ = -3;
   const turn = props.turn;
   const initial = props.trajectory[0];
+  const height = initial.height || 1.5;
   const current = props.trajectory[turn];
   const last = props.trajectory[turn-1] || current;
   const next = props.trajectory[turn+1] || current;
@@ -51,31 +51,44 @@ const HeroBox = React.forwardRef((props, ref) => {
       material: {
         friction: 0.01,
       },
-      position: [initial.x, initial.y, 0.5],
+      position: [initial.x, initial.y, height / 2],
     }),
     ref
   );
 
-  const [masterRef, masterApi] = useBox(() => ({
+  const [leashRef, leashApi] = useBox(() => ({
+    collisionFilterMask: 0,
     type: 'Static',
-    position: [initial.x, initial.y, masterZ],
+    position: [initial.x, initial.y, height / 2],
+  }));
+  const [keelRef, keelApi] = useBox(() => ({
+    collisionFilterMask: 0,
+    type: 'Static',
+    position: [initial.x, initial.y, keelZ],
   }));
 
-  useSpring(ref, masterRef, {
-    restLength: springLength,
+  useSpring(ref, leashRef, {
+    restLength: 0,
     stiffness: 12,
     damping: 2,
-    localAnchorA: [0.9, 0, masterZ + springLength - 0.5],
+    localAnchorA: [0.9, 0, 0],
+  });
+  useSpring(ref, keelRef, {
+    restLength: 0,
+    stiffness: 3,
+    damping: 0,
+    localAnchorA: [0, 0, -height],
   });
 
-  // Rotate mesh every frame, this is outside of React without overhead
   useFrame(() => {
     ref.current.physicsApi = api;
     const phase = props.turnClock.phase;
     const aX = current.x * (1 - phase) + next.x * phase;
     const aY = current.y * (1 - phase) + next.y * phase;
-    masterApi.position.set(aX, aY, masterZ);
-    masterApi.velocity.set(0, 0, 0);
+    leashApi.position.set(aX, aY, height / 2);
+    leashApi.velocity.set(0, 0, 0);
+    keelApi.position.set(ref.current.position.x, ref.current.position.y, keelZ);
+    keelApi.velocity.set(0, 0, 0);
   });
 
   return (
@@ -84,7 +97,7 @@ const HeroBox = React.forwardRef((props, ref) => {
       receiveShadow
       ref={ref}
     >
-      <boxBufferGeometry attach="geometry" args={[1, 1, 1.5]} />
+      <boxBufferGeometry attach="geometry" args={[1, 1, height]} />
       <meshStandardMaterial
         ref={mat}
         attach="material"
@@ -132,7 +145,7 @@ function SimpleAttack(props) {
     mesh.current && mesh.current.position.set(aX, aY, 2);
     if (props.turnClock.time === turnFrames && props.attackTurn === 0) {
       const force = new THREE.Vector3(tX - sX, tY - sY, 0);
-      force.normalize().multiplyScalar(25);
+      force.normalize().multiplyScalar(100);
       const localForce = targetHero.worldToLocal(force);
       targetHero.physicsApi.applyLocalForce(localForce.toArray(), [0, 0, 1]);
     }
