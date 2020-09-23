@@ -1319,6 +1319,16 @@
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.3.tgz#2b5a3ab3f918cca48a8c754c08168e3f03eba61b"
   integrity sha512-shAmDyaQC4H92APFoIaVDHCx5bStIocgvbwQyxPRrbUY20V1EYTbSDchWbuwlMG3V17cprZhA6+78JfB+3DTPw==
 
+"@openfonts/corben_latin@^1.44.2":
+  version "1.44.2"
+  resolved "https://registry.yarnpkg.com/@openfonts/corben_latin/-/corben_latin-1.44.2.tgz#46da4ef553ef566ff8e7bb5ca3226d7688409cdc"
+  integrity sha512-Ea3qLeKnKDk+CBmsVZQwr79YPUsZBSAY4tyBnp9PcNJK8lxu98qkUxbUi8pwfc76Izmaa4GgVDCCwyhF4obkRg==
+
+"@openfonts/grenze-gotisch_latin@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@openfonts/grenze-gotisch_latin/-/grenze-gotisch_latin-0.0.7.tgz#98edf95c3bc314708a5e059adee270fa98700e23"
+  integrity sha512-IEPAgvOiDqWtunplWRpkCE42oEcJCs6sKOkwN024ZXjOTBxdVaVxwk6HaSrcMz/govZcteTHuQpOHyR5I0MUtQ==
+
 "@react-spring/animated@9.0.0-rc.3":
   version "9.0.0-rc.3"
   resolved "https://registry.yarnpkg.com/@react-spring/animated/-/animated-9.0.0-rc.3.tgz#e792cb76aacecfc78db2be6020ac11ce96503eb5"

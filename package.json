@@ -5,6 +5,8 @@
   "proxy": "http://localhost:5000",
   "dependencies": {
     "@babel/runtime": "^7.11.2",
+    "@openfonts/corben_latin": "^1.44.2",
+    "@openfonts/grenze-gotisch_latin": "^0.0.7",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
