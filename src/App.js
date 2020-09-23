@@ -700,7 +700,7 @@ function HeroPage({ hero, back }) {
 function Searched(props) {
   props.data.just_found = { name: 'Professor Hark' };
   return (
-    <div>
+    <div className="Searched">
       <HeroCard hero={props.data.just_found}></HeroCard>
     </div>
   );
