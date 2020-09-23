@@ -2,6 +2,7 @@ body {
   font-family: Corben;
   min-height: 100vh;
   background: radial-gradient(#fca, #da6);
+  text-align: center;
 }
 .MapCanvas {
   overflow: hidden;
@@ -73,15 +74,10 @@ button:hover {
   cursor: pointer;
 }
 .CardBack {
-  position: absolute;
   background-color: #ba4;
   background-image: radial-gradient(transparent, #a83);
   transition: background-color 0.2s ease, box-shadow 0.6s ease-in;
   box-shadow: #0006 0px 2px 6px;
-}
-.CardBack:hover {
-  background-color: #fb5;
-  box-shadow: #54c 0px 10px 20px;
 }
 
 .CardBackground {
@@ -176,4 +172,18 @@ button:hover {
 .Searched {
   display: flex;
   justify-content: center;
+}
+.Searched .CardBack {
+  position: absolute;
+}
+.Searched .CardBack:hover {
+  background-color: #fb5;
+  box-shadow: #54c 0px 10px 20px;
+}
+
+.Party {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  background: #8008;
 }

@@ -161,20 +161,35 @@ function renderAction(
 }
 
 function PartySelector({ data, party, setParty, startCombat }) {
-  function toggleHero(h) {
-    // TODO: let the user set the party
-    setParty(party);
+  function removeHero(i) {
+        const p = [...party];
+        p[i] = undefined;
+    setParty(p);
+  }
+  function addHero(h) {
+      const s = party.indexOf(undefined);
+      if (s !== -1) {
+        const p = [...party];
+        p[s] = h.id;
+        setParty(p);
+      }
   }
 
-  return (
-    <div>
-      {party.map((id) => {
+  return <>
+    <div className="Party">
+      {party.map((id, i) => {
         const h = data.heroes.find((hero) => hero.id === id);
-        return <HeroListItem onClick={() => toggleHero(h)} hero={h} key={id} />;
+        if (h === undefined) {
+          return <div key={i} className="CardBack"/>
+        } else {
+          return <HeroListItem key={i} onClick={() => removeHero(i)} hero={h} />;
+        }
       })}
-      <button onClick={() => startCombat(party)}>Gooooooooooooo!</button>
     </div>
-  );
+    <p className="Hint Center">{party.length} heroes can join this fight. Choose them from your roster below.</p>
+      <button disabled={party.filter(h => h === undefined).length === party.length} onClick={() => startCombat(party)}>Fight!</button>
+    <HeroList heroes={data.heroes.filter(h => !party.includes(h.id))} onClick={h => addHero(h)}/>
+  </>;
 }
 
 function BattleRenderer(props) {
@@ -291,12 +306,9 @@ function Spinner() {
 
 function Combat({ data }) {
   const [state, setState] = useState('selectParty');
-  const [party, setParty] = useState([
-    data.heroes[0].id,
-    data.heroes[1].id,
-    data.heroes[2].id,
-  ]);
+  const [party, setParty] = useState(new Array(5).fill());
   const [journal, setJournal] = useState(null);
+  useEffect(() => window.scrollTo(0, 0), []);
 
   function startCombat(party) {
     setState('simulate');
@@ -325,6 +337,7 @@ function Combat({ data }) {
 }
 
 function Map(props) {
+  useEffect(() => window.scrollTo(0, 0), []);
   return (
     <div>
       <p>day {props.data.progress.day}</p>
@@ -341,8 +354,8 @@ function Map(props) {
         </Canvas>
       </div>
       <p>
-        <button onClick={props.searchBeach}>search the beach</button>
-        <button onClick={() => props.setPage('combat')}>attack</button>
+        <button onClick={props.searchBeach}>Search the beach</button>
+        <button onClick={() => props.setPage('combat')}>Next stage</button>
       </p>
     </div>
   );
@@ -561,18 +574,6 @@ function MapDiorama({ effects }) {
   );
 }
 
-function Heroes(props) {
-  const [current, setCurrent] = useState(props.data.heroes[0]);
-  return (
-    <>
-      {!current && (
-        <HeroList heroes={props.data.heroes} onClick={(h) => setCurrent(h)} />
-      )}
-      {current && <HeroPage hero={current} back={() => setCurrent()} />}
-    </>
-  );
-}
-
 function HeroList(props) {
   return (
     <div className="HeroList">
@@ -641,7 +642,7 @@ function HeroCard({ hero }) {
   );
 }
 
-function HeroPage({ hero, back }) {
+function HeroPage({ hero }) {
   hero.name = 'Professor Hark';
   hero.title = 'Dean of Arcane Studies';
   hero.abilities = [
@@ -664,40 +665,36 @@ function HeroPage({ hero, back }) {
     },
   ];
   return (
-    <>
-      <div className="HeroPage">
-        <div
-          className="HeroPortrait"
-          style={{ backgroundImage: heroPortrait(hero) }}
-        />
-        <div className="HeroText">
-          <div className="HeroName"> {hero.name} </div>
-          <div className="HeroTitle">
-            {' '}
-            Level {hero.level} {hero.title}{' '}
-          </div>
-          <div className="HeroAbilities">
-            <div className="PanelHeader">Abilities:</div>
-            {hero.abilities.map((a) => (
-              <div
-                key={a.name}
-                className={
-                  'HeroAbility ' + (a.unlocked ? 'Unlocked' : 'Locked')
-                }
-              >
-                <h1>{a.name}</h1>
-                <p>{a.description}</p>
-              </div>
-            ))}
-          </div>
+    <div className="HeroPage">
+      <div
+        className="HeroPortrait"
+        style={{ backgroundImage: heroPortrait(hero) }}
+      />
+      <div className="HeroText">
+        <div className="HeroName"> {hero.name} </div>
+        <div className="HeroTitle">
+          {' '}
+          Level {hero.level} {hero.title}{' '}
+        </div>
+        <div className="HeroAbilities">
+          <div className="PanelHeader">Abilities:</div>
+          {hero.abilities.map((a) => (
+            <div
+              key={a.name}
+              className={'HeroAbility ' + (a.unlocked ? 'Unlocked' : 'Locked')}
+            >
+              <h1>{a.name}</h1>
+              <p>{a.description}</p>
+            </div>
+          ))}
         </div>
       </div>
-      <button onClick={back}>Back</button>
-    </>
+    </div>
   );
 }
 
 function Searched(props) {
+  useEffect(() => window.scrollTo(0, 0), []);
   props.data.just_found = { name: 'Professor Hark' };
   return (
     <div className="Searched">
@@ -708,6 +705,7 @@ function Searched(props) {
 
 function App() {
   const [page, setPage] = useState('map');
+  const [heroPage, setHeroPage] = useState();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   useEffect(() => {
@@ -741,17 +739,26 @@ function App() {
       {data && (
         <div>
           {JSON.stringify(data)}
-          {page === 'combat' && <Combat data={data}></Combat>}
+          {page === 'combat' && <Combat data={data} />}
           {page === 'map' && (
-            <Map setPage={setPage} searchBeach={searchBeach} data={data}></Map>
+            <Map setPage={setPage} searchBeach={searchBeach} data={data} />
           )}
-          {page === 'heroes' && <Heroes data={data}></Heroes>}
-          {page === 'searched' && <Searched data={data}></Searched>}
+          {page === 'heroes' && (
+            <HeroList
+              heroes={data.heroes}
+              onClick={(h) => {
+                setPage('hero');
+                setHeroPage(h);
+              }}
+            />
+          )}
+          {page === 'hero' && <HeroPage hero={heroPage} />}
+          {page === 'searched' && <Searched data={data} />}
         </div>
       )}
       <div>
-        <button onClick={() => setPage('heroes')}>heroes</button>
-        <button onClick={() => setPage('map')}>map</button>
+        <button onClick={() => setPage('heroes')}>Heroes</button>
+        <button onClick={() => setPage('map')}>Map</button>
       </div>
     </div>
   );
