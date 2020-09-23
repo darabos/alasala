@@ -482,7 +482,7 @@ function MapDiorama({ effects }) {
   );
 
   const stones = useMemo(() => {
-    const p = new THREE.Vector3(41, 2, -112);
+    const p = new THREE.Vector3(41, 6, -112);
     const dir = new THREE.Vector3(-1, 0, -1);
     dir.normalize();
     dir.multiplyScalar(5);
@@ -505,7 +505,7 @@ function MapDiorama({ effects }) {
         const s = stones[i];
         tmpo.position.fromArray(s.position);
         tmpo.rotation.set(0, Math.random(), 0);
-        tmpo.scale.set(1, 1, 1);
+        tmpo.scale.set(1, 0.1, 1);
         tmpo.updateMatrix();
         mesh.setMatrixAt(i, tmpo.matrix);
         mesh.setColorAt(i, new THREE.Color('#fff'));
@@ -600,7 +600,7 @@ function MapDiorama({ effects }) {
         ref={setStoneInstances}
         castShadow
         args={[null, null, stones.length]}
-        onPointerMove={(e) => colorStone(e.instanceId, '#f00')}
+        onPointerOver={(e) => colorStone(e.instanceId, '#f00')}
         onPointerOut={(e) => colorStone(e.instanceId, '#fff')}
       >
         <boxBufferGeometry
