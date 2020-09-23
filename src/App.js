@@ -28,7 +28,7 @@ function BasePlane(props) {
 
   return (
       <Plane
-        args={[100, 100]}
+        args={[200, 200]}
         receiveShadow
       >
       <meshStandardMaterial attach="material" color="#691" />
@@ -91,6 +91,8 @@ const HeroBox = React.forwardRef((props, ref) => {
 
   return (
     <mesh
+      castShadow
+      receiveShadow
       ref={ref}
       scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}
       onClick={(e) => setActive(!active)}
@@ -231,18 +233,22 @@ function BattleRenderer(props) {
 
   return (
     <div className="CombatCanvas">
-      <Canvas>
+      <Canvas shadowMap>
+      {props.effects && (
+        <EffectComposer>
+          <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
+        </EffectComposer>
+      )}
       <spotLight
-        position={[0, 0, 10]}
-        angle={1}
+        position={[20, 0, 5]}
+        angle={0.5}
         penumbra={0.1}
         intensity={1.5}
         castShadow
-        shadow-bias={0.000001}
         shadow-mapSize-height={1024}
         shadow-mapSize-width={1024}
       />
-        <ambientLight />
+        <ambientLight args={[0x808080]}/>
         <Physics gravity={[0, 0, -10]}>
           <BattleSimulation
             journal={journal}
@@ -266,11 +272,13 @@ function BattleSimulation(props) {
 
   const [turn, setTurn] = useState(0);
   const turnClock = useRef({ time: 0, turn: -1 }).current;
-  useFrame(({ camera }) => {
+  useFrame(({ camera, clock }) => {
     if (journal) {
-      camera.position.x = 12;
-      camera.position.y = 6;
-      camera.position.z = 15;
+      const t = clock.getElapsedTime();
+      camera.position.x = Math.cos(0.19 * t);
+      camera.position.y = Math.sin(0.2 * t) - 6;
+      camera.position.z = 10;
+      camera.lookAt(0, 0, 0);
       if (turnClock.turn !== turn) {
         turnClock.turn = turn;
         turnClock.time = 0;
@@ -342,7 +350,7 @@ function Combat({ data }) {
         />
       )}
       {state === 'simulate' && <Spinner />}
-      {state === 'renderBattle' && <BattleRenderer journal={journal} />}
+      {state === 'renderBattle' && <BattleRenderer effects journal={journal} />}
     </div>
   );
 }
