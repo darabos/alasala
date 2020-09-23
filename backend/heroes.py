@@ -31,10 +31,10 @@ class Hero:
   def increase_loyalty(self):
     if self.loyalty >= 0:
       self.loyalty += self.loyalty_factor
-      self.loyalty = min(5, self.loyalty)
+      self.loyalty = min(self.max_loyalty, self.loyalty)
     else:
       self.loyalty -= self.loyalty_factor
-      self.loyalty = max(-5, self.loyalty)
+      self.loyalty = max(-self.max_loyalty, self.loyalty)
 
   def step(self, stage, state):
     self.actions_in_turn = []
@@ -94,7 +94,7 @@ class Cube(Hero):
 
   def __init__(self, level, id, owner, x, y):
     actions = [BaseAttack()]
-    super().__init__(level, id, owner, x, y, 1, 0.2, actions)
+    super().__init__(level, id, owner, x, y, 1, 0.1, actions)
 
   def speak(self):
     return 'cube'
