@@ -17,7 +17,7 @@ import './App.css';
 import '@openfonts/grenze-gotisch_latin';
 import '@openfonts/corben_latin';
 
-const turnFrames = 60;
+const turnFrames = 20;
 
 function BasePlane(props) {
   usePlane(() => ({
@@ -66,10 +66,6 @@ const HeroBox = React.forwardRef((props, ref) => {
     localAnchorA: [0.9, 0, masterZ + springLength - 0.5],
   });
 
-  // Set up state for the hovered and active state
-  const [hovered, setHover] = useState(false);
-  const [active, setActive] = useState(false);
-
   // Rotate mesh every frame, this is outside of React without overhead
   useFrame(() => {
     ref.current.physicsApi = api;
@@ -94,16 +90,11 @@ const HeroBox = React.forwardRef((props, ref) => {
       castShadow
       receiveShadow
       ref={ref}
-      scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}
-      onClick={(e) => setActive(!active)}
-      onPointerOver={(e) => setHover(true)}
-      onPointerOut={(e) => setHover(false)}
     >
-      <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
+      <boxBufferGeometry attach="geometry" args={[1, 1, 1.5]} />
       <meshStandardMaterial
         ref={mat}
         attach="material"
-        color={hovered ? 'hotpink' : 'orange'}
       />
     </mesh>
   );
