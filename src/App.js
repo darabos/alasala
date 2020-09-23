@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { useSpring as useReactSpring, animated } from 'react-spring';
 import { Canvas, useFrame } from 'react-three-fiber';
-import { Plane, Extrude } from 'drei';
+import { Plane, Extrude, Html } from 'drei';
 import WaterMaterial from './WaterMaterial.js';
 import * as THREE from 'three';
 import { Physics, useBox, usePlane, useSpring } from 'use-cannon';
@@ -17,7 +17,7 @@ import './App.css';
 import '@openfonts/grenze-gotisch_latin';
 import '@openfonts/corben_latin';
 
-const turnFrames = 60;
+const turnFrames = 20;
 
 function BasePlane(props) {
   usePlane(() => ({
@@ -27,34 +27,38 @@ function BasePlane(props) {
   }));
 
   return (
-    <mesh>
-      <planeBufferGeometry attach="geometry" args={[100, 100]} />
-      <meshStandardMaterial attach="material" color="yellow" />
-    </mesh>
+      <Plane
+        args={[200, 200]}
+        receiveShadow
+      >
+      <meshStandardMaterial attach="material" color="#691" />
+    </Plane>
   );
 }
 
 const HeroBox = React.forwardRef((props, ref) => {
   var mat = useRef();
-  const x = props.trajectory[0].x;
-  const y = props.trajectory[0].y;
   const masterZ = -3;
   const springLength = 0.3;
   const turn = props.turn;
+  const initial = props.trajectory[0];
+  const current = props.trajectory[turn];
+  const last = props.trajectory[turn-1] || current;
+  const next = props.trajectory[turn+1] || current;
   const [, api] = useBox(
     () => ({
       mass: 1,
       material: {
         friction: 0.01,
       },
-      position: [x, y, 0.5],
+      position: [initial.x, initial.y, 0.5],
     }),
     ref
   );
 
   const [masterRef, masterApi] = useBox(() => ({
     type: 'Static',
-    position: [x, y, masterZ],
+    position: [initial.x, initial.y, masterZ],
   }));
 
   useSpring(ref, masterRef, {
@@ -64,46 +68,53 @@ const HeroBox = React.forwardRef((props, ref) => {
     localAnchorA: [0.9, 0, masterZ + springLength - 0.5],
   });
 
-  // Set up state for the hovered and active state
-  const [hovered, setHover] = useState(false);
-  const [active, setActive] = useState(false);
-
   // Rotate mesh every frame, this is outside of React without overhead
   useFrame(() => {
     ref.current.physicsApi = api;
     const phase = props.turnClock.phase;
-    const sX = props.trajectory[turn].x;
-    const sY = props.trajectory[turn].y;
-    const tX = props.trajectory[turn + 1].x;
-    const tY = props.trajectory[turn + 1].y;
-    const aX = sX * (1 - phase) + tX * phase;
-    const aY = sY * (1 - phase) + tY * phase;
-    const l = props.trajectory[turn].loyalty;
-    const scaled = (l + Math.sign(l) * 2 + 7) / 14;
-    mat.current.color.r = 1 - scaled;
-    mat.current.color.b = scaled;
-    mat.current.color.g = 0;
+    const aX = current.x * (1 - phase) + next.x * phase;
+    const aY = current.y * (1 - phase) + next.y * phase;
     masterApi.position.set(aX, aY, masterZ);
     masterApi.velocity.set(0, 0, 0);
   });
 
   return (
     <mesh
+      castShadow
+      receiveShadow
       ref={ref}
-      scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}
-      onClick={(e) => setActive(!active)}
-      onPointerOver={(e) => setHover(true)}
-      onPointerOut={(e) => setHover(false)}
     >
-      <boxBufferGeometry attach="geometry" args={[1, 1, 1]} />
+      <boxBufferGeometry attach="geometry" args={[1, 1, 1.5]} />
       <meshStandardMaterial
         ref={mat}
         attach="material"
-        color={hovered ? 'hotpink' : 'orange'}
       />
+      <Html center position-z={2}><LoyaltyBar max={current.max_loyalty || Math.abs(initial.loyalty)} current={current.loyalty} change={current.loyalty - last.loyalty} /></Html>
     </mesh>
   );
 });
+
+function LoyaltyBar({max, current, change}) {
+  let baseClass = 'LoyaltyBar';
+  let changeClass = 'LoyaltyBarChange';
+  if (current < 0) {
+    current *= -1;
+    change *= -1;
+    baseClass += ' Evil';
+  }
+  let base = current * 100 / max;
+  change *= 100 / max;
+  if (change < 0) {
+    changeClass += ' Damage';
+    change *= -1;
+  } else {
+    changeClass += ' Heal';
+    base -= change;
+  }
+  return <div className={baseClass}>
+    <div className="LoyaltyBarInside" style={{width: base + '%'}}/>
+    <div className={changeClass} style={{width: change + '%'}}/></div>;
+}
 
 function SimpleAttack(props) {
   //const [ref, api] = useSphere(() => ({type: 'Static', radius: 0.2}));
@@ -202,9 +213,9 @@ function BattleRenderer(props) {
       heroStories.push({
         id: id,
         trajectory: journal.map((step) => ({
+          ...step[id],
           x: step[id].x * 3,
           y: step[id].y * 3,
-          loyalty: step[id].loyalty,
         })),
       });
     });
@@ -228,10 +239,23 @@ function BattleRenderer(props) {
   console.log(actionEntries);
 
   return (
-    <div style={{ height: '50vh' }}>
-      <Canvas>
-        <ambientLight />
-        <pointLight position={[10, 10, 10]} />
+    <div className="CombatCanvas">
+      <Canvas shadowMap>
+      {props.effects && (
+        <EffectComposer>
+          <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
+        </EffectComposer>
+      )}
+      <spotLight
+        position={[20, 0, 5]}
+        angle={0.5}
+        penumbra={0.1}
+        intensity={1.5}
+        castShadow
+        shadow-mapSize-height={1024}
+        shadow-mapSize-width={1024}
+      />
+        <ambientLight args={[0x808080]}/>
         <Physics gravity={[0, 0, -10]}>
           <BattleSimulation
             journal={journal}
@@ -255,11 +279,13 @@ function BattleSimulation(props) {
 
   const [turn, setTurn] = useState(0);
   const turnClock = useRef({ time: 0, turn: -1 }).current;
-  useFrame(({ camera }) => {
+  useFrame(({ camera, clock }) => {
     if (journal) {
-      camera.position.x = 12;
-      camera.position.y = 6;
-      camera.position.z = 15;
+      const t = clock.getElapsedTime();
+      camera.position.x = Math.cos(0.19 * t);
+      camera.position.y = Math.sin(0.2 * t) - 6;
+      camera.position.z = 10;
+      camera.lookAt(0, 0, 0);
       if (turnClock.turn !== turn) {
         turnClock.turn = turn;
         turnClock.time = 0;
@@ -267,7 +293,7 @@ function BattleSimulation(props) {
       turnClock.time += 1;
       turnClock.phase = Math.min(1, turnClock.time / turnFrames);
       if (turnClock.time === turnFrames) {
-        if (journal && turn < journal.length - 2) {
+        if (journal && turn < journal.length - 1) {
           setTurn(turn + 1);
         }
       }
@@ -307,7 +333,7 @@ function Spinner() {
 function Combat({ data }) {
   const [state, setState] = useState('selectParty');
   const [party, setParty] = useState(new Array(5).fill());
-  const [journal, setJournal] = useState(null);
+  const [journal, setJournal] = useState();
   useEffect(() => window.scrollTo(0, 0), []);
 
   function startCombat(party) {
@@ -331,7 +357,7 @@ function Combat({ data }) {
         />
       )}
       {state === 'simulate' && <Spinner />}
-      {state === 'renderBattle' && <BattleRenderer journal={journal} />}
+      {state === 'renderBattle' && <BattleRenderer effects journal={journal} />}
     </div>
   );
 }

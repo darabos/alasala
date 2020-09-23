@@ -11,7 +11,8 @@ class Hero:
     self.speed = speed
     self.loyalty_factor = loyalty_factor
     self.actions = actions
-    self.loyalty = 5 * (-1 if owner == 'enemy' else 1)
+    self.max_loyalty = 5
+    self.loyalty = self.max_loyalty * (-1 if owner == 'enemy' else 1)
     self.actions_in_turn = []
     self.status = []
 
@@ -61,6 +62,7 @@ class Hero:
     'x': self.x,
     'y': self.y,
     'loyalty': self.loyalty,
+    'max_loyalty': self.max_loyalty,
     'status': self.status,
     'actions': self.actions_in_turn
     }

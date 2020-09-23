@@ -1,5 +1,7 @@
 from backend.heroes import Hero
 
+STARTX = [4, 4, 5, 5, 5]
+STARTY = [-0.5, 0.5, -1, 0, 1]
 
 def get_player_state(heroes):
   print(heroes)
@@ -8,8 +10,8 @@ def get_player_state(heroes):
   level=hero['level'],
   id=hero['id'],
   owner='player',
-  x=0.5 * (i + 1),
-  y=0.5 * (i + 1)) for (i, hero) in enumerate(heroes)]
+  x=-STARTX[i],
+  y=STARTY[i]) for (i, hero) in enumerate(heroes)]
 
 
 def get_enemy_state(stage):
@@ -18,25 +20,20 @@ def get_enemy_state(stage):
   level=1,
   id=-(i + 1),
   owner='enemy',
-  x= 10 - 0.5 * (i + 1),
-  y= 0.5 * (i + 1)) for i in range(3)]
+  x= STARTX[i],
+  y= STARTY[i]) for i in range(3)]
 
 
 def battle_is_over(turn):
-  first = True
-  for _, log_entry in turn.items():
-    if first:
-      loyal_to_player = log_entry['loyalty'] >= 0
-      first = False
-    elif loyal_to_player != (log_entry['loyalty'] >= 0):
-      return False
-  return True
+  return (
+      all(log_entry['loyalty'] <= 0 for log_entry in turn.values()) or
+      all(log_entry['loyalty'] >= 0 for log_entry in turn.values()))
 
 
 def simulate_battle(heroes, stage):
   state = get_player_state(heroes) + get_enemy_state(stage)
   turns = [{hero.id: hero.get_log_entry() for hero in state}]
-  while not battle_is_over(turns[-1]) and len(turns) < 5 * 90:
+  while not battle_is_over(turns[-1]) and len(turns) < 4 * 120:
     for hero in state:
       hero.step(stage, state)
     turns.append({hero.id: hero.get_log_entry() for hero in state})

@@ -4,6 +4,7 @@ body {
   background: radial-gradient(#fca, #da6);
   text-align: center;
 }
+.CombatCanvas,
 .MapCanvas {
   overflow: hidden;
   border-radius: 20px;
@@ -186,4 +187,32 @@ button:hover {
   flex-wrap: wrap;
   justify-content: center;
   background: #8008;
+}
+
+.LoyaltyBar {
+  width: 100px;
+  height: 10px;
+  border: 1px solid black;
+  background: black;
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+}
+.LoyaltyBarChange,
+.LoyaltyBarInside {
+  height: 100%;
+  background: #6c4;
+  transition: width 0.25s;
+}
+.Evil .LoyaltyBarInside {
+  background: #c64;
+}
+.LoyaltyBarChange.Damage {
+  background: yellow;
+}
+.LoyaltyBarChange.Heal {
+  background: #5a3;
+}
+.Evil .LoyaltyBarChange.Heal {
+  background: #a53;
 }
