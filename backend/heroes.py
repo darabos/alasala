@@ -1,5 +1,4 @@
-from math import sqrt
-from collections import defaultdict
+from backend.actions import *
 
 class Hero:
   hero_classes = {}
@@ -11,12 +10,12 @@ class Hero:
     self.y = y
     self.speed = speed
     self.loyalty_factor = loyalty_factor
+    # Favorite action first.
     self.actions = actions
     self.max_loyalty = 8
     self.loyalty = self.max_loyalty * (-1 if owner == 'enemy' else 1)
     self.actions_in_turn = []
     self.status = []
-    self.cooldown = defaultdict(int)
 
   @classmethod
   def __init_subclass__(cls):
@@ -37,32 +36,29 @@ class Hero:
       self.loyalty -= self.loyalty_factor
       self.loyalty = max(-5, self.loyalty)
 
-
   def step(self, stage, state):
     self.actions_in_turn = []
     self.increase_loyalty()
-    target = self.find_closest_opponent(state)
-    if target is not None:
-      attack = self.actions['base_attack']
-      distance = sqrt(self.sq_distance(target))
-      if distance <= attack['range']:
-        if self.cooldown[attack['name']] == 0:
-          target.take_attack(attack)
-          self.actions_in_turn = [{**attack, 'target_hero': target.id}]
-          self.cooldown[attack['name']] = attack['cooldown']
-        else:
-          self.cooldown[attack['name']] -= 1
+    for action in self.actions:
+      if action.usable(self, state):
+        action.do()
+        self.actions_in_turn.append(action.get_info())
       else:
-        direction_x, direction_y = self.direction_to_hero(target)
-        step_size = min(self.speed, distance + target.speed - attack['range'])
-        self.x += direction_x * step_size
-        self.y += direction_y * step_size
+        action.cooldown_progress = max(0, action.cooldown_progress - 1)
+      if not self.actions_in_turn:
+        target = self.find_closest_opponent(state)
+        if target is not None:
+          distance = sqrt(self.sq_distance(target))
+          direction_x, direction_y = self.direction_to_hero(target)
+          step_size = min(self.speed, distance + target.speed - self.actions[0].range)
+          self.x += direction_x * step_size
+          self.y += direction_y * step_size
 
   def take_attack(self, attack):
     if self.loyalty >= 0:
-      self.loyalty -= attack['damage']
+      self.loyalty -= attack.damage
     else:
-      self.loyalty += attack['damage']
+      self.loyalty += attack.damage
 
   def get_log_entry(self):
     return {
@@ -97,8 +93,12 @@ class Cube(Hero):
   name = 'cube'
 
   def __init__(self, level, id, owner, x, y):
-    actions = {'base_attack': {'name': 'base_attack', 'range': 3, 'damage': 1, 'cooldown': 7}}
+    actions = [BaseAttack()]
     super().__init__(level, id, owner, x, y, 1, 0.2, actions)
 
   def speak(self):
     return 'cube'
+
+# class HornedLady(Hero):
+#   name = 'Lady Emily'
+#
