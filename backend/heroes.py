@@ -45,14 +45,14 @@ class Hero:
         self.actions_in_turn.append(action.get_info())
       else:
         action.cooldown_progress = max(0, action.cooldown_progress - 1)
-      if not self.actions_in_turn:
-        target = self.find_closest_opponent(state)
-        if target is not None:
-          distance = sqrt(self.sq_distance(target))
-          direction_x, direction_y = self.direction_to_hero(target)
-          step_size = min(self.speed, distance + target.speed - self.actions[0].range)
-          self.x += direction_x * step_size
-          self.y += direction_y * step_size
+    if not self.actions_in_turn:
+      target = self.find_closest_opponent(state)
+      if target is not None:
+        distance = sqrt(self.sq_distance(target))
+        direction_x, direction_y = self.direction_to_hero(target)
+        step_size = min(self.speed, distance + target.speed - self.actions[0].range)
+        self.x += direction_x * step_size
+        self.y += direction_y * step_size
 
   def take_attack(self, attack):
     if self.loyalty >= 0:
