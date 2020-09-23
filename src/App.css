@@ -1,17 +1,87 @@
+body {
+  font-family: Corben;
+  min-height: 100vh;
+  background: radial-gradient(#fca, #da6);
+}
+.MapCanvas {
+  overflow: hidden;
+  border-radius: 20px;
+  margin: 20px;
+  box-shadow: #0009 0px 10px 20px;
+  height: 80vh;
+}
+h1,
+h2,
+h3 {
+  font-family: Grenze Gotisch;
+}
+button {
+  border: 0;
+  padding: 0 10px;
+  font-family: Grenze Gotisch;
+  font-size: 30px;
+  box-shadow: #0009 0px 5px 10px;
+  border-radius: 20px;
+  margin: 10px 20px;
+  background-color: #a74;
+  background-image: linear-gradient(
+    -60deg,
+    #fff0 45%,
+    #fff8 50%,
+    #fff8 60%,
+    #fff0 65%
+  );
+  background-position: -100px 0;
+  background-size: 200px auto;
+  cursor: pointer;
+  transition: text-shadow 0.5s, background-color 0.5s;
+}
+button:focus,
+button:hover {
+  outline: none;
+  background-color: #c95;
+  animation: shine 2s infinite;
+  text-shadow: 0 0 3px #fff;
+}
+@keyframes shine {
+  from {
+    background-position: -100px 0;
+  }
+  to {
+    background-position: 100px 0;
+  }
+}
+
 .CardBack,
 .HeroCard {
-  position: absolute;
-  left: calc(50% - 100px);
+  overflow: hidden;
+  position: relative;
+  margin: 10px;
   width: 200px;
   height: 300px;
   border-radius: 20px;
-  box-shadow: black 0px 10px 20px;
+  box-shadow: #0009 0px 10px 20px;
   background: radial-gradient(#fc4, #da3);
   backface-visibility: hidden;
+  font-size: 20px;
+  font-weight: bold;
+  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff,
+    1px 1px 0 #fff;
+  text-align: center;
+}
+.Clickable {
+  cursor: pointer;
 }
 .CardBack {
-  background: radial-gradient(#ca4, #a83);
-  cursor: pointer;
+  position: absolute;
+  background-color: #ba4;
+  background-image: radial-gradient(transparent, #a83);
+  transition: background-color 0.2s ease, box-shadow 0.6s ease-in;
+  box-shadow: #0006 0px 2px 6px;
+}
+.CardBack:hover {
+  background-color: #fb5;
+  box-shadow: #54c 0px 10px 20px;
 }
 
 .CardBackground {
@@ -37,8 +107,73 @@
   position: absolute;
   top: 80%;
   width: 100%;
-  font-size: 20px;
+  font-family: Grenze Gotisch;
+  font-size: 30px;
   font-weight: bold;
-  text-align: center;
-  text-shadow: 0 0 2px white, 0 0 4px white;
+}
+
+.HeroList {
+  display: flex;
+  flex-wrap: wrap;
+}
+.CardLevel {
+  position: absolute;
+  top: 10%;
+  width: 80%;
+  text-align: right;
+}
+
+.HeroPage {
+  display: flex;
+  flex-wrap: wrap;
+}
+.HeroPage .HeroPortrait {
+  width: 300px;
+  height: 400px;
+  background-size: cover;
+  border-radius: 20px;
+  margin: 20px;
+  box-shadow: #0009 0px 10px 20px;
+}
+.HeroPage .HeroText {
+  flex: 1;
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+}
+.HeroPage .HeroName {
+  font-family: Grenze Gotisch;
+  font-size: 40px;
+  font-weight: bold;
+  initial-letter: 2;
+}
+.HeroPage h1::first-letter,
+.HeroPage .HeroName::first-letter {
+  color: #d00a;
+  font-size: 50px;
+}
+.HeroPage .Locked {
+  opacity: 50%;
+}
+.HeroPage h1 {
+  margin-bottom: 0;
+}
+.HeroPage p {
+  margin-top: 0;
+}
+.HeroPage .HeroAbilities {
+  display: flex;
+  flex-wrap: wrap;
+}
+.HeroPage .HeroAbility {
+  flex: 1 50%;
+}
+
+.PanelHeader {
+  position: absolute;
+}
+
+.Searched {
+  display: flex;
+  justify-content: center;
 }

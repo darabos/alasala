@@ -14,6 +14,8 @@ import * as THREE from 'three';
 import { Physics, useBox, usePlane, useSpring } from 'use-cannon';
 import { EffectComposer, DepthOfField, Bloom } from 'react-postprocessing';
 import './App.css';
+import '@openfonts/grenze-gotisch_latin';
+import '@openfonts/corben_latin';
 
 const turnFrames = 60;
 
@@ -168,7 +170,7 @@ function PartySelector({ data, party, setParty, startCombat }) {
     <div>
       {party.map((id) => {
         const h = data.heroes.find((hero) => hero.id === id);
-        return <Hero onClick={() => toggleHero(h)} hero={h} key={id} />;
+        return <HeroListItem onClick={() => toggleHero(h)} hero={h} key={id} />;
       })}
       <button onClick={() => startCombat(party)}>Gooooooooooooo!</button>
     </div>
@@ -327,7 +329,7 @@ function Map(props) {
     <div>
       <p>day {props.data.progress.day}</p>
       <p>current stage: {props.data.progress.stage}</p>
-      <div style={{ height: '80vh' }}>
+      <div className="MapCanvas">
         <Canvas
           shadowMap
           gl={{ antialias: false, alpha: false }}
@@ -560,36 +562,56 @@ function MapDiorama({ effects }) {
 }
 
 function Heroes(props) {
+  const [current, setCurrent] = useState(props.data.heroes[0]);
   return (
-    <div>
-      {props.data.heroes.map((h) => (
-        <Hero key={h.id} hero={h}></Hero>
+    <>
+      {!current && (
+        <HeroList heroes={props.data.heroes} onClick={(h) => setCurrent(h)} />
+      )}
+      {current && <HeroPage hero={current} back={() => setCurrent()} />}
+    </>
+  );
+}
+
+function HeroList(props) {
+  return (
+    <div className="HeroList">
+      {props.heroes.map((h) => (
+        <HeroListItem
+          key={h.id}
+          hero={h}
+          showLevel
+          onClick={() => props.onClick(h)}
+        />
       ))}
     </div>
   );
 }
-
-function Hero(props) {
+function heroPortrait(hero) {
   return (
-    <div onClick={props.onClick}>
-      {props.hero.name}, level {props.hero.level}
-      {props.selected && 'SELECTED'}
-    </div>
+    'url(/portraits/' + hero.name.toLowerCase().replace(' ', '-') + '.png)'
   );
 }
 
-function HeroCard(props) {
-  const portrait =
-    'url(/portraits/' +
-    props.hero.name.toLowerCase().replace(' ', '-') +
-    '.png)';
+function HeroListItem({ showLevel, hero, onClick }) {
+  return (
+    <>
+      <div className="HeroCard Clickable" onClick={onClick}>
+        <div className="CardBackground" />
+        <div
+          className="CardPortrait"
+          style={{ backgroundImage: heroPortrait(hero) }}
+        />
+        <div className="CardName"> {hero.name} </div>
+        {showLevel && <div className="CardLevel"> {hero.level} </div>}
+      </div>
+    </>
+  );
+}
+
+function HeroCard({ hero }) {
   const config = { tension: 100 };
   const [reveal, setReveal] = useState(false);
-  console.log({
-    config,
-    transform: `rotate3d(0, 1, 0, ${reveal ? 0 : 180}deg)`,
-    from: { transform: 'rotate3d(0, 1, 0, 180deg)' },
-  });
   const flip = useReactSpring({
     config,
     transform: `rotate3d(0, 1, 0, ${reveal ? 0 : 180}deg)`,
@@ -604,14 +626,73 @@ function HeroCard(props) {
     <>
       <animated.div
         style={backflip}
-        className="CardBack"
+        className="CardBack Clickable"
         onClick={() => setReveal(true)}
       />
       <animated.div style={flip} className="HeroCard">
         <div className="CardBackground" />
-        <div className="CardPortrait" style={{ backgroundImage: portrait }} />
-        <div className="CardName"> {props.hero.name} </div>
+        <div
+          className="CardPortrait"
+          style={{ backgroundImage: heroPortrait(hero) }}
+        />
+        <div className="CardName"> {hero.name} </div>
       </animated.div>
+    </>
+  );
+}
+
+function HeroPage({ hero, back }) {
+  hero.name = 'Professor Hark';
+  hero.title = 'Dean of Arcane Studies';
+  hero.abilities = [
+    {
+      name: 'Bookstorm',
+      description:
+        'Hark throws 5 books at opponents ahead of him.  Unlocked at level 1.',
+      unlocked: true,
+    },
+    {
+      name: 'Scientific Method',
+      description:
+        'Hark damages everyone around him 5 times and observes the results.  Unlocked at level 5.',
+      unlocked: false,
+    },
+    {
+      name: 'Reading Glasses',
+      description: 'Passive. Hark never misses. Unlocked at level 10.',
+      unlocked: false,
+    },
+  ];
+  return (
+    <>
+      <div className="HeroPage">
+        <div
+          className="HeroPortrait"
+          style={{ backgroundImage: heroPortrait(hero) }}
+        />
+        <div className="HeroText">
+          <div className="HeroName"> {hero.name} </div>
+          <div className="HeroTitle">
+            {' '}
+            Level {hero.level} {hero.title}{' '}
+          </div>
+          <div className="HeroAbilities">
+            <div className="PanelHeader">Abilities:</div>
+            {hero.abilities.map((a) => (
+              <div
+                key={a.name}
+                className={
+                  'HeroAbility ' + (a.unlocked ? 'Unlocked' : 'Locked')
+                }
+              >
+                <h1>{a.name}</h1>
+                <p>{a.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <button onClick={back}>Back</button>
     </>
   );
 }
@@ -619,7 +700,7 @@ function HeroCard(props) {
 function Searched(props) {
   props.data.just_found = { name: 'Professor Hark' };
   return (
-    <div>
+    <div className="Searched">
       <HeroCard hero={props.data.just_found}></HeroCard>
     </div>
   );
