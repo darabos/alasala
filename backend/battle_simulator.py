@@ -2,6 +2,8 @@ from backend.heroes import Hero
 
 STARTX = [4, 4, 5, 5, 5]
 STARTY = [-0.5, 0.5, -1, 0, 1]
+TURNFRAMES = 20
+FPS = 60
 
 def get_player_state(heroes):
   print(heroes)
@@ -33,7 +35,7 @@ def battle_is_over(turn):
 def simulate_battle(heroes, stage):
   state = get_player_state(heroes) + get_enemy_state(stage)
   turns = [{hero.id: hero.get_log_entry() for hero in state}]
-  while not battle_is_over(turns[-1]) and len(turns) < 4 * 120:
+  while not battle_is_over(turns[-1]) and len(turns) < 120 * FPS / TURNFRAMES:
     for hero in state:
       hero.step(stage, state)
     turns.append({hero.id: hero.get_log_entry() for hero in state})
