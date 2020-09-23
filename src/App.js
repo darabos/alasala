@@ -27,10 +27,7 @@ function BasePlane(props) {
   }));
 
   return (
-      <Plane
-        args={[200, 200]}
-        receiveShadow
-      >
+    <Plane args={[200, 200]} receiveShadow>
       <meshStandardMaterial attach="material" color="#691" />
     </Plane>
   );
@@ -43,8 +40,8 @@ const HeroBox = React.forwardRef((props, ref) => {
   const initial = props.trajectory[0];
   const height = initial.height || 1.5;
   const current = props.trajectory[turn];
-  const last = props.trajectory[turn-1] || current;
-  const next = props.trajectory[turn+1] || current;
+  const last = props.trajectory[turn - 1] || current;
+  const next = props.trajectory[turn + 1] || current;
   const [, api] = useBox(
     () => ({
       mass: 1,
@@ -92,22 +89,21 @@ const HeroBox = React.forwardRef((props, ref) => {
   });
 
   return (
-    <mesh
-      castShadow
-      receiveShadow
-      ref={ref}
-    >
+    <mesh castShadow receiveShadow ref={ref}>
       <boxBufferGeometry attach="geometry" args={[1, 1, height]} />
-      <meshStandardMaterial
-        ref={mat}
-        attach="material"
-      />
-      <Html center position-z={2}><LoyaltyBar max={current.max_loyalty || Math.abs(initial.loyalty)} current={current.loyalty} change={current.loyalty - last.loyalty} /></Html>
+      <meshStandardMaterial ref={mat} attach="material" />
+      <Html center position-z={2}>
+        <LoyaltyBar
+          max={current.max_loyalty || Math.abs(initial.loyalty)}
+          current={current.loyalty}
+          change={current.loyalty - last.loyalty}
+        />
+      </Html>
     </mesh>
   );
 });
 
-function LoyaltyBar({max, current, change}) {
+function LoyaltyBar({ max, current, change }) {
   let baseClass = 'LoyaltyBar';
   let changeClass = 'LoyaltyBarChange';
   if (current < 0) {
@@ -115,7 +111,7 @@ function LoyaltyBar({max, current, change}) {
     change *= -1;
     baseClass += ' Evil';
   }
-  let base = current * 100 / max;
+  let base = (current * 100) / max;
   change *= 100 / max;
   if (change < 0) {
     changeClass += ' Damage';
@@ -124,30 +120,27 @@ function LoyaltyBar({max, current, change}) {
     changeClass += ' Heal';
     base -= change;
   }
-  return <div className={baseClass}>
-    <div className="LoyaltyBarInside" style={{width: base + '%'}}/>
-    <div className={changeClass} style={{width: change + '%'}}/></div>;
+  return (
+    <div className={baseClass}>
+      <div className="LoyaltyBarInside" style={{ width: base + '%' }} />
+      <div className={changeClass} style={{ width: change + '%' }} />
+    </div>
+  );
 }
 
 function SimpleAttack(props) {
-  //const [ref, api] = useSphere(() => ({type: 'Static', radius: 0.2}));
   const mesh = useRef();
   const sourceHero = props.sourceHero.current;
   const targetHero = props.targetHero.current;
   useFrame(() => {
     const phase = props.turnClock.phase;
-    const sX = sourceHero.position.x;
-    const sY = sourceHero.position.y;
-    const tX = targetHero.position.x;
-    const tY = targetHero.position.y;
-    const aX = sX * (1 - phase) + tX * phase;
-    const aY = sY * (1 - phase) + tY * phase;
-    mesh.current && mesh.current.position.set(aX, aY, 2);
+    const src = sourceHero.position;
+    const dst = targetHero.position;
+    mesh.current && mesh.current.position.lerpVectors(src, dst, phase);
     if (props.turnClock.time === turnFrames && props.attackTurn === 0) {
-      const force = new THREE.Vector3(tX - sX, tY - sY, 0);
-      force.normalize().multiplyScalar(100);
+      const force = dst.clone().sub(src).normalize().multiplyScalar(5);
       const localForce = targetHero.worldToLocal(force);
-      targetHero.physicsApi.applyLocalForce(localForce.toArray(), [0, 0, 1]);
+      targetHero.physicsApi.applyLocalImpulse(localForce.toArray(), [0, 0, 1]);
     }
   });
   return (
@@ -186,34 +179,49 @@ function renderAction(
 
 function PartySelector({ data, party, setParty, startCombat }) {
   function removeHero(i) {
-        const p = [...party];
-        p[i] = undefined;
+    const p = [...party];
+    p[i] = undefined;
     setParty(p);
   }
   function addHero(h) {
-      const s = party.indexOf(undefined);
-      if (s !== -1) {
-        const p = [...party];
-        p[s] = h.id;
-        setParty(p);
-      }
+    const s = party.indexOf(undefined);
+    if (s !== -1) {
+      const p = [...party];
+      p[s] = h.id;
+      setParty(p);
+    }
   }
 
-  return <>
-    <div className="Party">
-      {party.map((id, i) => {
-        const h = data.heroes.find((hero) => hero.id === id);
-        if (h === undefined) {
-          return <div key={i} className="CardBack"/>
-        } else {
-          return <HeroListItem key={i} onClick={() => removeHero(i)} hero={h} />;
-        }
-      })}
-    </div>
-    <p className="Hint Center">{party.length} heroes can join this fight. Choose them from your roster below.</p>
-      <button disabled={party.filter(h => h === undefined).length === party.length} onClick={() => startCombat(party)}>Fight!</button>
-    <HeroList heroes={data.heroes.filter(h => !party.includes(h.id))} onClick={h => addHero(h)}/>
-  </>;
+  return (
+    <>
+      <div className="Party">
+        {party.map((id, i) => {
+          const h = data.heroes.find((hero) => hero.id === id);
+          if (h === undefined) {
+            return <div key={i} className="CardBack" />;
+          } else {
+            return (
+              <HeroListItem key={i} onClick={() => removeHero(i)} hero={h} />
+            );
+          }
+        })}
+      </div>
+      <p className="Hint Center">
+        {party.length} heroes can join this fight. Choose them from your roster
+        below.
+      </p>
+      <button
+        disabled={party.filter((h) => h === undefined).length === party.length}
+        onClick={() => startCombat(party)}
+      >
+        Fight!
+      </button>
+      <HeroList
+        heroes={data.heroes.filter((h) => !party.includes(h.id))}
+        onClick={(h) => addHero(h)}
+      />
+    </>
+  );
 }
 
 function BattleRenderer(props) {
@@ -254,21 +262,25 @@ function BattleRenderer(props) {
   return (
     <div className="CombatCanvas">
       <Canvas shadowMap>
-      {props.effects && (
-        <EffectComposer>
-          <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
-        </EffectComposer>
-      )}
-      <spotLight
-        position={[20, 0, 5]}
-        angle={0.5}
-        penumbra={0.1}
-        intensity={1.5}
-        castShadow
-        shadow-mapSize-height={1024}
-        shadow-mapSize-width={1024}
-      />
-        <ambientLight args={[0x808080]}/>
+        {props.effects && (
+          <EffectComposer>
+            <Bloom
+              luminanceThreshold={0}
+              luminanceSmoothing={0.9}
+              height={300}
+            />
+          </EffectComposer>
+        )}
+        <spotLight
+          position={[20, 0, 5]}
+          angle={0.5}
+          penumbra={0.1}
+          intensity={1.5}
+          castShadow
+          shadow-mapSize-height={1024}
+          shadow-mapSize-width={1024}
+        />
+        <ambientLight args={[0x808080]} />
         <Physics gravity={[0, 0, -10]}>
           <BattleSimulation
             journal={journal}
