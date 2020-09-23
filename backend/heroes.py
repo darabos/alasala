@@ -1,4 +1,5 @@
 from math import sqrt
+from collections import defaultdict
 
 class Hero:
   hero_classes = {}
@@ -11,10 +12,11 @@ class Hero:
     self.speed = speed
     self.loyalty_factor = loyalty_factor
     self.actions = actions
-    self.max_loyalty = 5
+    self.max_loyalty = 8
     self.loyalty = self.max_loyalty * (-1 if owner == 'enemy' else 1)
     self.actions_in_turn = []
     self.status = []
+    self.cooldown = defaultdict(int)
 
   @classmethod
   def __init_subclass__(cls):
@@ -37,14 +39,19 @@ class Hero:
 
 
   def step(self, stage, state):
+    self.actions_in_turn = []
     self.increase_loyalty()
     target = self.find_closest_opponent(state)
     if target is not None:
       attack = self.actions['base_attack']
       distance = sqrt(self.sq_distance(target))
       if distance <= attack['range']:
-        target.take_attack(attack)
-        self.actions_in_turn = [{**attack, 'target_hero': target.id}]
+        if self.cooldown[attack['name']] == 0:
+          target.take_attack(attack)
+          self.actions_in_turn = [{**attack, 'target_hero': target.id}]
+          self.cooldown[attack['name']] = attack['cooldown']
+        else:
+          self.cooldown[attack['name']] -= 1
       else:
         direction_x, direction_y = self.direction_to_hero(target)
         step_size = min(self.speed, distance + target.speed - attack['range'])
@@ -90,8 +97,8 @@ class Cube(Hero):
   name = 'cube'
 
   def __init__(self, level, id, owner, x, y):
-    actions = {'base_attack': {'name': 'base_attack', 'range': 3, 'damage': 1}}
-    super().__init__(level, id, owner, x, y, 1, 0.5, actions)
+    actions = {'base_attack': {'name': 'base_attack', 'range': 3, 'damage': 1, 'cooldown': 7}}
+    super().__init__(level, id, owner, x, y, 1, 0.2, actions)
 
   def speak(self):
     return 'cube'
