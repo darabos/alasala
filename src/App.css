@@ -123,6 +123,7 @@ button:hover {
 .HeroPage {
   display: flex;
   flex-wrap: wrap;
+  text-align: left;
 }
 .HeroPage .HeroPortrait {
   width: 300px;
