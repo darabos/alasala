@@ -694,7 +694,6 @@ function HeroCard({ hero }) {
 }
 
 function HeroPage({ hero, data }) {
-  hero.name = 'Professor Hark';
   const heroMeta = data.index[hero.name];
   return (
     <div className="HeroPage">
@@ -727,7 +726,6 @@ function HeroPage({ hero, data }) {
 
 function Searched(props) {
   useEffect(() => window.scrollTo(0, 0), []);
-  props.data.just_found = { name: 'Professor Hark' };
   return (
     <div className="Searched">
       <HeroCard hero={props.data.just_found}></HeroCard>
