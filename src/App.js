@@ -35,6 +35,8 @@ function BasePlane(props) {
 
 const HeroBox = React.forwardRef((props, ref) => {
   var mat = useRef();
+  const meta = props.meta;
+  const weight = meta.weight;
   const keelZ = -3;
   const turn = props.turn;
   const initial = props.trajectory[0];
@@ -44,7 +46,7 @@ const HeroBox = React.forwardRef((props, ref) => {
   const next = props.trajectory[turn + 1] || current;
   const [, api] = useBox(
     () => ({
-      mass: 1,
+      mass: weight,
       material: {
         friction: 0.01,
       },
@@ -66,13 +68,13 @@ const HeroBox = React.forwardRef((props, ref) => {
 
   useSpring(ref, leashRef, {
     restLength: 0,
-    stiffness: 12,
+    stiffness: 12 * weight,
     damping: 2,
     localAnchorA: [0.9, 0, 0],
   });
   useSpring(ref, keelRef, {
     restLength: 0,
-    stiffness: 3,
+    stiffness: 3 * weight,
     damping: 0,
     localAnchorA: [0, 0, -height],
   });
@@ -225,14 +227,17 @@ function PartySelector({ data, party, setParty, startCombat }) {
 }
 
 function BattleRenderer(props) {
+  const data = props.data;
   const journal = props.journal;
   const heroStories = [];
   const actionEntries = [];
   console.log('journal', journal);
   if (journal) {
     Object.entries(journal[0]).forEach(([id, value]) => {
+      const meta = data.index[value.name];
       heroStories.push({
         id: id,
+        meta: meta,
         trajectory: journal.map((step) => ({
           ...step[id],
           x: step[id].x * 3,
@@ -330,6 +335,7 @@ function BattleSimulation(props) {
       {heroStories.map((hero) => (
         <HeroBox
           key={hero.id}
+          meta={hero.meta}
           ref={heroRef(hero.id)}
           trajectory={hero.trajectory}
           turn={turn}
@@ -382,7 +388,9 @@ function Combat({ data }) {
         />
       )}
       {state === 'simulate' && <Spinner />}
-      {state === 'renderBattle' && <BattleRenderer effects journal={journal} />}
+      {state === 'renderBattle' && (
+        <BattleRenderer effects journal={journal} data={data} />
+      )}
     </div>
   );
 }
@@ -693,28 +701,8 @@ function HeroCard({ hero }) {
   );
 }
 
-function HeroPage({ hero }) {
-  hero.name = 'Professor Hark';
-  hero.title = 'Dean of Arcane Studies';
-  hero.abilities = [
-    {
-      name: 'Bookstorm',
-      description:
-        'Hark throws 5 books at opponents ahead of him.  Unlocked at level 1.',
-      unlocked: true,
-    },
-    {
-      name: 'Scientific Method',
-      description:
-        'Hark damages everyone around him 5 times and observes the results.  Unlocked at level 5.',
-      unlocked: false,
-    },
-    {
-      name: 'Reading Glasses',
-      description: 'Passive. Hark never misses. Unlocked at level 10.',
-      unlocked: false,
-    },
-  ];
+function HeroPage({ hero, data }) {
+  const heroMeta = data.index[hero.name];
   return (
     <div className="HeroPage">
       <div
@@ -725,11 +713,11 @@ function HeroPage({ hero }) {
         <div className="HeroName"> {hero.name} </div>
         <div className="HeroTitle">
           {' '}
-          Level {hero.level} {hero.title}{' '}
+          Level {hero.level} {heroMeta.title}{' '}
         </div>
         <div className="HeroAbilities">
           <div className="PanelHeader">Abilities:</div>
-          {hero.abilities.map((a) => (
+          {heroMeta.abilities.map((a) => (
             <div
               key={a.name}
               className={'HeroAbility ' + (a.unlocked ? 'Unlocked' : 'Locked')}
@@ -746,7 +734,6 @@ function HeroPage({ hero }) {
 
 function Searched(props) {
   useEffect(() => window.scrollTo(0, 0), []);
-  props.data.just_found = { name: 'Professor Hark' };
   return (
     <div className="Searched">
       <HeroCard hero={props.data.just_found}></HeroCard>
@@ -803,7 +790,7 @@ function App() {
               }}
             />
           )}
-          {page === 'hero' && <HeroPage hero={heroPage} />}
+          {page === 'hero' && <HeroPage hero={heroPage} data={data} />}
           {page === 'searched' && <Searched data={data} />}
         </div>
       )}

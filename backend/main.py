@@ -1,6 +1,8 @@
 import flask
+import random
 import sqlite3
 import backend.battle_simulator as bs
+from backend.heroes import Hero
 
 app = flask.Flask('backend')
 
@@ -73,12 +75,19 @@ def getuserdata():
   c = db()
   progress = query(c, 'select * from users where email = ?', (user,))[0]
   heroes = get_heroes_of_user(c, user)
-  return flask.jsonify({'progress': progress, 'heroes': heroes})
+  return flask.jsonify({
+    'progress': progress,
+    'heroes': heroes,
+    'index': Hero.get_index()
+  })
 
 @app.route('/searchbeach', methods=['POST'])
 def searchbeach():
   user = flask.request.get_json()['user']
-  hero = {'name': 'cube', 'level': 1}
+  hero = random.choice([
+    {'name': 'cube', 'level': 1},
+    {'name': 'Professor Hark', 'level': 1}])
+                       
   c = db()
   c.execute('update users set day = day + 1 where email = ?', (user,))
   c.execute('insert into heroes values (?, ?, ?)', (hero['name'], hero['level'], user))

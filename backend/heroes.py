@@ -3,15 +3,11 @@ from backend.actions import *
 class Hero:
   hero_classes = {}
 
-  def __init__(self, level, id, owner, x, y, speed, loyalty_factor, actions):
+  def __init__(self, level, id, owner, x, y):
     self.level = level
     self.id = id
     self.x = x
     self.y = y
-    self.speed = speed
-    self.loyalty_factor = loyalty_factor
-    # Favorite action first.
-    self.actions = actions
     self.max_loyalty = 8
     self.loyalty = self.max_loyalty * (-1 if owner == 'enemy' else 1)
     self.actions_in_turn = []
@@ -24,6 +20,18 @@ class Hero:
   @staticmethod
   def create_by_name(name, level, id, owner, x, y):
     return Hero.hero_classes[name](level, id, owner, x, y)
+
+  @staticmethod
+  def get_index():
+    return {
+      name: {
+        'title': cls.title,
+        'abilities': cls.abilities,
+        'speed': cls.speed,
+        'loyalty_factor': cls.loyalty_factor,
+        'weight': cls.weight
+      }
+      for (name, cls) in Hero.hero_classes.items()}
 
   def speak(self):
     return 'hero'
@@ -64,6 +72,7 @@ class Hero:
     return {
     'x': self.x,
     'y': self.y,
+    'name': self.name,
     'loyalty': self.loyalty,
     'max_loyalty': self.max_loyalty,
     'status': self.status,
@@ -91,13 +100,48 @@ class Hero:
 
 class Cube(Hero):
   name = 'cube'
-
-  def __init__(self, level, id, owner, x, y):
-    actions = [BaseAttack()]
-    super().__init__(level, id, owner, x, y, 1, 0.1, actions)
+  title = 'Platonic Solid'
+  speed = 1
+  weight = 1
+  loyalty_factor = 0.1
+  abilities = []
+  actions = [BaseAttack()]
 
   def speak(self):
     return 'cube'
+
+class Hark(Hero):
+  name = 'Professor Hark'
+  title = 'Dean of Arcane Studies',
+  speed = 0.5
+  loyalty_factor = 0.2
+  weight = 8
+
+  # Eventually these would become classes, but for now, it's just for display.
+  abilities = [
+    {
+      'name': 'Bookstorm',
+      'description':
+      'Hark throws 5 books at opponents ahead of him.  Unlocked at level 1.',
+      'unlockLevel': 1,
+    },
+    {
+      'name': 'Scientific Method',
+      'description':
+      'Hark damages everyone around him 5 times and observes the results.  Unlocked at level 5.',
+      'unlockLevel': 5,
+    },
+    {
+      'name': 'Reading Glasses',
+      'description': 'Passive. Hark never misses. Unlocked at level 10.',
+      'unlockLevel': 10,
+    }
+  ]
+
+  actions = [BaseAttack()]
+
+  def speak(self):
+    return 'Hark!Hark!'
 
 # class HornedLady(Hero):
 #   name = 'Lady Emily'
