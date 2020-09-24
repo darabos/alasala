@@ -63,11 +63,17 @@ def computecombat():
 
   heroes_in_party = [find_hero_by_id(hero_id) for hero_id in party]
   log = bs.simulate_battle(heroes_in_party, stage)
+  winner = bs.get_winner(log[-1])
+  if winner == 1:
+    progress(user)
   return flask.jsonify(log)
 
 def get_heroes_of_user(c, user):
   return query(c, 'select rowid as id, * from heroes where user = ?', (user,))
 
+def progress(user):
+  c = db()
+  c.execute('update users set stage = stage + 1 where email = ?', (user,))
 
 @app.route('/getuserdata')
 def getuserdata():
@@ -84,10 +90,8 @@ def getuserdata():
 @app.route('/searchbeach', methods=['POST'])
 def searchbeach():
   user = flask.request.get_json()['user']
-  hero = random.choice([
-    {'name': 'cube', 'level': 1},
-    {'name': 'Professor Hark', 'level': 1}])
-                       
+  hero_name = random.choice(list(Hero.get_index().keys()))
+  hero = {'name': hero_name, 'level': 1}
   c = db()
   c.execute('update users set day = day + 1 where email = ?', (user,))
   c.execute('insert into heroes values (?, ?, ?)', (hero['name'], hero['level'], user))

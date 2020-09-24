@@ -2,16 +2,17 @@ from backend.actions import *
 
 class Hero:
   hero_classes = {}
+  max_loyalty = 8
 
   def __init__(self, level, id, owner, x, y):
     self.level = level
     self.id = id
     self.x = x
     self.y = y
-    self.max_loyalty = 8
     self.loyalty = self.max_loyalty * (-1 if owner == 'enemy' else 1)
     self.actions_in_turn = []
     self.status = []
+    self.actions = [a(self) for a in self.action_classes]
 
   @classmethod
   def __init_subclass__(cls):
@@ -44,29 +45,36 @@ class Hero:
       self.loyalty -= self.loyalty_factor
       self.loyalty = max(-self.max_loyalty, self.loyalty)
 
+
   def step(self, stage, state):
     self.actions_in_turn = []
     self.increase_loyalty()
-    for action in self.actions:
-      if action.usable(self, state):
+    cool_actions = [a for a in self.actions if a.is_cool()]
+    for action in cool_actions:
+      action.prepare(state)
+    exclusive_actions = [a for a in cool_actions if a.exclusive]
+    exclusive_action = (exclusive_actions and
+      max(exclusive_actions, key=lambda a: a.hankering()))
+    if exclusive_action and exclusive_action.hankering() > 0:
+      exclusive_action.do()
+      self.actions_in_turn.append(exclusive_action.get_info())
+
+    for action in cool_actions:
+      if not action.exclusive and (action.hankering() > 0):
         action.do()
         self.actions_in_turn.append(action.get_info())
-      else:
-        action.cooldown_progress = max(0, action.cooldown_progress - 1)
+
+    for action in self.actions:
+      action.cool()
     if not self.actions_in_turn:
       target = self.find_closest_opponent(state)
       if target is not None:
         distance = sqrt(self.sq_distance(target))
         direction_x, direction_y = self.direction_to_hero(target)
-        step_size = min(self.speed, distance + target.speed - self.actions[0].range)
+        step_size = max(0, min(self.speed, distance + target.speed - self.actions[0].range))
         self.x += direction_x * step_size
         self.y += direction_y * step_size
 
-  def take_attack(self, attack):
-    if self.loyalty >= 0:
-      self.loyalty -= attack.damage
-    else:
-      self.loyalty += attack.damage
 
   def get_log_entry(self):
     return {
@@ -105,10 +113,7 @@ class Cube(Hero):
   weight = 1
   loyalty_factor = 0.1
   abilities = []
-
-  def __init__(self,  level, id, owner, x, y):
-    self.actions = [BaseAttack()]
-    super().__init__(level, id, owner, x, y)
+  action_classes = [BaseAttack]
 
   def speak(self):
     return 'cube'
@@ -119,6 +124,7 @@ class Hark(Hero):
   speed = 0.5
   loyalty_factor = 0.2
   weight = 8
+  action_classes = [BrutalAttack]
 
   # Eventually these would become classes, but for now, it's just for display.
   abilities = [
@@ -141,13 +147,30 @@ class Hark(Hero):
     }
   ]
 
-  def __init__(self):
-    self.actions = [BaseAttack()]
-    super().__init__(level, id, owner, x, y)
-
   def speak(self):
     return 'Hark!Hark!'
 
-# class HornedLady(Hero):
-#   name = 'Lady Emily'
-#
+
+class Healer(Hero):
+  name = 'healer'
+  title = 'Angelic Presence'
+  speed = 0
+  weight = 1
+  loyalty_factor = 0.1
+  abilities = []
+  action_classes = [FarCaress, HealAll]
+
+  def speak(self):
+    return 'cube'
+
+class Reaper(Hero):
+  name = 'Reaper'
+  title = 'Diabolic Presence'
+  speed = 0.1
+  weight = 5
+  loyalty_factor = 0.1
+  abilities = []
+  action_classes = [Scythe, ComeToPapa]
+
+  def speak(self):
+    return 'cube'

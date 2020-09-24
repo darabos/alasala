@@ -138,9 +138,10 @@ function LoyaltyBar({ max, current, change }) {
 
 function SimpleAttack(props) {
   const mesh = useRef();
-  const sourceHero = props.sourceHero.current;
-  const targetHero = props.targetHero.current;
+  const damage = props.damage;
   useFrame(() => {
+    const sourceHero = props.sourceHero.current;
+    const targetHero = props.targetHero.current;
     const phase = props.turnClock.phase;
     const src = sourceHero.position;
     const dst = targetHero.position;
@@ -151,9 +152,10 @@ function SimpleAttack(props) {
       targetHero.physicsApi.applyLocalImpulse(localForce.toArray(), [0, 0, 1]);
     }
   });
+  const radius = Math.pow(damage, 1 / 3) * 0.2;
   return (
     <mesh ref={mesh}>
-      <sphereBufferGeometry attach="geometry" args={[0.2, 32, 32]} />
+      <sphereBufferGeometry attach="geometry" args={[radius, 32, 32]} />
       <meshStandardMaterial attach="material" color="black" />
     </mesh>
   );
@@ -175,10 +177,15 @@ function renderAction(
     key: key,
     action: action,
   };
-  if (action.name === 'base_attack' && attackTurn >= -1 && attackTurn <= 0) {
+  if (
+    action.animation_name === 'simple_attack' &&
+    attackTurn >= -1 &&
+    attackTurn <= 0
+  ) {
     return (
       <SimpleAttack
         targetHero={heroRef(action.target_hero)}
+        damage={action.damage}
         {...defaultProps}
       />
     );
@@ -418,7 +425,7 @@ function Map(props) {
             gl.setClearColor(new THREE.Color('#fff'));
           }}
         >
-          <MapDiorama effects />
+          <MapDiorama effects stage={props.data.progress.stage}/>
         </Canvas>
       </div>
       <p>
@@ -431,7 +438,7 @@ function Map(props) {
 
 const tmpo = new THREE.Object3D();
 
-function MapDiorama({ effects }) {
+function MapDiorama({ effects, stage}) {
   function randomShape(fn, n) {
     const s = new THREE.Shape();
     s.moveTo(fn(0), 0);
@@ -555,7 +562,13 @@ function MapDiorama({ effects }) {
         tmpo.scale.set(1, 1, 1);
         tmpo.updateMatrix();
         mesh.setMatrixAt(i, tmpo.matrix);
-        mesh.setColorAt(i, new THREE.Color('#fff'));
+        if (i < stage) {
+          mesh.setColorAt(i, new THREE.Color(1, 1, 1));
+        } else if (i == stage) {
+          mesh.setColorAt(i, new THREE.Color(0, 0.8, 1));
+        } else {
+          mesh.setColorAt(i, new THREE.Color(1, 0.2, 0 ));
+        }
       }
       mesh.instanceMatrix.needsUpdate = true;
       stoneInstances.current = mesh;
@@ -647,8 +660,6 @@ function MapDiorama({ effects }) {
         ref={setStoneInstances}
         castShadow
         args={[null, null, stones.length]}
-        onPointerOver={(e) => colorStone(e.instanceId, '#f00')}
-        onPointerOut={(e) => colorStone(e.instanceId, '#fff')}
       >
         <boxBufferGeometry
           attach="geometry"
@@ -673,9 +684,11 @@ function MapDiorama({ effects }) {
 }
 
 function HeroList(props) {
+  const heroes = [...props.heroes];
+  heroes.sort((a, b) => a.name > b.name ? 1 : -1);
   return (
     <div className="HeroList">
-      {props.heroes.map((h) => (
+      {heroes.map((h) => (
         <HeroListItem
           key={h.id}
           hero={h}
@@ -885,19 +898,21 @@ function Searched(props) {
   );
 }
 
-function App() {
-  const [page, setPage] = useState('map');
-  const [heroPage, setHeroPage] = useState();
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
-  useEffect(() => {
+function fetchData(setData, setError) {
     fetch('/getuserdata?user=test')
       .then((res) => res.json())
       .then(
         (res) => setData(res),
         (error) => setError(error)
       );
-  }, []);
+  }
+
+function App() {
+  const [page, setPage] = useState('map');
+  const [heroPage, setHeroPage] = useState();
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  useEffect(() => fetchData(setData, setError), []);
   function searchBeach() {
     fetch('/searchbeach', {
       method: 'POST',
@@ -940,7 +955,10 @@ function App() {
       )}
       <div>
         <button onClick={() => setPage('heroes')}>Heroes</button>
-        <button onClick={() => setPage('map')}>Map</button>
+        <button onClick={() => {
+          fetchData(setData, setError);
+          setPage('map');
+        }}>Map</button>
       </div>
     </div>
   );
