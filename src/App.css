@@ -241,3 +241,12 @@ button:hover {
   left: 50%;
   transform: translate(-50%,-100%);
 }
+
+#post-battle {
+  position: absolute;
+  top: 52%;
+  left: 51%;
+  transform: translate(-50%, 0);
+  z-index: 100000000000000000;
+  
+}

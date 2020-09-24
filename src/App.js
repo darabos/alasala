@@ -237,7 +237,7 @@ function BattleRenderer(props) {
   const data = props.data;
   const journal = props.journal;
   const result = props.winner === 1 ? 'Victory!' : (props.winner === 0 ? 'Draw!' : 'Defeat!')
-  const [isBattleOver, setBattleOver] = useState(false);
+  const [battleIsOver, setBattleIsOver] = useState(false);
   const heroStories = [];
   const actionEntries = [];
   console.log('journal', journal);
@@ -276,13 +276,16 @@ function BattleRenderer(props) {
 
   return (
     <div className="CombatCanvas">
-      { isBattleOver && (
-        <div class = "overlay">
-
-        <div id="result">
-          {result}
-        </div>
-
+      { battleIsOver && (
+        <div>
+          <div class = "overlay">
+            <div id="result">
+              {result}
+            </div>
+          </div>
+          <div id="post-battle">
+            <Buttons  setPage={props.setPage} setData={props.setData} setError={props.setError}/>
+          </div>
         </div>
       )}
 
@@ -291,7 +294,7 @@ function BattleRenderer(props) {
           journal={journal}
           heroStories={heroStories}
           actionEntries={actionEntries}
-          battleOverCallback={() => setBattleOver(true)}
+          battleOverCallback={() => setBattleIsOver(true)}
         />
       </CombatCanvas>
     </div>
@@ -395,7 +398,7 @@ function Spinner() {
   return <div />;
 }
 
-function Combat({ data }) {
+function Combat({ data, setPage, setData, setError}) {
   const [state, setState] = useState('selectParty');
   const [party, setParty] = useState(new Array(5).fill());
   const [journal, setJournal] = useState();
@@ -425,7 +428,8 @@ function Combat({ data }) {
       )}
       {state === 'simulate' && <Spinner />}
       {state === 'renderBattle' && (
-        <BattleRenderer effects journal={journal} winner={winner} data={data} />
+        <BattleRenderer effects journal={journal} winner={winner} data={data}
+        setPage={setPage} setData={setData} setError={setError} />
       )}
     </div>
   );
@@ -936,6 +940,23 @@ function fetchData(setData, setError) {
     );
 }
 
+function Buttons({setData, setError, setPage}) {
+  return (
+
+  <div>
+  <button onClick={() => setPage('heroes')}>Heroes</button>
+  <button
+  onClick={() => {
+    fetchData(setData, setError);
+    setPage('map');
+  }}
+  >
+  Map
+  </button>
+  </div>
+)
+}
+
 function App() {
   const [page, setPage] = useState('map');
   const [heroPage, setHeroPage] = useState();
@@ -963,7 +984,7 @@ function App() {
       {error && <div>{error}</div>}
       {data && (
         <div>
-          {page === 'combat' && <Combat data={data} />}
+          {page === 'combat' && <Combat data={data} setPage={setPage} setData={setData} setError={setError}/>}
           {page === 'map' && (
             <Map setPage={setPage} searchBeach={searchBeach} data={data} />
           )}
@@ -980,17 +1001,7 @@ function App() {
           {page === 'searched' && <Searched data={data} />}
         </div>
       )}
-      <div>
-        <button onClick={() => setPage('heroes')}>Heroes</button>
-        <button
-          onClick={() => {
-            fetchData(setData, setError);
-            setPage('map');
-          }}
-        >
-          Map
-        </button>
-      </div>
+      { page !== 'combat' && <Buttons setPage={setPage} setData={setData} setError={setError} />}
     </div>
   );
 }
