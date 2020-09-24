@@ -511,14 +511,23 @@ function MapDiorama({ effects }) {
   );
 
   const stones = useMemo(() => {
-    const p = new THREE.Vector3(41, 6, -112);
+    const p = new THREE.Vector3(41, 1, -112);
     const dir = new THREE.Vector3(-1, 0, -1);
     dir.normalize();
     dir.multiplyScalar(5);
     const up = new THREE.Vector3(0, 1, 0);
     const stones = [];
-    const turns = [5, 4, 3, 4, 5, 6, 6, 5, 4, -2, -4, -8, -5, -1, 0, 0, 0, 0];
+    // prettier-ignore
+    const turns = [5, 4, 3, 4, 5, 6, 6, 5, 4, -2, -4, -8, -5, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     for (let i = 0; i < turns.length; ++i) {
+      const gphi = Math.atan2(-p.z, -p.x);
+      const gr = Math.hypot(p.z, p.x);
+      for (let l of layers) {
+        const lr = l.fn(gphi) + 2;
+        if (gr < lr) {
+          p.setY(l.y + 1);
+        }
+      }
       stones.push({ position: p.toArray() });
       dir.applyAxisAngle(up, 0.1 * turns[i]);
       p.add(dir);
