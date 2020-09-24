@@ -1,6 +1,7 @@
 import flask
 import sqlite3
 import backend.battle_simulator as bs
+from backend.hero_index import HeroIndex
 
 app = flask.Flask('backend')
 
@@ -73,7 +74,7 @@ def getuserdata():
   c = db()
   progress = query(c, 'select * from users where email = ?', (user,))[0]
   heroes = get_heroes_of_user(c, user)
-  return flask.jsonify({'progress': progress, 'heroes': heroes})
+  return flask.jsonify({'progress': progress, 'heroes': heroes, 'index': HeroIndex})
 
 @app.route('/searchbeach', methods=['POST'])
 def searchbeach():

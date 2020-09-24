@@ -693,28 +693,9 @@ function HeroCard({ hero }) {
   );
 }
 
-function HeroPage({ hero }) {
+function HeroPage({ hero, data }) {
   hero.name = 'Professor Hark';
-  hero.title = 'Dean of Arcane Studies';
-  hero.abilities = [
-    {
-      name: 'Bookstorm',
-      description:
-        'Hark throws 5 books at opponents ahead of him.  Unlocked at level 1.',
-      unlocked: true,
-    },
-    {
-      name: 'Scientific Method',
-      description:
-        'Hark damages everyone around him 5 times and observes the results.  Unlocked at level 5.',
-      unlocked: false,
-    },
-    {
-      name: 'Reading Glasses',
-      description: 'Passive. Hark never misses. Unlocked at level 10.',
-      unlocked: false,
-    },
-  ];
+  const heroMeta = data.index[hero.name];
   return (
     <div className="HeroPage">
       <div
@@ -725,11 +706,11 @@ function HeroPage({ hero }) {
         <div className="HeroName"> {hero.name} </div>
         <div className="HeroTitle">
           {' '}
-          Level {hero.level} {hero.title}{' '}
+          Level {hero.level} {heroMeta.title}{' '}
         </div>
         <div className="HeroAbilities">
           <div className="PanelHeader">Abilities:</div>
-          {hero.abilities.map((a) => (
+          {heroMeta.abilities.map((a) => (
             <div
               key={a.name}
               className={'HeroAbility ' + (a.unlocked ? 'Unlocked' : 'Locked')}
@@ -803,7 +784,7 @@ function App() {
               }}
             />
           )}
-          {page === 'hero' && <HeroPage hero={heroPage} />}
+          {page === 'hero' && <HeroPage hero={heroPage} data={data} />}
           {page === 'searched' && <Searched data={data} />}
         </div>
       )}
