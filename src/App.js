@@ -147,7 +147,7 @@ function SimpleAttack(props) {
     const dst = targetHero.position;
     mesh.current && mesh.current.position.lerpVectors(src, dst, phase);
     if (props.turnClock.time === turnFrames && props.attackTurn === 0) {
-      const force = dst.clone().sub(src).normalize().multiplyScalar(5);
+      const force = dst.clone().sub(src).normalize().multiplyScalar(5 * damage);
       const localForce = targetHero.worldToLocal(force);
       targetHero.physicsApi.applyLocalImpulse(localForce.toArray(), [0, 0, 1]);
     }
