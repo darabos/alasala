@@ -828,9 +828,9 @@ function HeroDiorama({ hero, effects }) {
     const t = clock.getElapsedTime();
     camera.up.set(0, 0, 1);
     camera.position.x = 0.2 * Math.cos(0.19 * t);
-    camera.position.y = 0.1 * Math.sin(0.2 * t) - 6;
-    camera.position.z = 4;
-    camera.lookAt(0, 0, 0);
+    camera.position.y = 0.1 * Math.sin(0.2 * t) - 3;
+    camera.position.z = 2;
+    camera.lookAt(0, 0, 1);
   });
   return (
     <>
