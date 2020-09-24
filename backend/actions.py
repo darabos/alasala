@@ -73,3 +73,27 @@ class BrutalAttack(SimpleAttack):
   range=10
   damage=3
   cooldown=10
+
+class FarCaress(SimpleAttack):
+  range=7
+  damage=0.1
+  cooldown=1
+
+class HealAll(Action):
+  default_hankering = 10
+  heal = 3
+  def prepare(self, state):
+    self.targets = [hero for hero in state if self.subject.teammate(hero) and (abs(hero.loyalty) < hero.max_loyalty)]
+
+  def hankering(self):
+    if self.targets:
+      return self.default_hankering
+    return 0
+
+  def apply_effect(self):
+    for target in self.targets:
+      target.loyalty += copysign(self.heal, self.subject.loyalty)
+
+  def get_info(self):
+    return {**super().get_info(),
+            'heal': self.heal}

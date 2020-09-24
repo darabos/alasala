@@ -2,13 +2,13 @@ from backend.actions import *
 
 class Hero:
   hero_classes = {}
+  max_loyalty = 8
 
   def __init__(self, level, id, owner, x, y):
     self.level = level
     self.id = id
     self.x = x
     self.y = y
-    self.max_loyalty = 8
     self.loyalty = self.max_loyalty * (-1 if owner == 'enemy' else 1)
     self.actions_in_turn = []
     self.status = []
@@ -150,6 +150,16 @@ class Hark(Hero):
   def speak(self):
     return 'Hark!Hark!'
 
-# class HornedLady(Hero):
-#   name = 'Lady Emily'
+
+class Healer(Hero):
+  name = 'healer'
+  title = 'Angelic Presence'
+  speed = 0
+  weight = 1
+  loyalty_factor = 0.1
+  abilities = []
+  action_classes = [FarCaress, HealAll]
+
+  def speak(self):
+    return 'cube'
 #
