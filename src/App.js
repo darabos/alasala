@@ -237,6 +237,7 @@ function PartySelector({ data, party, setParty, startCombat }) {
 function BattleRenderer(props) {
   const data = props.data;
   const journal = props.journal;
+  const [isBattleOver, setBattleOver] = useState(false);
   const heroStories = [];
   const actionEntries = [];
   console.log('journal', journal);
@@ -272,17 +273,29 @@ function BattleRenderer(props) {
   console.log('actions');
   console.log(actionEntries);
 
+
   return (
     <div className="CombatCanvas">
+      { isBattleOver && (
+        <div class = "overlay">
+        <div id="result">
+        OVER!!!!!!!!!!!!
+        </div>
+
+        </div>
+      )}
+
       <CombatCanvas effects={props.effects} lightPosition={[20, 0, 5]}>
         <BattleSimulation
           journal={journal}
           heroStories={heroStories}
           actionEntries={actionEntries}
+          battleOverCallback={() => setBattleOver(true)}
         />
       </CombatCanvas>
     </div>
   );
+
 }
 
 function CombatCanvas({ effects, lightPosition, children }) {
@@ -308,10 +321,7 @@ function CombatCanvas({ effects, lightPosition, children }) {
   );
 }
 
-function BattleSimulation(props) {
-  const journal = props.journal;
-  const heroStories = props.heroStories;
-  const actionEntries = props.actionEntries;
+function BattleSimulation({journal, heroStories, actionEntries, battleOverCallback}) {
   const heroRefs = useRef({}).current;
   function heroRef(id) {
     return heroRefs[id] || (heroRefs[id] = createRef());
@@ -336,6 +346,8 @@ function BattleSimulation(props) {
       if (turnClock.time === turnFrames) {
         if (journal && turn < journal.length - 1) {
           setTurn(turn + 1);
+        } else {
+          battleOverCallback();
         }
       }
     }
@@ -657,6 +669,19 @@ function MapDiorama({ effects, stage }) {
         ></boxBufferGeometry>
         <meshLambertMaterial attach="material" color="#fff" />
       </instancedMesh>
+
+      <instancedMesh
+        // ref={setStoneInstances}
+        castShadow
+        args={[null, null, 1]}
+      >
+        <boxBufferGeometry
+          attach="geometry"
+          args={[3, 10, 3]}
+        ></boxBufferGeometry>
+        <meshLambertMaterial attach="material" color="#fff" />
+      </instancedMesh>
+
 
       {effects && (
         <EffectComposer>
