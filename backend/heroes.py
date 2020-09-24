@@ -12,7 +12,7 @@ class Hero:
     self.loyalty = self.max_loyalty * (-1 if owner == 'enemy' else 1)
     self.actions_in_turn = []
     self.status = []
-    self.actions = [a() for a in self.action_classes]
+    self.actions = [a(self) for a in self.action_classes]
 
   @classmethod
   def __init_subclass__(cls):
@@ -45,29 +45,36 @@ class Hero:
       self.loyalty -= self.loyalty_factor
       self.loyalty = max(-self.max_loyalty, self.loyalty)
 
+
   def step(self, stage, state):
     self.actions_in_turn = []
     self.increase_loyalty()
-    for action in self.actions:
-      if action.usable(self, state):
+    cool_actions = [a for a in self.actions if a.is_cool()]
+    for action in cool_actions:
+      action.prepare(state)
+    exclusive_actions = [a for a in cool_actions if a.exclusive]
+    exclusive_action = (exclusive_actions and
+      max(exclusive_actions, key=lambda a: a.hankering()))
+    if exclusive_action and exclusive_action.hankering() > 0:
+      exclusive_action.do()
+      self.actions_in_turn.append(exclusive_action.get_info())
+
+    for action in cool_actions:
+      if not action.exclusive and (action.hankering() > 0):
         action.do()
         self.actions_in_turn.append(action.get_info())
-      else:
-        action.cooldown_progress = max(0, action.cooldown_progress - 1)
+
+    for action in self.actions:
+      action.cool()
     if not self.actions_in_turn:
       target = self.find_closest_opponent(state)
       if target is not None:
         distance = sqrt(self.sq_distance(target))
         direction_x, direction_y = self.direction_to_hero(target)
-        step_size = min(self.speed, distance + target.speed - self.actions[0].range)
+        step_size = max(0, min(self.speed, distance + target.speed - self.actions[0].range))
         self.x += direction_x * step_size
         self.y += direction_y * step_size
 
-  def take_attack(self, attack):
-    if self.loyalty >= 0:
-      self.loyalty -= attack.damage
-    else:
-      self.loyalty += attack.damage
 
   def get_log_entry(self):
     return {
