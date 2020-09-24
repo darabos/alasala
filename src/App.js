@@ -765,35 +765,26 @@ const HeroBodyPart = React.forwardRef(({ shape, parent }, apiRef) => {
     apiRef.current = api;
   }
   if (parent) {
-    console.log(parent.ref, ref, {
-      pivotA: joint.clone().sub(parent.pos),
-      pivotB: joint.clone().sub(pos),
-      axisA: joint.clone().sub(parent.pos).normalize(),
-      axisB: joint.clone().sub(pos).normalize().negate(),
-      twistAngle: Math.PI / 8,
-      angle: Math.PI / 8,
-      collideConnected: false,
-      maxForce: 1,
-    });
     useConeTwistConstraint(parent.ref, ref, {
-      pivotA: joint.clone().sub(parent.pos),
-      pivotB: joint.clone().sub(pos),
-      axisA: joint.clone().sub(parent.pos).normalize(),
-      axisB: joint.clone().sub(pos).normalize().negate(),
+      pivotA: joint.clone().sub(parent.pos).toArray(),
+      pivotB: joint.clone().sub(pos).toArray(),
+      axisA: joint.clone().sub(parent.pos).normalize().toArray(),
+      axisB: joint.clone().sub(pos).normalize().negate().toArray(),
       twistAngle: Math.PI / 8,
       angle: Math.PI / 8,
       collideConnected: false,
       maxForce: 1,
     });
   }
+  const color = shape.color || parent.color;
   return (
     <>
       <Box castShadow ref={ref} args={shape.size}>
-        <meshStandardMaterial attach="material" color="#fff" wireframe />
+        <meshStandardMaterial attach="material" color={color} />
       </Box>
       {shape.children &&
         shape.children.map((c, i) => (
-          <HeroBodyPart key={i} shape={c} parent={{ shape, ref, pos }} />
+          <HeroBodyPart key={i} shape={c} parent={{ shape, ref, pos, color }} />
         ))}
     </>
   );
@@ -806,8 +797,12 @@ function HeroDiorama({ hero, effects }) {
       size: [1, 1, 1.5],
       color: '#961',
       children: [
-        { size: [0.2, 0.5, 0.2], dir: 'left' },
-        { size: [0.2, 0.5, 0.2], dir: 'right' },
+        {
+          size: [0.5, 0.2, 0.2],
+          dir: 'left',
+          children: [{ size: [0.5, 0.2, 0.2], dir: 'left' }],
+        },
+        { size: [0.5, 0.2, 0.2], dir: 'right' },
       ],
     },
   };
