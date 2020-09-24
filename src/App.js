@@ -423,24 +423,30 @@ function Map(props) {
 const tmpo = new THREE.Object3D();
 
 function MapDiorama({ effects }) {
-  function randomShape(r, n) {
+  function randomShape(fn, n) {
     const s = new THREE.Shape();
-    const start = r;
-    s.moveTo(r, 0);
+    s.moveTo(fn(0), 0);
     for (let i = 1; i < n; ++i) {
       const phi = (i * Math.PI * 2) / n;
-      r = (start * (9 + Math.sin(7 * phi) + Math.sin(8 * phi))) / 9;
+      const r = fn(phi);
       s.lineTo(r * Math.cos(phi), r * Math.sin(phi));
     }
-    s.lineTo(start, 0);
+    s.lineTo(fn(0), 0);
     return s;
   }
   const layers = useMemo(
-    () => [
-      { shape: randomShape(100, 100), y: 0, color: '#691' },
-      { shape: randomShape(60, 60), y: 5, color: '#562' },
-      { shape: randomShape(30, 30), y: 15, color: '#999' },
-    ],
+    () =>
+      [
+        // prettier-ignore
+        { fn: phi => (100 * (9 + Math.sin(7 * phi) + Math.sin(8 * phi))) / 9, segments: 100, y: 0, color: '#691' },
+        // prettier-ignore
+        { fn: phi => (60 * (9 + Math.sin(7 * phi) + Math.sin(8 * phi))) / 9, segments: 60, y: 5, color: '#562' },
+        // prettier-ignore
+        { fn: phi => (30 * (9 + Math.sin(7 * phi) + Math.sin(8 * phi))) / 9, segments: 30, y: 15, color: '#999' },
+      ].map((e) => {
+        e.shape = randomShape(e.fn, e.segments);
+        return e;
+      }),
     []
   );
   const extrudeSettings = useMemo(
@@ -459,30 +465,45 @@ function MapDiorama({ effects }) {
     () =>
       [
         // prettier-ignore
-        { pos: [80, 5, -20], r: 20, w: 1, h: 1, count: 20, color: [[0, 0.5], [0.2, 0.7], [0, 0.2]] },
+        { pos: [80, -20], r: 20, w: 1, h: 1, count: 50, color: [[0, 0.5], [0.2, 0.7], [0, 0.2]] },
         // prettier-ignore
-        { pos: [10, 5, -80], r: 18, w: 0.7, h: 1, count: 50, color: [[0.2, 0.3], [0.5, 0.7], [0, 0.2]] },
+        { pos: [10, -80], r: 18, w: 0.7, h: 1, count: 50, color: [[0.2, 0.3], [0.5, 0.7], [0, 0.2]] },
         // prettier-ignore
-        { pos: [40, 5, -105], r: 10, w: 0.5, h: 0.5, count: 10, color: [[0.2, 0.3], [0.5, 0.7], [0, 0.2]] },
+        { pos: [40, -105], r: 10, w: 0.5, h: 0.5, count: 10, color: [[0.2, 0.3], [0.5, 0.7], [0, 0.2]] },
+        // prettier-ignore
+        { pos: [0, 0], r: 200, w: 0.4, h: 0.3, count: 2000, color: [[0, 0.5], [0.2, 0.7], [0, 0.2]] },
       ].flatMap((forest) =>
         new Array(forest.count).fill().map(() => {
-          const phi = Math.random() * Math.PI * 2;
-          const r = forest.r * (0.5 + Math.tan(Math.random() - 0.5));
-          const w = forest.w * (1 + 4 * Math.random());
-          return {
-            position: [
-              forest.pos[0] + Math.cos(phi) * r,
-              forest.pos[1] + (w * forest.h) / forest.w,
-              forest.pos[2] + Math.sin(phi) * r,
-            ],
-            size: [w, (w * forest.h) / forest.w, w],
-            color: forest.color.map(
-              (c) => c[0] + Math.random() * (c[1] - c[0])
-            ),
-          };
+          while (true) {
+            const phi = Math.random() * Math.PI * 2;
+            const r = forest.r * Math.sqrt(Math.random());
+            const w = forest.w * (1 + 4 * Math.random());
+            const h = w * (forest.h / forest.w);
+            const x = forest.pos[0] + Math.cos(phi) * r;
+            let y;
+            const z = forest.pos[1] + Math.sin(phi) * r;
+            const gphi = Math.atan2(-z, -x);
+            const gr = Math.hypot(z, x);
+            let offmap = true;
+            for (let l of layers) {
+              const lr = l.fn(gphi);
+              if (gr < lr) {
+                y = l.y + h + 5;
+                offmap = false;
+              }
+            }
+            if (offmap) continue;
+            return {
+              position: [x, y, z],
+              size: [w, h, w],
+              color: forest.color.map(
+                (c) => c[0] + Math.random() * (c[1] - c[0])
+              ),
+            };
+          }
         })
       ),
-    []
+    [layers]
   );
   const treeColors = useMemo(
     () => Float32Array.from(trees.flatMap((t) => t.color)),
@@ -513,7 +534,7 @@ function MapDiorama({ effects }) {
         const s = stones[i];
         tmpo.position.fromArray(s.position);
         tmpo.rotation.set(0, Math.random(), 0);
-        tmpo.scale.set(1, 0.1, 1);
+        tmpo.scale.set(1, 1, 1);
         tmpo.updateMatrix();
         mesh.setMatrixAt(i, tmpo.matrix);
         mesh.setColorAt(i, new THREE.Color('#fff'));
