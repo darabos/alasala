@@ -41,7 +41,6 @@ function BasePlane(props) {
 
 const HeroBox = React.forwardRef((props, heroRef) => {
   const meta = props.meta;
-  meta.shape = tmpHeroShape;
   const weight = meta.weight;
   const keelZ = -3;
   const turn = props.turn;
@@ -309,10 +308,20 @@ function CombatCanvas({ effects, lightPosition, children }) {
         </EffectComposer>
       )}
       <spotLight
+        position={[-3, 0, 1]}
+        color={0x9999ff}
+        angle={1}
+        penumbra={0.1}
+        intensity={0.5}
+        castShadow
+        shadow-mapSize-height={1024}
+        shadow-mapSize-width={1024}
+      />
+      <spotLight
         position={lightPosition}
         angle={0.5}
         penumbra={0.1}
-        intensity={1.5}
+        intensity={1.0}
         castShadow
         shadow-mapSize-height={1024}
         shadow-mapSize-width={1024}
@@ -498,6 +507,8 @@ function MapDiorama({ effects, stage }) {
         // prettier-ignore
         { pos: [40, -105], r: 10, w: 0.5, h: 0.5, count: 10, color: [[0.2, 0.3], [0.5, 0.7], [0, 0.2]] },
         // prettier-ignore
+        { pos: [-80, -20], r: 50, w: 1, h: 1, count: 50, color: [[0.5, 0.8], [0.2, 0.7], [0, 0.2]] },
+        // prettier-ignore
         { pos: [0, 0], r: 200, w: 0.4, h: 0.3, count: 2000, color: [[0, 0.5], [0.2, 0.7], [0, 0.2]] },
       ].flatMap((forest) =>
         new Array(forest.count).fill().map(() => {
@@ -516,7 +527,7 @@ function MapDiorama({ effects, stage }) {
               const lr = l.fn(gphi);
               if (gr < lr) {
                 y = l.y + h + 5;
-                offmap = false;
+                offmap = l === layers[2];
               }
             }
             if (offmap) continue;
@@ -545,12 +556,16 @@ function MapDiorama({ effects, stage }) {
     const up = new THREE.Vector3(0, 1, 0);
     const stones = [];
     // prettier-ignore
-    const turns = [5, 4, 3, 4, 5, 6, 6, 5, 4, -2, -4, -8, -5, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const turns = [
+      5, 4, 3, 4, 5, 6, 6, 5, 4, -2, -4, -8, -5, -1, 0, 3, 4, 3, 1, 2, 1, 2, 2, 0, -2, -3, -4, -7, -9, -7, -3, -2,
+      0, 1, 2, 0, -2, -4, -3, 1, 4, 4, 6, 6, 4, -2, -2, -4, -4, -3, 0, 0, 0, 0, -3, -2, -3, 0, 0, 0, -3, -6, -1,
+      3, 4, 2, 6, 0, 0, 0, 6, 8, 8, 6, 0, -2, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9, -2, -2, -2, -2, -2, -2, -2,
+      -2, -2, -2, -2, -3, -3, -3, -2, -2, -2, -2, -3, -3, -3, -3, -3, -3, -4, -4, -4, -5, -5, -6, -7, -8, -9];
     for (let i = 0; i < turns.length; ++i) {
       const gphi = Math.atan2(-p.z, -p.x);
       const gr = Math.hypot(p.z, p.x);
       for (let l of layers) {
-        const lr = l.fn(gphi) + 2;
+        const lr = l.fn(gphi) + 5;
         if (gr < lr) {
           p.setY(l.y + 1);
         }
@@ -574,7 +589,7 @@ function MapDiorama({ effects, stage }) {
         tmpo.updateMatrix();
         mesh.setMatrixAt(i, tmpo.matrix);
         if (i < stage) {
-          mesh.setColorAt(i, new THREE.Color(1, 1, 1));
+          mesh.setColorAt(i, new THREE.Color(0.7, 0.7, 0.7));
         } else if (i === stage) {
           mesh.setColorAt(i, new THREE.Color(0, 0.8, 1));
         } else {
@@ -590,7 +605,7 @@ function MapDiorama({ effects, stage }) {
   useFrame(({ camera, clock }) => {
     const t = clock.getElapsedTime();
     camera.position.z = -140;
-    camera.position.y = 50 + 2 * Math.cos(0.19 * t);
+    camera.position.y = 60 + 2 * Math.cos(0.19 * t);
     camera.position.x = 5 * Math.sin(0.2 * t);
     camera.lookAt(0, 0, -50);
     for (let i = 0; i < trees.length; ++i) {
@@ -850,36 +865,12 @@ const HeroBodyPart = React.forwardRef(
   }
 );
 
-const tmpHeroShape = {
-  size: [1, 1, 1.5],
-  color: '#961',
-  children: [
-    { size: [0.3, 0.2, 0.3], dir: 'front' },
-    { size: [0.3, 0.2, 0.4], offset: [0.3, 0, 0], dir: 'up' },
-    { size: [0.3, 0.2, 0.4], offset: [-0.3, 0, 0], dir: 'up' },
-    {
-      size: [0.5, 0.2, 0.2],
-      dir: 'left',
-      children: [{ size: [0.4, 0.2, 0.2], dir: 'left' }],
-    },
-    {
-      size: [0.5, 0.2, 0.2],
-      dir: 'right',
-      children: [{ size: [0.4, 0.2, 0.2], dir: 'right' }],
-    },
-  ],
-};
-
 function HeroDiorama({ hero, effects }) {
-  hero = {
-    ...hero,
-    shape: tmpHeroShape,
-  };
   useFrame(({ camera, clock }) => {
     const t = clock.getElapsedTime();
     camera.up.set(0, 0, 1);
-    camera.position.x = 0.2 * Math.cos(0.19 * t);
-    camera.position.y = 0.1 * Math.sin(0.2 * t) - 3;
+    camera.position.x = -2 + 0.2 * Math.cos(0.19 * t);
+    camera.position.y = -2 + 0.1 * Math.sin(0.2 * t);
     camera.position.z = 2;
     camera.lookAt(0, 0, 1);
   });
@@ -896,7 +887,7 @@ function HeroPage({ hero, data }) {
   return (
     <div className="HeroPage">
       <div className="HeroCanvas">
-        <CombatCanvas effects lightPosition={[0, 0, 5]}>
+        <CombatCanvas effects lightPosition={[3, 0, 5]}>
           <HeroDiorama hero={heroMeta} />
         </CombatCanvas>
       </div>
@@ -969,11 +960,9 @@ function App() {
 
   return (
     <div>
-      {page}
       {error && <div>{error}</div>}
       {data && (
         <div>
-          {JSON.stringify(data)}
           {page === 'combat' && <Combat data={data} />}
           {page === 'map' && (
             <Map setPage={setPage} searchBeach={searchBeach} data={data} />
