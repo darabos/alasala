@@ -12,6 +12,7 @@ class Hero:
     self.loyalty = self.max_loyalty * (-1 if owner == 'enemy' else 1)
     self.actions_in_turn = []
     self.status = []
+    self.actions = [a() for a in self.action_classes]
 
   @classmethod
   def __init_subclass__(cls):
@@ -105,10 +106,7 @@ class Cube(Hero):
   weight = 1
   loyalty_factor = 0.1
   abilities = []
-
-  def __init__(self,  level, id, owner, x, y):
-    self.actions = [BaseAttack()]
-    super().__init__(level, id, owner, x, y)
+  action_classes = [BaseAttack]
 
   def speak(self):
     return 'cube'
@@ -119,6 +117,7 @@ class Hark(Hero):
   speed = 0.5
   loyalty_factor = 0.2
   weight = 8
+  action_classes = [BaseAttack]
 
   # Eventually these would become classes, but for now, it's just for display.
   abilities = [
@@ -140,10 +139,6 @@ class Hark(Hero):
       'unlockLevel': 10,
     }
   ]
-
-  def __init__(self):
-    self.actions = [BaseAttack()]
-    super().__init__(level, id, owner, x, y)
 
   def speak(self):
     return 'Hark!Hark!'
