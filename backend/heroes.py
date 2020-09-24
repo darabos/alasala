@@ -28,7 +28,8 @@ class Hero:
         'title': cls.title,
         'abilities': cls.abilities,
         'speed': cls.speed,
-        'loyalty_factor': cls.loyalty_factor
+        'loyalty_factor': cls.loyalty_factor,
+        'weight': cls.weight
       }
       for (name, cls) in Hero.hero_classes.items()}
 
@@ -71,6 +72,7 @@ class Hero:
     return {
     'x': self.x,
     'y': self.y,
+    'name': self.name,
     'loyalty': self.loyalty,
     'max_loyalty': self.max_loyalty,
     'status': self.status,
@@ -100,6 +102,7 @@ class Cube(Hero):
   name = 'cube'
   title = 'Platonic Solid'
   speed = 1
+  weight = 1
   loyalty_factor = 0.1
   abilities = []
   actions = [BaseAttack()]
@@ -112,6 +115,7 @@ class Hark(Hero):
   title = 'Dean of Arcane Studies',
   speed = 0.5
   loyalty_factor = 0.2
+  weight = 8
 
   # Eventually these would become classes, but for now, it's just for display.
   abilities = [

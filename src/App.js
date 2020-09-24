@@ -35,6 +35,8 @@ function BasePlane(props) {
 
 const HeroBox = React.forwardRef((props, ref) => {
   var mat = useRef();
+  const meta = props.meta;
+  const weight = meta.weight;
   const keelZ = -3;
   const turn = props.turn;
   const initial = props.trajectory[0];
@@ -44,7 +46,7 @@ const HeroBox = React.forwardRef((props, ref) => {
   const next = props.trajectory[turn + 1] || current;
   const [, api] = useBox(
     () => ({
-      mass: 1,
+      mass: weight,
       material: {
         friction: 0.01,
       },
@@ -66,13 +68,13 @@ const HeroBox = React.forwardRef((props, ref) => {
 
   useSpring(ref, leashRef, {
     restLength: 0,
-    stiffness: 12,
+    stiffness: 12 * weight,
     damping: 2,
     localAnchorA: [0.9, 0, 0],
   });
   useSpring(ref, keelRef, {
     restLength: 0,
-    stiffness: 3,
+    stiffness: 3 * weight,
     damping: 0,
     localAnchorA: [0, 0, -height],
   });
@@ -225,14 +227,17 @@ function PartySelector({ data, party, setParty, startCombat }) {
 }
 
 function BattleRenderer(props) {
+  const data = props.data;
   const journal = props.journal;
   const heroStories = [];
   const actionEntries = [];
   console.log('journal', journal);
   if (journal) {
     Object.entries(journal[0]).forEach(([id, value]) => {
+      const meta = data.index[value.name];
       heroStories.push({
         id: id,
+        meta: meta,
         trajectory: journal.map((step) => ({
           ...step[id],
           x: step[id].x * 3,
@@ -330,6 +335,7 @@ function BattleSimulation(props) {
       {heroStories.map((hero) => (
         <HeroBox
           key={hero.id}
+          meta={hero.meta}
           ref={heroRef(hero.id)}
           trajectory={hero.trajectory}
           turn={turn}
@@ -382,7 +388,9 @@ function Combat({ data }) {
         />
       )}
       {state === 'simulate' && <Spinner />}
-      {state === 'renderBattle' && <BattleRenderer effects journal={journal} />}
+      {state === 'renderBattle' && (
+        <BattleRenderer effects journal={journal} data={data} />
+      )}
     </div>
   );
 }
