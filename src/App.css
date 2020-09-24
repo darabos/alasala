@@ -7,6 +7,7 @@ body {
 .CombatCanvas,
 .HeroCanvas,
 .MapCanvas {
+  position: relative;
   overflow: hidden;
   border-radius: 20px;
   margin: 20px;
@@ -43,8 +44,8 @@ button {
   cursor: pointer;
   transition: text-shadow 0.5s, background-color 0.5s;
 }
-button:focus,
-button:hover {
+button:focus:enabled,
+button:hover:enabled {
   outline: none;
   background-color: #c95;
   animation: shine 2s infinite;
@@ -174,6 +175,7 @@ button:hover {
 
 .PanelHeader {
   position: absolute;
+  border-bottom: 1px solid black;
 }
 
 .Searched {
@@ -223,18 +225,43 @@ button:hover {
   background: #a53;
 }
 
+.HeroStats span {
+  margin: 20px;
+}
+.HeroPageButton {
+  display: flex;
+  flex-direction: column;
+  max-width: 400px;
+  text-align: center;
+  margin: 20px;
+}
+.HeroPageButtons {
+  margin: 20px -20px;
+  display: flex;
+  justify-content: left;
+}
+
+.TopStats {
+  background: black;
+  color: white;
+  padding: 5px;
+  display: flex;
+  font-weight: bold;
+}
+.TopStats span {
+  flex: 1;
+}
+
 .overlay {
   position: absolute;
   height: 100%;
   width: 100%;
   z-index: 100000000000000000;
-  background: #a74;
-  opacity: 0.5;
+  background: #a748;
 }
 
 #result {
   position: absolute;
-  background: #a74;
   font-family: Grenze Gotisch;
   font-size: 90px;
   top: 50%;

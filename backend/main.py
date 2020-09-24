@@ -23,8 +23,8 @@ def db():
     c = db.cursor()
     init_table(c, 'select * from users where email = "test"', '''
       drop table if exists users
-      create table users (email text, stage int, day int)
-      insert into users values ("test", 0, 1)
+      create table users (email text, stage int, day int, ectoplasm int)
+      insert into users values ("test", 0, 1, 0)
       ''')
 
     init_table(c, 'select * from heroes where user = "test"', '''
@@ -98,3 +98,31 @@ def searchbeach():
   progress = query(c, 'select * from users where email = ?', (user,))[0]
   heroes = query(c, 'select rowid as id, * from heroes where user = ?', (user,))
   return flask.jsonify({'progress': progress, 'heroes': heroes, 'just_found': hero})
+
+@app.route('/dissolve', methods=['POST'])
+def dissolve():
+  user = flask.request.get_json()['user']
+  rowid = flask.request.get_json()['hero']
+  c = db()
+  count = query(c, 'select count(1) as cnt from heroes where rowid = ? and user = ?', (rowid, user))[0]['cnt']
+  assert(count == 1)
+  c.execute('delete from heroes where rowid = ? and user = ?', (rowid, user))
+  c.execute('update users set ectoplasm = ectoplasm + 1 where email = ?', (user,))
+  return 'OK'
+
+@app.route('/fuse', methods=['POST'])
+def fuse():
+  user = flask.request.get_json()['user']
+  rowid = flask.request.get_json()['hero']
+  c = db()
+  ectoplasm = query(c, 'select ectoplasm from users where email = ?', (user,))[0]['ectoplasm']
+  assert(ectoplasm > 0)
+  names = query(c, 'select name from heroes where rowid = ? and user = ?', (rowid, user))
+  assert(len(names) == 1)
+  name = names[0]['name']
+  count = query(c, 'select count(1) as cnt from heroes where name = ? and user = ?', (name, user))[0]['cnt']
+  assert(count > 1)
+  c.execute('update users set ectoplasm = ectoplasm - 1 where email = ?', (user,))
+  c.execute('delete from heroes where rowid != ? and name = ? and user = ?', (rowid, name, user))
+  c.execute('update heroes set level = level + 1 where rowid = ?', (rowid,))
+  return 'OK'
