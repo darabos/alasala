@@ -8,10 +8,16 @@ import React, {
 } from 'react';
 import { useSpring as useReactSpring, animated } from 'react-spring';
 import { Canvas, useFrame } from 'react-three-fiber';
-import { Plane, Extrude, Html } from 'drei';
+import { Plane, Extrude, Html, Box } from 'drei';
 import WaterMaterial from './WaterMaterial.js';
 import * as THREE from 'three';
-import { Physics, useBox, usePlane, useSpring } from 'use-cannon';
+import {
+  Physics,
+  useBox,
+  usePlane,
+  useSpring,
+  useConeTwistConstraint,
+} from 'use-cannon';
 import { EffectComposer, DepthOfField, Bloom } from 'react-postprocessing';
 import './App.css';
 import '@openfonts/grenze-gotisch_latin';
@@ -273,35 +279,37 @@ function BattleRenderer(props) {
 
   return (
     <div className="CombatCanvas">
-      <Canvas shadowMap>
-        {props.effects && (
-          <EffectComposer>
-            <Bloom
-              luminanceThreshold={0}
-              luminanceSmoothing={0.9}
-              height={300}
-            />
-          </EffectComposer>
-        )}
-        <spotLight
-          position={[20, 0, 5]}
-          angle={0.5}
-          penumbra={0.1}
-          intensity={1.5}
-          castShadow
-          shadow-mapSize-height={1024}
-          shadow-mapSize-width={1024}
+      <CombatCanvas effects={props.effects} lightPosition={[20, 0, 5]}>
+        <BattleSimulation
+          journal={journal}
+          heroStories={heroStories}
+          actionEntries={actionEntries}
         />
-        <ambientLight args={[0x808080]} />
-        <Physics gravity={[0, 0, -10]}>
-          <BattleSimulation
-            journal={journal}
-            heroStories={heroStories}
-            actionEntries={actionEntries}
-          />
-        </Physics>
-      </Canvas>
+      </CombatCanvas>
     </div>
+  );
+}
+
+function CombatCanvas({ effects, lightPosition, children }) {
+  return (
+    <Canvas shadowMap>
+      {effects && (
+        <EffectComposer>
+          <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
+        </EffectComposer>
+      )}
+      <spotLight
+        position={lightPosition}
+        angle={0.5}
+        penumbra={0.1}
+        intensity={1.5}
+        castShadow
+        shadow-mapSize-height={1024}
+        shadow-mapSize-width={1024}
+      />
+      <ambientLight args={[0x808080]} />
+      <Physics gravity={[0, 0, -10]}>{children}</Physics>
+    </Canvas>
   );
 }
 
@@ -319,6 +327,7 @@ function BattleSimulation(props) {
   useFrame(({ camera, clock }) => {
     if (journal) {
       const t = clock.getElapsedTime();
+      camera.up.set(0, 0, 1);
       camera.position.x = Math.cos(0.19 * t);
       camera.position.y = Math.sin(0.2 * t) - 6;
       camera.position.z = 10;
@@ -744,14 +753,97 @@ function HeroCard({ hero }) {
   );
 }
 
+const HeroBodyPart = React.forwardRef(({ shape, parent }, apiRef) => {
+  const pos = new THREE.Vector3();
+  const joint = new THREE.Vector3();
+  if (parent) {
+    joint.copy(parent.pos);
+    pos.copy(parent.pos);
+    if (shape.dir === 'left') {
+      joint.x += parent.shape.size[0] / 2;
+      pos.x = joint.x + shape.size[0] / 2;
+    } else if (shape.dir === 'right') {
+      joint.x -= parent.shape.size[0] / 2;
+      pos.x = joint.x - shape.size[0] / 2;
+    }
+  } else {
+    pos.z = shape.size[2] / 2;
+  }
+  const [ref, api] = useBox(() => ({
+    mass: 1,
+    position: pos.toArray(),
+    args: shape.size,
+  }));
+  if (apiRef) {
+    apiRef.current = api;
+  }
+  if (parent) {
+    useConeTwistConstraint(parent.ref, ref, {
+      pivotA: joint.clone().sub(parent.pos).toArray(),
+      pivotB: joint.clone().sub(pos).toArray(),
+      axisA: joint.clone().sub(parent.pos).normalize().toArray(),
+      axisB: joint.clone().sub(pos).normalize().negate().toArray(),
+      twistAngle: Math.PI / 8,
+      angle: Math.PI / 8,
+      collideConnected: false,
+      maxForce: 1,
+    });
+  }
+  const color = shape.color || parent.color;
+  return (
+    <>
+      <Box castShadow ref={ref} args={shape.size}>
+        <meshStandardMaterial attach="material" color={color} />
+      </Box>
+      {shape.children &&
+        shape.children.map((c, i) => (
+          <HeroBodyPart key={i} shape={c} parent={{ shape, ref, pos, color }} />
+        ))}
+    </>
+  );
+});
+
+function HeroDiorama({ hero, effects }) {
+  hero = {
+    ...hero,
+    shape: {
+      size: [1, 1, 1.5],
+      color: '#961',
+      children: [
+        {
+          size: [0.5, 0.2, 0.2],
+          dir: 'left',
+          children: [{ size: [0.5, 0.2, 0.2], dir: 'left' }],
+        },
+        { size: [0.5, 0.2, 0.2], dir: 'right' },
+      ],
+    },
+  };
+  useFrame(({ camera, clock }) => {
+    const t = clock.getElapsedTime();
+    camera.up.set(0, 0, 1);
+    camera.position.x = 0.2 * Math.cos(0.19 * t);
+    camera.position.y = 0.1 * Math.sin(0.2 * t) - 6;
+    camera.position.z = 4;
+    camera.lookAt(0, 0, 0);
+  });
+  return (
+    <>
+      <HeroBodyPart shape={hero.shape} />
+      <BasePlane />
+    </>
+  );
+}
+
 function HeroPage({ hero, data }) {
   const heroMeta = data.index[hero.name];
   return (
     <div className="HeroPage">
-      <div
-        className="HeroPortrait"
-        style={{ backgroundImage: heroPortrait(hero) }}
-      />
+      <div className="HeroCanvas">
+        <CombatCanvas effects lightPosition={[0, 0, 5]}>
+          <HeroDiorama hero={heroMeta} />
+        </CombatCanvas>
+      </div>
       <div className="HeroText">
         <div className="HeroName"> {hero.name} </div>
         <div className="HeroTitle">

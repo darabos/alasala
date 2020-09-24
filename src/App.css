@@ -5,12 +5,16 @@ body {
   text-align: center;
 }
 .CombatCanvas,
+.HeroCanvas,
 .MapCanvas {
   overflow: hidden;
   border-radius: 20px;
   margin: 20px;
   box-shadow: #0009 0px 10px 20px;
   height: 80vh;
+}
+.HeroCanvas {
+  width: 300px;
 }
 h1,
 h2,
