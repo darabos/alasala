@@ -66,7 +66,7 @@ def computecombat():
   winner = bs.get_winner(log[-1])
   if winner == 1:
     progress(user)
-  return flask.jsonify(log)
+  return flask.jsonify({'log': log, 'winner': winner})
 
 def get_heroes_of_user(c, user):
   return query(c, 'select rowid as id, * from heroes where user = ?', (user,))

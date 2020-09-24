@@ -141,7 +141,11 @@ function SimpleAttack(props) {
     const dst = targetHero.position;
     mesh.current && mesh.current.position.lerpVectors(src, dst, phase);
     if (props.turnClock.time === turnFrames && props.attackTurn === 0) {
-      const force = dst.clone().sub(src).normalize().multiplyScalar(5 * damage);
+      const force = dst
+        .clone()
+        .sub(src)
+        .normalize()
+        .multiplyScalar(5 * damage);
       const localForce = targetHero.worldToLocal(force);
       targetHero.physicsApi.applyLocalImpulse(localForce.toArray(), [0, 0, 1]);
     }
@@ -236,6 +240,9 @@ function PartySelector({ data, party, setParty, startCombat }) {
 function BattleRenderer(props) {
   const data = props.data;
   const journal = props.journal;
+  const result =
+    props.winner === 1 ? 'Victory!' : props.winner === 0 ? 'Draw!' : 'Defeat!';
+  const [battleIsOver, setBattleIsOver] = useState(false);
   const heroStories = [];
   const actionEntries = [];
   console.log('journal', journal);
@@ -273,11 +280,27 @@ function BattleRenderer(props) {
 
   return (
     <div className="CombatCanvas">
+      {battleIsOver && (
+        <div>
+          <div class="overlay">
+            <div id="result">{result}</div>
+          </div>
+          <div id="post-battle">
+            <Buttons
+              setPage={props.setPage}
+              setData={props.setData}
+              setError={props.setError}
+            />
+          </div>
+        </div>
+      )}
+
       <CombatCanvas effects={props.effects} lightPosition={[20, 0, 5]}>
         <BattleSimulation
           journal={journal}
           heroStories={heroStories}
           actionEntries={actionEntries}
+          battleOverCallback={() => setBattleIsOver(true)}
         />
       </CombatCanvas>
     </div>
@@ -317,10 +340,12 @@ function CombatCanvas({ effects, lightPosition, children }) {
   );
 }
 
-function BattleSimulation(props) {
-  const journal = props.journal;
-  const heroStories = props.heroStories;
-  const actionEntries = props.actionEntries;
+function BattleSimulation({
+  journal,
+  heroStories,
+  actionEntries,
+  battleOverCallback,
+}) {
   const heroRefs = useRef({}).current;
   function heroRef(id) {
     return heroRefs[id] || (heroRefs[id] = createRef());
@@ -345,6 +370,8 @@ function BattleSimulation(props) {
       if (turnClock.time === turnFrames) {
         if (journal && turn < journal.length - 1) {
           setTurn(turn + 1);
+        } else {
+          battleOverCallback();
         }
       }
     }
@@ -381,10 +408,11 @@ function Spinner() {
   return <div />;
 }
 
-function Combat({ data }) {
+function Combat({ data, setPage, setData, setError }) {
   const [state, setState] = useState('selectParty');
   const [party, setParty] = useState(new Array(5).fill());
   const [journal, setJournal] = useState();
+  const [winner, setWinner] = useState();
   useEffect(() => window.scrollTo(0, 0), []);
 
   function startCombat(party) {
@@ -393,7 +421,8 @@ function Combat({ data }) {
       .then((res) => res.json())
       .then((res) => {
         setState('renderBattle');
-        setJournal(res);
+        setJournal(res.log);
+        setWinner(res.winner);
       });
   }
 
@@ -409,7 +438,15 @@ function Combat({ data }) {
       )}
       {state === 'simulate' && <Spinner />}
       {state === 'renderBattle' && (
-        <BattleRenderer effects journal={journal} data={data} />
+        <BattleRenderer
+          effects
+          journal={journal}
+          winner={winner}
+          data={data}
+          setPage={setPage}
+          setData={setData}
+          setError={setError}
+        />
       )}
     </div>
   );
@@ -868,7 +905,9 @@ function HeroPage({ id, data, update }) {
       body: JSON.stringify({ user: 'test', hero: hero.id }),
     }).then(() => update());
   }
-  const canFuse = data.heroes.filter(h => h.name === hero.name).length > 1 && data.progress.ectoplasm > 0;
+  const canFuse =
+    data.heroes.filter((h) => h.name === hero.name).length > 1 &&
+    data.progress.ectoplasm > 0;
 
   return (
     <div className="HeroPage">
@@ -943,6 +982,22 @@ function fetchData(setData, setError) {
     );
 }
 
+function Buttons({ setData, setError, setPage }) {
+  return (
+    <div>
+      <button onClick={() => setPage('heroes')}>Heroes</button>
+      <button
+        onClick={() => {
+          fetchData(setData, setError);
+          setPage('map');
+        }}
+      >
+        Map
+      </button>
+    </div>
+  );
+}
+
 function App() {
   const [page, setPage] = useState('map');
   const [heroPage, setHeroPage] = useState();
@@ -978,12 +1033,22 @@ function App() {
       {error && <div>{error}</div>}
       {data && (
         <div>
-        <div className="TopStats">
-        <span>{data.progress.stage >= 5 && `Ectoplasm: ${data.progress.ectoplasm}`}</span>
-      <span>Day {data.progress.day}</span>
-      <span>Next stage: {data.progress.stage + 1}</span>
-        </div>
-          {page === 'combat' && <Combat data={data} />}
+          <div className="TopStats">
+            <span>
+              {data.progress.stage >= 5 &&
+                `Ectoplasm: ${data.progress.ectoplasm}`}
+            </span>
+            <span>Day {data.progress.day}</span>
+            <span>Next stage: {data.progress.stage + 1}</span>
+          </div>
+          {page === 'combat' && (
+            <Combat
+              data={data}
+              setPage={setPage}
+              setData={setData}
+              setError={setError}
+            />
+          )}
           {page === 'map' && (
             <Map setPage={setPage} searchBeach={searchBeach} data={data} />
           )}
@@ -1013,6 +1078,9 @@ function App() {
           Map
         </button>
       </div>
+      {page !== 'combat' && (
+        <Buttons setPage={setPage} setData={setData} setError={setError} />
+      )}
     </div>
   );
 }
