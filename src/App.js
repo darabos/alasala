@@ -675,9 +675,11 @@ function MapDiorama({ effects, stage}) {
 }
 
 function HeroList(props) {
+  const heroes = [...props.heroes];
+  heroes.sort((a, b) => a.name > b.name ? 1 : -1);
   return (
     <div className="HeroList">
-      {props.heroes.map((h) => (
+      {heroes.map((h) => (
         <HeroListItem
           key={h.id}
           hero={h}
