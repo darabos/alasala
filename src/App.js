@@ -243,6 +243,7 @@ function BattleRenderer(props) {
   const result =
     props.winner === 1 ? 'Victory!' : props.winner === 0 ? 'Draw!' : 'Defeat!';
   const [battleIsOver, setBattleIsOver] = useState(false);
+  props.setShowButtons(battleIsOver);
   const heroStories = [];
   const actionEntries = [];
   console.log('journal', journal);
@@ -281,17 +282,8 @@ function BattleRenderer(props) {
   return (
     <div className="CombatCanvas">
       {battleIsOver && (
-        <div>
-          <div class="overlay">
-            <div id="result">{result}</div>
-          </div>
-          <div id="post-battle">
-            <Buttons
-              setPage={props.setPage}
-              setData={props.setData}
-              setError={props.setError}
-            />
-          </div>
+        <div class="overlay">
+          <div id="result">{result}</div>
         </div>
       )}
 
@@ -408,7 +400,7 @@ function Spinner() {
   return <div />;
 }
 
-function Combat({ data, setPage, setData, setError }) {
+function Combat({ data, setShowButtons }) {
   const [state, setState] = useState('selectParty');
   const [party, setParty] = useState(new Array(5).fill());
   const [journal, setJournal] = useState();
@@ -443,9 +435,7 @@ function Combat({ data, setPage, setData, setError }) {
           journal={journal}
           winner={winner}
           data={data}
-          setPage={setPage}
-          setData={setData}
-          setError={setError}
+          setShowButtons={setShowButtons}
         />
       )}
     </div>
@@ -761,17 +751,18 @@ function HeroListItem({ showLevel, hero, onClick }) {
   );
 }
 
-function HeroCard({ hero }) {
+function HeroCard({ hero, reportFlipped }) {
   const config = { tension: 100 };
-  const [reveal, setReveal] = useState(false);
+  const [flipped, setFlipped] = useState(false);
+  reportFlipped(flipped);
   const flip = useReactSpring({
     config,
-    transform: `rotate3d(0, 1, 0, ${reveal ? 0 : 180}deg)`,
+    transform: `rotate3d(0, 1, 0, ${flipped ? 0 : 180}deg)`,
     from: { transform: 'rotate3d(0, 1, 0, 180deg)' },
   });
   const backflip = useReactSpring({
     config,
-    transform: `rotate3d(0, 1, 0, ${reveal ? 180 : 360}deg)`,
+    transform: `rotate3d(0, 1, 0, ${flipped ? 180 : 360}deg)`,
     from: { transform: 'rotate3d(0, 1, 0, 360deg)' },
   });
   return (
@@ -779,7 +770,7 @@ function HeroCard({ hero }) {
       <animated.div
         style={backflip}
         className="CardBack Clickable"
-        onClick={() => setReveal(true)}
+        onClick={() => setFlipped(true)}
       />
       <animated.div style={flip} className="HeroCard">
         <div className="CardBackground" />
@@ -968,7 +959,10 @@ function Searched(props) {
   useEffect(() => window.scrollTo(0, 0), []);
   return (
     <div className="Searched">
-      <HeroCard hero={props.data.just_found}></HeroCard>
+      <HeroCard
+        reportFlipped={props.setShowButtons}
+        hero={props.data.just_found}
+      ></HeroCard>
     </div>
   );
 }
@@ -982,27 +976,12 @@ function fetchData(setData, setError) {
     );
 }
 
-function Buttons({ setData, setError, setPage }) {
-  return (
-    <div>
-      <button onClick={() => setPage('heroes')}>Heroes</button>
-      <button
-        onClick={() => {
-          fetchData(setData, setError);
-          setPage('map');
-        }}
-      >
-        Map
-      </button>
-    </div>
-  );
-}
-
 function App() {
   const [page, setPage] = useState('map');
   const [heroPage, setHeroPage] = useState();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [showButtons, setShowButtons] = useState(true);
   useEffect(() => fetchData(setData, setError), []);
   function searchBeach() {
     fetch('/searchbeach', {
@@ -1042,12 +1021,7 @@ function App() {
             <span>Next stage: {data.progress.stage + 1}</span>
           </div>
           {page === 'combat' && (
-            <Combat
-              data={data}
-              setPage={setPage}
-              setData={setData}
-              setError={setError}
-            />
+            <Combat data={data} setShowButtons={setShowButtons} />
           )}
           {page === 'map' && (
             <Map setPage={setPage} searchBeach={searchBeach} data={data} />
@@ -1064,22 +1038,23 @@ function App() {
           {page === 'hero' && (
             <HeroPage update={update} id={heroPage} data={data} />
           )}
-          {page === 'searched' && <Searched data={data} />}
+          {page === 'searched' && (
+            <Searched data={data} setShowButtons={setShowButtons} />
+          )}
         </div>
       )}
-      <div>
-        <button onClick={() => setPage('heroes')}>Heroes</button>
-        <button
-          onClick={() => {
-            update();
-            setPage('map');
-          }}
-        >
-          Map
-        </button>
-      </div>
-      {page !== 'combat' && (
-        <Buttons setPage={setPage} setData={setData} setError={setError} />
+      {showButtons && (
+        <div>
+          <button onClick={() => setPage('heroes')}>Heroes</button>
+          <button
+            onClick={() => {
+              update();
+              setPage('map');
+            }}
+          >
+            Map
+          </button>
+        </div>
       )}
     </div>
   );
