@@ -940,11 +940,9 @@ function App() {
 
   return (
     <div>
-      {page}
       {error && <div>{error}</div>}
       {data && (
         <div>
-          {JSON.stringify(data)}
           {page === 'combat' && <Combat data={data} />}
           {page === 'map' && (
             <Map setPage={setPage} searchBeach={searchBeach} data={data} />
