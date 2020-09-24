@@ -124,7 +124,7 @@ class Hark(Hero):
   speed = 0.5
   loyalty_factor = 0.2
   weight = 8
-  action_classes = [BaseAttack]
+  action_classes = [BrutalAttack]
 
   # Eventually these would become classes, but for now, it's just for display.
   abilities = [

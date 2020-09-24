@@ -5,13 +5,12 @@ class Action:
   cooldown = 0
   # It uses up this much inspiration.
   inspiration = 0
-  name = "Subclass me you dummy!"
+  animation_name = "Override me you dummy!"
   # Only one exclusive action is done in a turn
   exclusive = True
   def __init__(self, subject):
     self.subject = subject
     self.cooldown_progress = 0
-    print('Init', subject, self.name)
 
   def cool(self):
     self.cooldown_progress = max(0, self.cooldown_progress - 1)
@@ -38,13 +37,14 @@ class Action:
     self.cooldown_progress = self.cooldown
 
   def get_info(self):
-    return {'name': self.name}
+    return {'animation_name': self.animation_name}
   
 
-class SingleAttack(Action):
+class SimpleAttack(Action):
   range = None
   damage = None
   default_hankering = 1
+  animation_name = 'simple_attack'
 
   def prepare(self, state):
     self.target = self.subject.find_closest_opponent(state)
@@ -64,8 +64,12 @@ class SingleAttack(Action):
             'target_hero': self.target.id}
 
 
-class BaseAttack(SingleAttack):
+class BaseAttack(SimpleAttack):
   range=3
   damage=1
   cooldown=7
-  name = 'base_attack'
+
+class BrutalAttack(SimpleAttack):
+  range=10
+  damage=3
+  cooldown=10
