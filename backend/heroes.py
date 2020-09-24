@@ -162,4 +162,15 @@ class Healer(Hero):
 
   def speak(self):
     return 'cube'
-#
+
+class Reaper(Hero):
+  name = 'Reaper'
+  title = 'Diabolic Presence'
+  speed = 0.1
+  weight = 5
+  loyalty_factor = 0.1
+  abilities = []
+  action_classes = [Scythe, ComeToPapa]
+
+  def speak(self):
+    return 'cube'
