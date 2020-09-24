@@ -419,8 +419,6 @@ function Map(props) {
   useEffect(() => window.scrollTo(0, 0), []);
   return (
     <div>
-      <p>day {props.data.progress.day}</p>
-      <p>current stage: {props.data.progress.stage}</p>
       <div className="MapCanvas">
         <Canvas
           shadowMap
@@ -853,8 +851,25 @@ function HeroDiorama({ hero, effects }) {
   );
 }
 
-function HeroPage({ hero, data }) {
+function HeroPage({ id, data, update }) {
+  const hero = data.heroes.find((h) => h.id === id);
   const heroMeta = data.index[hero.name];
+  function dissolve() {
+    fetch('/dissolve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user: 'test', hero: hero.id }),
+    }).then(() => update());
+  }
+  function fuse() {
+    fetch('/fuse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user: 'test', hero: hero.id }),
+    }).then(() => update());
+  }
+  const canFuse = data.heroes.filter(h => h.name === hero.name).length > 1 && data.progress.ectoplasm > 0;
+
   return (
     <div className="HeroPage">
       <div className="HeroCanvas">
@@ -864,13 +879,34 @@ function HeroPage({ hero, data }) {
       </div>
       <div className="HeroText">
         <div className="HeroName"> {hero.name} </div>
-        <div className="HeroTitle">
-          {' '}
-          Level {hero.level} {heroMeta.title}{' '}
-        </div>
         <div className="HeroStats">
-          Speed: {heroMeta.speed} Weight: {heroMeta.weight} Stubbornness:{' '}
-          {heroMeta.loyalty_factor}
+          <span>{heroMeta.title}</span>
+          <span>Level {hero.level}</span>
+          <span>Speed: {Math.round(100 * heroMeta.speed)}</span>
+          <span>Weight: {Math.round(10 * heroMeta.weight)}</span>
+          <span>Stubbornness: {Math.round(100 * heroMeta.loyalty_factor)}</span>
+        </div>
+        <div className="HeroPageButtons">
+          <div className="HeroPageButton">
+            <button disabled={data.progress.stage < 5} onClick={dissolve}>
+              Dissolve into Ectoplasm
+            </button>
+            <p>
+              Destroys this hero and yields 1 Ectoplasm.
+              <br />
+              Unlocked after reaching stage 5.
+            </p>
+          </div>
+          <div className="HeroPageButton">
+            <button disabled={!canFuse} onClick={fuse}>
+              Fuse with Fragment
+            </button>
+            <p>
+              Costs 1 Ectoplasm and 1 other copy of this hero.
+              <br />
+              Takes this hero to the next level.
+            </p>
+          </div>
         </div>
         <div className="HeroAbilities">
           <div className="PanelHeader">Abilities:</div>
@@ -928,12 +964,25 @@ function App() {
         (error) => setError(error)
       );
   }
+  function update() {
+    fetchData((data) => {
+      if (page === 'hero' && !data.heroes.find((h) => h.id === heroPage)) {
+        setPage('heroes');
+      }
+      setData(data);
+    }, setError);
+  }
 
   return (
     <div>
       {error && <div>{error}</div>}
       {data && (
         <div>
+        <div className="TopStats">
+        <span>{data.progress.stage >= 5 && `Ectoplasm: ${data.progress.ectoplasm}`}</span>
+      <span>Day {data.progress.day}</span>
+      <span>Next stage: {data.progress.stage + 1}</span>
+        </div>
           {page === 'combat' && <Combat data={data} />}
           {page === 'map' && (
             <Map setPage={setPage} searchBeach={searchBeach} data={data} />
@@ -943,11 +992,13 @@ function App() {
               heroes={data.heroes}
               onClick={(h) => {
                 setPage('hero');
-                setHeroPage(h);
+                setHeroPage(h.id);
               }}
             />
           )}
-          {page === 'hero' && <HeroPage hero={heroPage} data={data} />}
+          {page === 'hero' && (
+            <HeroPage update={update} id={heroPage} data={data} />
+          )}
           {page === 'searched' && <Searched data={data} />}
         </div>
       )}
@@ -955,7 +1006,7 @@ function App() {
         <button onClick={() => setPage('heroes')}>Heroes</button>
         <button
           onClick={() => {
-            fetchData(setData, setError);
+            update();
             setPage('map');
           }}
         >
