@@ -715,6 +715,10 @@ function HeroPage({ hero, data }) {
           {' '}
           Level {hero.level} {heroMeta.title}{' '}
         </div>
+        <div className="HeroStats">
+          Speed: {heroMeta.speed} Weight: {heroMeta.weight} Stubbornness:{' '}
+          {heroMeta.loyalty_factor}
+        </div>
         <div className="HeroAbilities">
           <div className="PanelHeader">Abilities:</div>
           {heroMeta.abilities.map((a) => (
