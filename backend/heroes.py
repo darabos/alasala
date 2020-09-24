@@ -13,6 +13,7 @@ class Hero:
     self.actions_in_turn = []
     self.status = []
     self.actions = [a(self) for a in self.action_classes]
+    self.inspiration = 0
 
   @classmethod
   def __init_subclass__(cls):
@@ -46,35 +47,56 @@ class Hero:
       self.loyalty -= self.loyalty_factor
       self.loyalty = max(-self.max_loyalty, self.loyalty)
 
+  def before_step(self):
+    pass
 
-  def step(self, stage, state):
+  def after_step(self):
+    pass
+  
+  def step(self, state, step_number):
+    self.before_step()
+
+    if (step_number % 10) == 0:
+      self.inspiration += 1
+
     self.actions_in_turn = []
     self.increase_loyalty()
     cool_actions = [a for a in self.actions if a.is_cool()]
     for action in cool_actions:
       action.prepare(state)
-    exclusive_actions = [a for a in cool_actions if a.exclusive]
-    exclusive_action = (exclusive_actions and
-      max(exclusive_actions, key=lambda a: a.hankering()))
-    if exclusive_action and exclusive_action.hankering() > 0:
-      exclusive_action.do()
-      self.actions_in_turn.append(exclusive_action.get_info())
-
+    cool_actions.sort(reverse=True, key=lambda a: a.hankering())
+    resources = {
+      'attention': 1,
+      'inspiration': self.inspiration
+    }
     for action in cool_actions:
-      if not action.exclusive and (action.hankering() > 0):
+      if action.hankering() <= 0:
+        break
+      if action.resources_sufficient(resources):
+        action.consume_resources(resources)
         action.do()
         self.actions_in_turn.append(action.get_info())
 
+    self.inspiration = resources['inspiration']
+        
     for action in self.actions:
       action.cool()
-    if not self.actions_in_turn:
-      target = self.find_closest_opponent(state)
-      if target is not None:
-        distance = sqrt(self.sq_distance(target))
-        direction_x, direction_y = self.direction_to_hero(target)
-        step_size = max(0, min(self.speed, distance + target.speed - self.actions[0].range))
-        self.x += direction_x * step_size
-        self.y += direction_y * step_size
+
+    if resources['attention']:
+      self.move(state)
+
+    self.after_step()
+
+  def move(self, state):
+    target = self.find_closest_opponent(state)
+    min_range = min(a.range for a in self.actions)
+    if target is not None:
+      distance = sqrt(self.sq_distance(target))
+      direction_x, direction_y = self.direction_to_hero(target)
+      step_size = max(
+        0, min(self.speed, distance, distance + target.speed - min_range))
+      self.x += direction_x * step_size
+      self.y += direction_y * step_size
 
 
   def get_log_entry(self):
@@ -85,7 +107,8 @@ class Hero:
     'loyalty': self.loyalty,
     'max_loyalty': self.max_loyalty,
     'status': self.status,
-    'actions': self.actions_in_turn
+    'actions': self.actions_in_turn,
+    'inspiration': self.inspiration
     }
 
   def direction_to_hero(self, other):

@@ -3,14 +3,30 @@ from math import sqrt, copysign
 class Action:
   # How much cooldown it needs.
   cooldown = 0
+
+  # Leave unchanged for actions where affect has unlimited range.
+  range = 99999
+
   # It uses up this much inspiration.
   inspiration = 0
+
+  # It uses up this much attention. Attention is reset to 1 at the
+  # start of each round. This is basically a mechanism to restrict
+  # heros to do only one of certain attention-requiring actions.
+  # Attention is also used for walking.
+  attention = 1
+
+  # Used by the UI to decide what animation to show when this action
+  # is found in the journal.
   animation_name = "Override me you dummy!"
-  # Only one exclusive action is done in a turn
-  exclusive = True
+
   def __init__(self, subject):
     self.subject = subject
     self.cooldown_progress = 0
+    self.resource_needs = {
+      'attention': self.attention,
+      'inspiration': self.inspiration
+    }
 
   def cool(self):
     self.cooldown_progress = max(0, self.cooldown_progress - 1)
@@ -28,6 +44,16 @@ class Action:
   def hankering(self):
     return 0
 
+  def resources_sufficient(self, resources):
+    for (resource, need) in self.resource_needs.items():
+      if resources[resource] < need:
+        return False
+    return True
+
+  def consume_resources(self, resources):
+    for (resource, need) in self.resource_needs.items():
+      resources[resource] -= need
+  
   # Do what you have to do...
   def apply_effect(self):
     pass
@@ -41,7 +67,6 @@ class Action:
   
 
 class SimpleAttack(Action):
-  range = None
   damage = None
   default_hankering = 1
   animation_name = 'simple_attack'
@@ -108,10 +133,7 @@ class ComeToPapa(Action):
   default_hankering = 10
   pull_range = 1
   cooldown = 5
-
-  def __init__(self, subject):
-    super().__init__(subject)
-    self.cooldown_progress = self.cooldown
+  inspiration = 1
 
   def prepare(self, state):
     self.targets = [hero for hero in state if not self.subject.teammate(hero)]
