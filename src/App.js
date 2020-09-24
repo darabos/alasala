@@ -425,7 +425,7 @@ function Map(props) {
             gl.setClearColor(new THREE.Color('#fff'));
           }}
         >
-          <MapDiorama effects stage={props.data.progress.stage}/>
+          <MapDiorama effects stage={props.data.progress.stage} />
         </Canvas>
       </div>
       <p>
@@ -438,7 +438,7 @@ function Map(props) {
 
 const tmpo = new THREE.Object3D();
 
-function MapDiorama({ effects, stage}) {
+function MapDiorama({ effects, stage }) {
   function randomShape(fn, n) {
     const s = new THREE.Shape();
     s.moveTo(fn(0), 0);
@@ -564,22 +564,17 @@ function MapDiorama({ effects, stage}) {
         mesh.setMatrixAt(i, tmpo.matrix);
         if (i < stage) {
           mesh.setColorAt(i, new THREE.Color(1, 1, 1));
-        } else if (i == stage) {
+        } else if (i === stage) {
           mesh.setColorAt(i, new THREE.Color(0, 0.8, 1));
         } else {
-          mesh.setColorAt(i, new THREE.Color(1, 0.2, 0 ));
+          mesh.setColorAt(i, new THREE.Color(1, 0.2, 0));
         }
       }
       mesh.instanceMatrix.needsUpdate = true;
       stoneInstances.current = mesh;
     },
-    [stones]
+    [stones, stage]
   );
-  function colorStone(i, c) {
-    const mesh = stoneInstances.current;
-    mesh.setColorAt(i, new THREE.Color(c));
-    mesh.instanceColor.needsUpdate = true;
-  }
 
   useFrame(({ camera, clock }) => {
     const t = clock.getElapsedTime();
@@ -685,7 +680,7 @@ function MapDiorama({ effects, stage}) {
 
 function HeroList(props) {
   const heroes = [...props.heroes];
-  heroes.sort((a, b) => a.name > b.name ? 1 : -1);
+  heroes.sort((a, b) => (a.name > b.name ? 1 : -1));
   return (
     <div className="HeroList">
       {heroes.map((h) => (
@@ -899,13 +894,13 @@ function Searched(props) {
 }
 
 function fetchData(setData, setError) {
-    fetch('/getuserdata?user=test')
-      .then((res) => res.json())
-      .then(
-        (res) => setData(res),
-        (error) => setError(error)
-      );
-  }
+  fetch('/getuserdata?user=test')
+    .then((res) => res.json())
+    .then(
+      (res) => setData(res),
+      (error) => setError(error)
+    );
+}
 
 function App() {
   const [page, setPage] = useState('map');
@@ -955,10 +950,14 @@ function App() {
       )}
       <div>
         <button onClick={() => setPage('heroes')}>Heroes</button>
-        <button onClick={() => {
-          fetchData(setData, setError);
-          setPage('map');
-        }}>Map</button>
+        <button
+          onClick={() => {
+            fetchData(setData, setError);
+            setPage('map');
+          }}
+        >
+          Map
+        </button>
       </div>
     </div>
   );
