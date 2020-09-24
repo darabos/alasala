@@ -533,7 +533,7 @@ function MapDiorama({ effects }) {
       p.add(dir);
     }
     return stones;
-  }, []);
+  }, [layers]);
 
   const stoneInstances = useRef();
   const setStoneInstances = useCallback(
