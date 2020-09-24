@@ -106,7 +106,7 @@ class Cube(Hero):
   loyalty_factor = 0.1
   abilities = []
 
-  def __init__(self,  level, id, owner, x, y):
+  def __init__(self, level, id, owner, x, y):
     self.actions = [BaseAttack()]
     super().__init__(level, id, owner, x, y)
 
@@ -141,7 +141,7 @@ class Hark(Hero):
     }
   ]
 
-  def __init__(self):
+  def __init__(self, level, id, owner, x, y):
     self.actions = [BaseAttack()]
     super().__init__(level, id, owner, x, y)
 
