@@ -105,7 +105,10 @@ class Cube(Hero):
   weight = 1
   loyalty_factor = 0.1
   abilities = []
-  actions = [BaseAttack()]
+
+  def __init__(self,  level, id, owner, x, y):
+    self.actions = [BaseAttack()]
+    super().__init__(level, id, owner, x, y)
 
   def speak(self):
     return 'cube'
@@ -138,7 +141,9 @@ class Hark(Hero):
     }
   ]
 
-  actions = [BaseAttack()]
+  def __init__(self):
+    self.actions = [BaseAttack()]
+    super().__init__(level, id, owner, x, y)
 
   def speak(self):
     return 'Hark!Hark!'
