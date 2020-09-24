@@ -63,11 +63,17 @@ def computecombat():
 
   heroes_in_party = [find_hero_by_id(hero_id) for hero_id in party]
   log = bs.simulate_battle(heroes_in_party, stage)
+  winner = bs.get_winner(log[-1])
+  if winner == 1:
+    progress(user)
   return flask.jsonify(log)
 
 def get_heroes_of_user(c, user):
   return query(c, 'select rowid as id, * from heroes where user = ?', (user,))
 
+def progress(user):
+  c = db()
+  c.execute('update users set stage = stage + 1 where email = ?', (user,))
 
 @app.route('/getuserdata')
 def getuserdata():

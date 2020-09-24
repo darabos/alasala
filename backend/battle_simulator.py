@@ -32,6 +32,15 @@ def battle_is_over(turn):
       all(log_entry['loyalty'] >= 0 for log_entry in turn.values()))
 
 
+def get_winner(turn):
+    if all(log_entry['loyalty'] <= 0 for log_entry in turn.values()):
+      return -1
+    elif all(log_entry['loyalty'] >= 0 for log_entry in turn.values()):
+      return 1
+    else:
+      return 0
+
+
 def simulate_battle(heroes, stage):
   state = get_player_state(heroes) + get_enemy_state(stage)
   turns = [{hero.id: hero.get_log_entry() for hero in state}]
