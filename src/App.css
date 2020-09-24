@@ -228,18 +228,18 @@ button:hover {
   height: 100%;
   width: 100%;
   z-index: 100000000000000000;
-  background:  #a74;
-  opacity: 0.5
+  background: #a74;
+  opacity: 0.5;
 }
 
 #result {
   position: absolute;
-  background:  #a74;
+  background: #a74;
   font-family: Grenze Gotisch;
   font-size: 90px;
   top: 50%;
   left: 50%;
-  transform: translate(-50%,-100%);
+  transform: translate(-50%, -100%);
 }
 
 #post-battle {
@@ -248,5 +248,4 @@ button:hover {
   left: 51%;
   transform: translate(-50%, 0);
   z-index: 100000000000000000;
-  
 }

@@ -141,7 +141,11 @@ function SimpleAttack(props) {
     const dst = targetHero.position;
     mesh.current && mesh.current.position.lerpVectors(src, dst, phase);
     if (props.turnClock.time === turnFrames && props.attackTurn === 0) {
-      const force = dst.clone().sub(src).normalize().multiplyScalar(5 * damage);
+      const force = dst
+        .clone()
+        .sub(src)
+        .normalize()
+        .multiplyScalar(5 * damage);
       const localForce = targetHero.worldToLocal(force);
       targetHero.physicsApi.applyLocalImpulse(localForce.toArray(), [0, 0, 1]);
     }
@@ -236,7 +240,8 @@ function PartySelector({ data, party, setParty, startCombat }) {
 function BattleRenderer(props) {
   const data = props.data;
   const journal = props.journal;
-  const result = props.winner === 1 ? 'Victory!' : (props.winner === 0 ? 'Draw!' : 'Defeat!')
+  const result =
+    props.winner === 1 ? 'Victory!' : props.winner === 0 ? 'Draw!' : 'Defeat!';
   const [battleIsOver, setBattleIsOver] = useState(false);
   const heroStories = [];
   const actionEntries = [];
@@ -273,18 +278,19 @@ function BattleRenderer(props) {
   console.log('actions');
   console.log(actionEntries);
 
-
   return (
     <div className="CombatCanvas">
-      { battleIsOver && (
+      {battleIsOver && (
         <div>
-          <div class = "overlay">
-            <div id="result">
-              {result}
-            </div>
+          <div class="overlay">
+            <div id="result">{result}</div>
           </div>
           <div id="post-battle">
-            <Buttons  setPage={props.setPage} setData={props.setData} setError={props.setError}/>
+            <Buttons
+              setPage={props.setPage}
+              setData={props.setData}
+              setError={props.setError}
+            />
           </div>
         </div>
       )}
@@ -299,7 +305,6 @@ function BattleRenderer(props) {
       </CombatCanvas>
     </div>
   );
-
 }
 
 function CombatCanvas({ effects, lightPosition, children }) {
@@ -335,7 +340,12 @@ function CombatCanvas({ effects, lightPosition, children }) {
   );
 }
 
-function BattleSimulation({journal, heroStories, actionEntries, battleOverCallback}) {
+function BattleSimulation({
+  journal,
+  heroStories,
+  actionEntries,
+  battleOverCallback,
+}) {
   const heroRefs = useRef({}).current;
   function heroRef(id) {
     return heroRefs[id] || (heroRefs[id] = createRef());
@@ -398,7 +408,7 @@ function Spinner() {
   return <div />;
 }
 
-function Combat({ data, setPage, setData, setError}) {
+function Combat({ data, setPage, setData, setError }) {
   const [state, setState] = useState('selectParty');
   const [party, setParty] = useState(new Array(5).fill());
   const [journal, setJournal] = useState();
@@ -428,8 +438,15 @@ function Combat({ data, setPage, setData, setError}) {
       )}
       {state === 'simulate' && <Spinner />}
       {state === 'renderBattle' && (
-        <BattleRenderer effects journal={journal} winner={winner} data={data}
-        setPage={setPage} setData={setData} setError={setError} />
+        <BattleRenderer
+          effects
+          journal={journal}
+          winner={winner}
+          data={data}
+          setPage={setPage}
+          setData={setData}
+          setError={setError}
+        />
       )}
     </div>
   );
@@ -705,7 +722,6 @@ function MapDiorama({ effects, stage }) {
         <meshLambertMaterial attach="material" color="#fff" />
       </instancedMesh>
 
-
       {effects && (
         <EffectComposer>
           <DepthOfField
@@ -940,21 +956,20 @@ function fetchData(setData, setError) {
     );
 }
 
-function Buttons({setData, setError, setPage}) {
+function Buttons({ setData, setError, setPage }) {
   return (
-
-  <div>
-  <button onClick={() => setPage('heroes')}>Heroes</button>
-  <button
-  onClick={() => {
-    fetchData(setData, setError);
-    setPage('map');
-  }}
-  >
-  Map
-  </button>
-  </div>
-)
+    <div>
+      <button onClick={() => setPage('heroes')}>Heroes</button>
+      <button
+        onClick={() => {
+          fetchData(setData, setError);
+          setPage('map');
+        }}
+      >
+        Map
+      </button>
+    </div>
+  );
 }
 
 function App() {
@@ -984,7 +999,14 @@ function App() {
       {error && <div>{error}</div>}
       {data && (
         <div>
-          {page === 'combat' && <Combat data={data} setPage={setPage} setData={setData} setError={setError}/>}
+          {page === 'combat' && (
+            <Combat
+              data={data}
+              setPage={setPage}
+              setData={setData}
+              setError={setError}
+            />
+          )}
           {page === 'map' && (
             <Map setPage={setPage} searchBeach={searchBeach} data={data} />
           )}
@@ -1001,7 +1023,9 @@ function App() {
           {page === 'searched' && <Searched data={data} />}
         </div>
       )}
-      { page !== 'combat' && <Buttons setPage={setPage} setData={setData} setError={setError} />}
+      {page !== 'combat' && (
+        <Buttons setPage={setPage} setData={setData} setError={setError} />
+      )}
     </div>
   );
 }
