@@ -79,6 +79,11 @@ class FarCaress(SimpleAttack):
   damage=0.1
   cooldown=1
 
+class Scythe(SimpleAttack):
+  range=1.5
+  damage=8
+  cooldown=10
+
 class HealAll(Action):
   default_hankering = 10
   heal = 3
@@ -97,3 +102,29 @@ class HealAll(Action):
   def get_info(self):
     return {**super().get_info(),
             'heal': self.heal}
+
+
+class ComeToPapa(Action):
+  default_hankering = 10
+  pull_range = 1
+  cooldown = 5
+
+  def __init__(self, subject):
+    super().__init__(subject)
+    self.cooldown_progress = self.cooldown
+
+  def prepare(self, state):
+    self.targets = [hero for hero in state if not self.subject.teammate(hero)]
+
+  def hankering(self):
+    return self.default_hankering
+
+  def apply_effect(self):
+    for target in self.targets:
+      direction_x, direction_y = self.subject.direction_to_hero(target)
+      target.x = self.subject.x + direction_x * self.pull_range
+      target.y = self.subject.y + direction_y * self.pull_range
+
+  def get_info(self):
+    return {**super().get_info(),
+            'pull_range': self.pull_range}
