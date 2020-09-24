@@ -710,18 +710,6 @@ function MapDiorama({ effects, stage }) {
         <meshLambertMaterial attach="material" color="#fff" />
       </instancedMesh>
 
-      <instancedMesh
-        // ref={setStoneInstances}
-        castShadow
-        args={[null, null, 1]}
-      >
-        <boxBufferGeometry
-          attach="geometry"
-          args={[3, 10, 3]}
-        ></boxBufferGeometry>
-        <meshLambertMaterial attach="material" color="#fff" />
-      </instancedMesh>
-
       {effects && (
         <EffectComposer>
           <DepthOfField
