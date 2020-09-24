@@ -39,9 +39,9 @@ function BasePlane(props) {
   );
 }
 
-const HeroBox = React.forwardRef((props, ref) => {
-  var mat = useRef();
+const HeroBox = React.forwardRef((props, heroRef) => {
   const meta = props.meta;
+  meta.shape = tmpHeroShape;
   const weight = meta.weight;
   const keelZ = -3;
   const turn = props.turn;
@@ -50,16 +50,6 @@ const HeroBox = React.forwardRef((props, ref) => {
   const current = props.trajectory[turn];
   const last = props.trajectory[turn - 1] || current;
   const next = props.trajectory[turn + 1] || current;
-  const [, api] = useBox(
-    () => ({
-      mass: weight,
-      material: {
-        friction: 0.01,
-      },
-      position: [initial.x, initial.y, height / 2],
-    }),
-    ref
-  );
 
   const [leashRef, leashApi] = useBox(() => ({
     collisionFilterMask: 0,
@@ -72,13 +62,13 @@ const HeroBox = React.forwardRef((props, ref) => {
     position: [initial.x, initial.y, keelZ],
   }));
 
-  useSpring(ref, leashRef, {
+  useSpring(heroRef, leashRef, {
     restLength: 0,
     stiffness: 12 * weight,
     damping: 2,
     localAnchorA: [0.9, 0, 0],
   });
-  useSpring(ref, keelRef, {
+  useSpring(heroRef, keelRef, {
     restLength: 0,
     stiffness: 3 * weight,
     damping: 0,
@@ -86,20 +76,25 @@ const HeroBox = React.forwardRef((props, ref) => {
   });
 
   useFrame(() => {
-    ref.current.physicsApi = api;
     const phase = props.turnClock.phase;
     const aX = current.x * (1 - phase) + next.x * phase;
     const aY = current.y * (1 - phase) + next.y * phase;
     leashApi.position.set(aX, aY, height / 2);
     leashApi.velocity.set(0, 0, 0);
-    keelApi.position.set(ref.current.position.x, ref.current.position.y, keelZ);
+    keelApi.position.set(
+      heroRef.current.position.x,
+      heroRef.current.position.y,
+      keelZ
+    );
     keelApi.velocity.set(0, 0, 0);
   });
 
   return (
-    <mesh castShadow receiveShadow ref={ref}>
-      <boxBufferGeometry attach="geometry" args={[1, 1, height]} />
-      <meshStandardMaterial ref={mat} attach="material" />
+    <HeroBodyPart
+      shape={meta.shape}
+      ref={heroRef}
+      position={[initial.x, initial.y]}
+    >
       <Html center position-z={2}>
         <LoyaltyBar
           max={current.max_loyalty || Math.abs(initial.loyalty)}
@@ -107,7 +102,7 @@ const HeroBox = React.forwardRef((props, ref) => {
           change={current.loyalty - last.loyalty}
         />
       </Html>
-    </mesh>
+    </HeroBodyPart>
   );
 });
 
@@ -329,8 +324,8 @@ function BattleSimulation(props) {
       const t = clock.getElapsedTime();
       camera.up.set(0, 0, 1);
       camera.position.x = Math.cos(0.19 * t);
-      camera.position.y = Math.sin(0.2 * t) - 6;
-      camera.position.z = 10;
+      camera.position.y = Math.sin(0.2 * t) - 10;
+      camera.position.z = 5;
       camera.lookAt(0, 0, 0);
       if (turnClock.turn !== turn) {
         turnClock.turn = turn;
@@ -748,89 +743,108 @@ function HeroCard({ hero }) {
   );
 }
 
-const HeroBodyPart = React.forwardRef(({ shape, parent }, apiRef) => {
-  const pos = new THREE.Vector3();
-  const joint = new THREE.Vector3();
-  if (parent) {
-    joint.copy(parent.pos);
-    pos.copy(parent.pos);
-    if (shape.dir === 'left') {
-      joint.x += parent.shape.size[0] / 2;
-      pos.x = joint.x + shape.size[0] / 2;
-    } else if (shape.dir === 'right') {
-      joint.x -= parent.shape.size[0] / 2;
-      pos.x = joint.x - shape.size[0] / 2;
-    } else if (shape.dir === 'front') {
-      joint.y -= parent.shape.size[1] / 2;
-      pos.y = joint.y - shape.size[1] / 2;
-    } else if (shape.dir === 'back') {
-      joint.y += parent.shape.size[1] / 2;
-      pos.y = joint.y + shape.size[1] / 2;
-    } else if (shape.dir === 'up') {
-      joint.z += parent.shape.size[2] / 2;
-      pos.z = joint.z + shape.size[2] / 2;
-    } else if (shape.dir === 'down') {
-      joint.z -= parent.shape.size[2] / 2;
-      pos.z = joint.z - shape.size[2] / 2;
+const HeroBodyPart = React.forwardRef(
+  ({ shape, parent, children, position }, ref) => {
+    ref = ref || createRef();
+    const pos = new THREE.Vector3();
+    const joint = new THREE.Vector3();
+    if (parent) {
+      joint.copy(parent.pos);
+      pos.copy(parent.pos);
+      if (shape.dir === 'left') {
+        joint.x += parent.shape.size[0] / 2;
+        pos.x = joint.x + shape.size[0] / 2;
+      } else if (shape.dir === 'right') {
+        joint.x -= parent.shape.size[0] / 2;
+        pos.x = joint.x - shape.size[0] / 2;
+      } else if (shape.dir === 'front') {
+        joint.y -= parent.shape.size[1] / 2;
+        pos.y = joint.y - shape.size[1] / 2;
+      } else if (shape.dir === 'back') {
+        joint.y += parent.shape.size[1] / 2;
+        pos.y = joint.y + shape.size[1] / 2;
+      } else if (shape.dir === 'up') {
+        joint.z += parent.shape.size[2] / 2;
+        pos.z = joint.z + shape.size[2] / 2;
+      } else if (shape.dir === 'down') {
+        joint.z -= parent.shape.size[2] / 2;
+        pos.z = joint.z - shape.size[2] / 2;
+      }
+    } else {
+      pos.z = shape.size[2] / 2;
     }
-  } else {
-    pos.z = shape.size[2] / 2;
-  }
-  const offset = new THREE.Vector3(...(shape.offset || [0, 0, 0]));
-  const [ref, api] = useBox(() => ({
-    mass: shape.size[0] * shape.size[1] * shape.size[2],
-    position: pos.clone().add(offset).toArray(),
-    args: shape.size,
-  }));
-  if (apiRef) {
-    apiRef.current = api;
-  }
-  if (parent) {
-    useConeTwistConstraint(parent.ref, ref, {
-      pivotA: joint.clone().sub(parent.pos).add(offset).toArray(),
-      pivotB: joint.clone().sub(pos).toArray(),
-      axisA: joint.clone().sub(parent.pos).normalize().toArray(),
-      axisB: joint.clone().sub(pos).normalize().negate().toArray(),
-      twistAngle: Math.PI / 8,
-      angle: Math.PI / 8,
+    if (position) {
+      pos.x += position[0];
+      pos.y += position[1];
+    }
+    const offset = new THREE.Vector3(...(shape.offset || [0, 0, 0]));
+    const [, api] = useBox(
+      () => ({
+        mass: shape.size[0] * shape.size[1] * shape.size[2],
+        position: pos.clone().add(offset).toArray(),
+        args: shape.size,
+      }),
+      ref
+    );
+    useFrame(() => {
+      if (ref.current) {
+        ref.current.physicsApi = api;
+      }
     });
+    if (parent) {
+      useConeTwistConstraint(parent.ref, ref, {
+        pivotA: joint.clone().sub(parent.pos).add(offset).toArray(),
+        pivotB: joint.clone().sub(pos).toArray(),
+        axisA: joint.clone().sub(parent.pos).normalize().toArray(),
+        axisB: joint.clone().sub(pos).normalize().negate().toArray(),
+        twistAngle: Math.PI / 8,
+        angle: Math.PI / 8,
+      });
+    }
+    const color = shape.color || parent.color;
+    return (
+      <>
+        <Box castShadow ref={ref} args={shape.size}>
+          <meshStandardMaterial attach="material" color={color} />
+          {children}
+        </Box>
+        {shape.children &&
+          shape.children.map((c, i) => (
+            <HeroBodyPart
+              key={i}
+              shape={c}
+              parent={{ shape, ref, pos, color }}
+            />
+          ))}
+      </>
+    );
   }
-  const color = shape.color || parent.color;
-  return (
-    <>
-      <Box castShadow ref={ref} args={shape.size}>
-        <meshStandardMaterial attach="material" color={color} />
-      </Box>
-      {shape.children &&
-        shape.children.map((c, i) => (
-          <HeroBodyPart key={i} shape={c} parent={{ shape, ref, pos, color }} />
-        ))}
-    </>
-  );
-});
+);
+
+const tmpHeroShape = {
+  size: [1, 1, 1.5],
+  color: '#961',
+  children: [
+    { size: [0.3, 0.2, 0.3], dir: 'front' },
+    { size: [0.3, 0.2, 0.4], offset: [0.3, 0, 0], dir: 'up' },
+    { size: [0.3, 0.2, 0.4], offset: [-0.3, 0, 0], dir: 'up' },
+    {
+      size: [0.5, 0.2, 0.2],
+      dir: 'left',
+      children: [{ size: [0.4, 0.2, 0.2], dir: 'left' }],
+    },
+    {
+      size: [0.5, 0.2, 0.2],
+      dir: 'right',
+      children: [{ size: [0.4, 0.2, 0.2], dir: 'right' }],
+    },
+  ],
+};
 
 function HeroDiorama({ hero, effects }) {
   hero = {
     ...hero,
-    shape: {
-      size: [1, 1, 1.5],
-      color: '#961',
-      children: [
-        { size: [0.3, 0.2, 0.3], dir: 'front' },
-        { size: [0.3, 0.2, 0.4], offset: [0.3, 0, 0], dir: 'up' },
-        { size: [0.3, 0.2, 0.4], offset: [-0.3, 0, 0], dir: 'up' },
-        {
-          size: [0.5, 0.2, 0.2],
-          dir: 'left',
-          children: [{ size: [0.4, 0.2, 0.2], dir: 'left' }],
-        },
-        {
-          size: [0.5, 0.2, 0.2],
-          dir: 'right',
-          children: [{ size: [0.4, 0.2, 0.2], dir: 'right' }],
-        },
-      ],
-    },
+    shape: tmpHeroShape,
   };
   useFrame(({ camera, clock }) => {
     const t = clock.getElapsedTime();
