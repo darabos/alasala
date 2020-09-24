@@ -132,9 +132,10 @@ function LoyaltyBar({ max, current, change }) {
 
 function SimpleAttack(props) {
   const mesh = useRef();
-  const sourceHero = props.sourceHero.current;
-  const targetHero = props.targetHero.current;
+  const damage = props.damage;
   useFrame(() => {
+    const sourceHero = props.sourceHero.current;
+    const targetHero = props.targetHero.current;
     const phase = props.turnClock.phase;
     const src = sourceHero.position;
     const dst = targetHero.position;
@@ -145,9 +146,10 @@ function SimpleAttack(props) {
       targetHero.physicsApi.applyLocalImpulse(localForce.toArray(), [0, 0, 1]);
     }
   });
+  const radius = Math.pow(damage, 1 / 3) * 0.2;
   return (
     <mesh ref={mesh}>
-      <sphereBufferGeometry attach="geometry" args={[0.2, 32, 32]} />
+      <sphereBufferGeometry attach="geometry" args={[radius, 32, 32]} />
       <meshStandardMaterial attach="material" color="black" />
     </mesh>
   );
@@ -169,10 +171,15 @@ function renderAction(
     key: key,
     action: action,
   };
-  if (action.name === 'base_attack' && attackTurn >= -1 && attackTurn <= 0) {
+  if (
+    action.animation_name === 'simple_attack' &&
+    attackTurn >= -1 &&
+    attackTurn <= 0
+  ) {
     return (
       <SimpleAttack
         targetHero={heroRef(action.target_hero)}
+        damage={action.damage}
         {...defaultProps}
       />
     );
