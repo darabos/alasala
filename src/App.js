@@ -293,10 +293,20 @@ function CombatCanvas({ effects, lightPosition, children }) {
         </EffectComposer>
       )}
       <spotLight
+        position={[-3, 0, 1]}
+        color={0x9999ff}
+        angle={1}
+        penumbra={0.1}
+        intensity={0.5}
+        castShadow
+        shadow-mapSize-height={1024}
+        shadow-mapSize-width={1024}
+      />
+      <spotLight
         position={lightPosition}
         angle={0.5}
         penumbra={0.1}
-        intensity={1.5}
+        intensity={1.0}
         castShadow
         shadow-mapSize-height={1024}
         shadow-mapSize-width={1024}
@@ -824,8 +834,8 @@ function HeroDiorama({ hero, effects }) {
   useFrame(({ camera, clock }) => {
     const t = clock.getElapsedTime();
     camera.up.set(0, 0, 1);
-    camera.position.x = 0.2 * Math.cos(0.19 * t);
-    camera.position.y = 0.1 * Math.sin(0.2 * t) - 3;
+    camera.position.x = -2 + 0.2 * Math.cos(0.19 * t);
+    camera.position.y = -2 + 0.1 * Math.sin(0.2 * t);
     camera.position.z = 2;
     camera.lookAt(0, 0, 1);
   });
@@ -842,7 +852,7 @@ function HeroPage({ hero, data }) {
   return (
     <div className="HeroPage">
       <div className="HeroCanvas">
-        <CombatCanvas effects lightPosition={[0, 0, 5]}>
+        <CombatCanvas effects lightPosition={[3, 0, 5]}>
           <HeroDiorama hero={heroMeta} />
         </CombatCanvas>
       </div>
