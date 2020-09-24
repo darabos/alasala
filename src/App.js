@@ -237,6 +237,7 @@ function PartySelector({ data, party, setParty, startCombat }) {
 function BattleRenderer(props) {
   const data = props.data;
   const journal = props.journal;
+  const result = props.winner === 1 ? 'Victory!' : (props.winner === 0 ? 'Draw!' : 'Defeat!')
   const [isBattleOver, setBattleOver] = useState(false);
   const heroStories = [];
   const actionEntries = [];
@@ -278,8 +279,9 @@ function BattleRenderer(props) {
     <div className="CombatCanvas">
       { isBattleOver && (
         <div class = "overlay">
+
         <div id="result">
-        OVER!!!!!!!!!!!!
+          {result}
         </div>
 
         </div>
@@ -388,6 +390,7 @@ function Combat({ data }) {
   const [state, setState] = useState('selectParty');
   const [party, setParty] = useState(new Array(5).fill());
   const [journal, setJournal] = useState();
+  const [winner, setWinner] = useState();
   useEffect(() => window.scrollTo(0, 0), []);
 
   function startCombat(party) {
@@ -396,7 +399,8 @@ function Combat({ data }) {
       .then((res) => res.json())
       .then((res) => {
         setState('renderBattle');
-        setJournal(res);
+        setJournal(res.log);
+        setWinner(res.winner);
       });
   }
 
@@ -412,7 +416,7 @@ function Combat({ data }) {
       )}
       {state === 'simulate' && <Spinner />}
       {state === 'renderBattle' && (
-        <BattleRenderer effects journal={journal} data={data} />
+        <BattleRenderer effects journal={journal} winner={winner} data={data} />
       )}
     </div>
   );
