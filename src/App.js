@@ -409,7 +409,7 @@ function Map(props) {
             gl.setClearColor(new THREE.Color('#fff'));
           }}
         >
-          <MapDiorama effects />
+          <MapDiorama effects stage={props.data.progress.stage}/>
         </Canvas>
       </div>
       <p>
@@ -422,7 +422,7 @@ function Map(props) {
 
 const tmpo = new THREE.Object3D();
 
-function MapDiorama({ effects }) {
+function MapDiorama({ effects, stage}) {
   function randomShape(fn, n) {
     const s = new THREE.Shape();
     s.moveTo(fn(0), 0);
@@ -546,7 +546,13 @@ function MapDiorama({ effects }) {
         tmpo.scale.set(1, 1, 1);
         tmpo.updateMatrix();
         mesh.setMatrixAt(i, tmpo.matrix);
-        mesh.setColorAt(i, new THREE.Color('#fff'));
+        if (i < stage) {
+          mesh.setColorAt(i, new THREE.Color(1, 1, 1));
+        } else if (i == stage) {
+          mesh.setColorAt(i, new THREE.Color(0, 0.8, 1));
+        } else {
+          mesh.setColorAt(i, new THREE.Color(1, 0.2, 0 ));
+        }
       }
       mesh.instanceMatrix.needsUpdate = true;
       stoneInstances.current = mesh;
@@ -638,8 +644,6 @@ function MapDiorama({ effects }) {
         ref={setStoneInstances}
         castShadow
         args={[null, null, stones.length]}
-        onPointerOver={(e) => colorStone(e.instanceId, '#f00')}
-        onPointerOut={(e) => colorStone(e.instanceId, '#fff')}
       >
         <boxBufferGeometry
           attach="geometry"
@@ -775,19 +779,21 @@ function Searched(props) {
   );
 }
 
-function App() {
-  const [page, setPage] = useState('map');
-  const [heroPage, setHeroPage] = useState();
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
-  useEffect(() => {
+function fetchData(setData, setError) {
     fetch('/getuserdata?user=test')
       .then((res) => res.json())
       .then(
         (res) => setData(res),
         (error) => setError(error)
       );
-  }, []);
+  }
+
+function App() {
+  const [page, setPage] = useState('map');
+  const [heroPage, setHeroPage] = useState();
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  useEffect(() => fetchData(setData, setError), []);
   function searchBeach() {
     fetch('/searchbeach', {
       method: 'POST',
@@ -830,7 +836,10 @@ function App() {
       )}
       <div>
         <button onClick={() => setPage('heroes')}>Heroes</button>
-        <button onClick={() => setPage('map')}>Map</button>
+        <button onClick={() => {
+          fetchData(setData, setError);
+          setPage('map');
+        }}>Map</button>
       </div>
     </div>
   );
