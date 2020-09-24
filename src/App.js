@@ -752,13 +752,26 @@ const HeroBodyPart = React.forwardRef(({ shape, parent }, apiRef) => {
     } else if (shape.dir === 'right') {
       joint.x -= parent.shape.size[0] / 2;
       pos.x = joint.x - shape.size[0] / 2;
+    } else if (shape.dir === 'front') {
+      joint.y -= parent.shape.size[1] / 2;
+      pos.y = joint.y - shape.size[1] / 2;
+    } else if (shape.dir === 'back') {
+      joint.y += parent.shape.size[1] / 2;
+      pos.y = joint.y + shape.size[1] / 2;
+    } else if (shape.dir === 'up') {
+      joint.z += parent.shape.size[2] / 2;
+      pos.z = joint.z + shape.size[2] / 2;
+    } else if (shape.dir === 'down') {
+      joint.z -= parent.shape.size[2] / 2;
+      pos.z = joint.z - shape.size[2] / 2;
     }
   } else {
     pos.z = shape.size[2] / 2;
   }
+  const offset = new THREE.Vector3(...(shape.offset || [0, 0, 0]));
   const [ref, api] = useBox(() => ({
-    mass: 1,
-    position: pos.toArray(),
+    mass: shape.size[0] * shape.size[1] * shape.size[2],
+    position: pos.clone().add(offset).toArray(),
     args: shape.size,
   }));
   if (apiRef) {
@@ -766,14 +779,12 @@ const HeroBodyPart = React.forwardRef(({ shape, parent }, apiRef) => {
   }
   if (parent) {
     useConeTwistConstraint(parent.ref, ref, {
-      pivotA: joint.clone().sub(parent.pos).toArray(),
+      pivotA: joint.clone().sub(parent.pos).add(offset).toArray(),
       pivotB: joint.clone().sub(pos).toArray(),
       axisA: joint.clone().sub(parent.pos).normalize().toArray(),
       axisB: joint.clone().sub(pos).normalize().negate().toArray(),
       twistAngle: Math.PI / 8,
       angle: Math.PI / 8,
-      collideConnected: false,
-      maxForce: 1,
     });
   }
   const color = shape.color || parent.color;
@@ -797,12 +808,19 @@ function HeroDiorama({ hero, effects }) {
       size: [1, 1, 1.5],
       color: '#961',
       children: [
+        { size: [0.3, 0.2, 0.3], dir: 'front' },
+        { size: [0.3, 0.2, 0.4], offset: [0.3, 0, 0], dir: 'up' },
+        { size: [0.3, 0.2, 0.4], offset: [-0.3, 0, 0], dir: 'up' },
         {
           size: [0.5, 0.2, 0.2],
           dir: 'left',
-          children: [{ size: [0.5, 0.2, 0.2], dir: 'left' }],
+          children: [{ size: [0.4, 0.2, 0.2], dir: 'left' }],
         },
-        { size: [0.5, 0.2, 0.2], dir: 'right' },
+        {
+          size: [0.5, 0.2, 0.2],
+          dir: 'right',
+          children: [{ size: [0.4, 0.2, 0.2], dir: 'right' }],
+        },
       ],
     },
   };
