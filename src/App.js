@@ -41,7 +41,6 @@ function BasePlane(props) {
 
 const HeroBox = React.forwardRef((props, heroRef) => {
   const meta = props.meta;
-  meta.shape = tmpHeroShape;
   const weight = meta.weight;
   const keelZ = -3;
   const turn = props.turn;
@@ -821,31 +820,7 @@ const HeroBodyPart = React.forwardRef(
   }
 );
 
-const tmpHeroShape = {
-  size: [1, 1, 1.5],
-  color: '#961',
-  children: [
-    { size: [0.3, 0.2, 0.3], dir: 'front' },
-    { size: [0.3, 0.2, 0.4], offset: [0.3, 0, 0], dir: 'up' },
-    { size: [0.3, 0.2, 0.4], offset: [-0.3, 0, 0], dir: 'up' },
-    {
-      size: [0.5, 0.2, 0.2],
-      dir: 'left',
-      children: [{ size: [0.4, 0.2, 0.2], dir: 'left' }],
-    },
-    {
-      size: [0.5, 0.2, 0.2],
-      dir: 'right',
-      children: [{ size: [0.4, 0.2, 0.2], dir: 'right' }],
-    },
-  ],
-};
-
 function HeroDiorama({ hero, effects }) {
-  hero = {
-    ...hero,
-    shape: tmpHeroShape,
-  };
   useFrame(({ camera, clock }) => {
     const t = clock.getElapsedTime();
     camera.up.set(0, 0, 1);
