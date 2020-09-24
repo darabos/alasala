@@ -28,6 +28,7 @@ class Hero:
       name: {
         'title': cls.title,
         'abilities': cls.abilities,
+        'shape': cls.shape,
         'speed': cls.speed,
         'loyalty_factor': cls.loyalty_factor,
         'weight': cls.weight
@@ -114,6 +115,7 @@ class Cube(Hero):
   loyalty_factor = 0.1
   abilities = []
   action_classes = [BaseAttack]
+  shape = {'size': [1, 1, 1], 'color': '#fff'}
 
   def speak(self):
     return 'cube'
@@ -125,6 +127,7 @@ class Hark(Hero):
   loyalty_factor = 0.2
   weight = 8
   action_classes = [BrutalAttack]
+  shape = Cube.shape
 
   # Eventually these would become classes, but for now, it's just for display.
   abilities = [
@@ -159,6 +162,26 @@ class Healer(Hero):
   loyalty_factor = 0.1
   abilities = []
   action_classes = [FarCaress, HealAll]
+  shape = {
+    'size': [1, 1, 1.5],
+    'color': '#961',
+    'children': [
+      { 'size': [0.3, 0.2, 0.3], 'dir': 'front' },
+      { 'size': [0.3, 0.2, 0.4], 'offset': [0.3, 0, 0], 'dir': 'up' },
+      { 'size': [0.3, 0.2, 0.4], 'offset': [-0.3, 0, 0], 'dir': 'up' },
+      {
+        'size': [0.5, 0.2, 0.2],
+        'dir': 'left',
+        'children': [{ 'size': [0.4, 0.2, 0.2], 'dir': 'left' }],
+      },
+      {
+        'size': [0.5, 0.2, 0.2],
+        'dir': 'right',
+        'children': [{ 'size': [0.4, 0.2, 0.2], 'dir': 'right' }],
+      },
+    ],
+  }
+
 
   def speak(self):
     return 'cube'
@@ -171,6 +194,27 @@ class Reaper(Hero):
   loyalty_factor = 0.1
   abilities = []
   action_classes = [Scythe, ComeToPapa]
+  shape = {
+    'size': [0.8, 0.8, 1.5],
+    'color': '#691',
+    'children': [
+      { 'size': [0.1, 0.3, 0.3], 'dir': 'up', 'color': '#900' },
+      { 'size': [0.4, 0.2, 0.2], 'dir': 'left' },
+      { 'size': [0.4, 0.2, 0.2], 'dir': 'right' },
+      {
+        'size': [0.5, 0.5, 0.5],
+        'dir': 'back',
+        'offset': [0, 0, -0.25],
+        'children': [
+          {
+            'size': [0.4, 0.5, 0.4],
+            'dir': 'back',
+            'children': [{ 'size': [0.3, 0.5, 0.3], 'dir': 'back' }],
+          },
+        ],
+      },
+    ],
+  }
 
   def speak(self):
     return 'cube'
