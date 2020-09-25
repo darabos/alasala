@@ -1,3 +1,5 @@
+import math
+import random
 import backend.shapes as shapes
 from backend.actions import *
 
@@ -102,11 +104,12 @@ class Hero:
     min_range = min(a.range for a in self.actions)
     if target is not None:
       distance = sqrt(self.sq_distance(target))
-      direction_x, direction_y = self.direction_to_hero(target)
       step_size = max(
         0, min(self.speed, distance, distance + target.speed - min_range))
-      self.x += direction_x * step_size
-      self.y += direction_y * step_size
+      if step_size > 0:
+        direction_x, direction_y = self.direction_to_hero(target)
+        self.x += direction_x * step_size
+        self.y += direction_y * step_size
 
 
   def get_log_entry(self):
@@ -213,3 +216,39 @@ class CrocodileMan(Hero):
     normal_influance = self.influence_base + self.level * self.influence_per_level
     self.influence = normal_influance * (
       (self.max_loyalty - abs(self.loyalty)) / self.max_loyalty + 1)
+
+class Monkey(Hero):
+  name = 'Crazy Monkey'
+  title = 'Itchy Fleabag'
+  abilities = []
+  action_classes = [Scratch]
+  speed_base = 2
+  speed_per_level = 0.5
+  shape = shapes.cube
+
+  def before_step(self):
+    if hasattr(self, 'prev_loyalty'):
+      if ((abs(self.prev_loyalty) > abs(self.loyalty)) or
+          (self.prev_loyalty * self.loyalty < 0)):
+        if random.random() < 0.6:
+          self.loyalty = self.prev_loyalty
+    self.prev_loyalty = self.loyalty
+  
+  def move(self, state):
+    if not hasattr(self,'target'):
+      self.target = None
+    if not self.target:
+      enemies = [hero for hero in state if not self.teammate(hero)]
+      if enemies:
+        self.target = random.choice(enemies)
+    if self.target:
+      distance = sqrt(self.sq_distance(self.target))
+      if distance < 1:
+        self.target = None # Maybe next round...
+      else:
+        direction_x, direction_y = self.direction_to_hero(self.target)
+        step_size = max(
+          0, min(self.speed, distance + self.target.speed - 1))
+        self.x += direction_x * step_size
+        self.y += direction_y * step_size
+
