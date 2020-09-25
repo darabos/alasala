@@ -233,7 +233,7 @@ class MemorableAttack(BaseAttack):
 
 class EngageInConversation(SimpleAttack):
   default_hankering = 99
-  inspiration = 1
+  inspiration = 4
   orig_cooldown = 10
   cooldown = orig_cooldown
   range = 3

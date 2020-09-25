@@ -113,13 +113,8 @@ class Hero:
         action.do()
         self.actions_in_turn.append(action.get_info())
 
-<<<<<<< HEAD
-    self.inspiration = resources['inspiration']
-
-=======
     self.inspiration = min(3, self.inspiration + resources['inspiration'])
 
->>>>>>> master
     for action in self.actions:
       action.cool()
 
