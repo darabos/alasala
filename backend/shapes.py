@@ -1,3 +1,14 @@
+import math
+
+def weightOf(shape):
+    weight = shape.get(
+        'mass',
+        shape['size'][0] * shape['size'][1] * shape['size'][2])
+    if 'children' in shape:
+        for c in shape['children']:
+            weight += weightOf(c)
+    return weight
+
 cube = {'size': [1, 1, 1], 'color': '#fff'}
 
 chicken = dict(

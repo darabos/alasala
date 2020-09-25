@@ -48,7 +48,7 @@ class Hero:
         'speed_per_level': cls.speed_per_level,
         'influence_base': cls.influence_base,
         'influence_per_level': cls.influence_per_level,
-        'weight': cls.weight
+        'weight': shapes.weightOf(cls.shape)
       }
       for (name, cls) in Hero.hero_classes.items()}
 
@@ -137,7 +137,6 @@ class Hero:
 class Cube(Hero):
   name = 'cube'
   title = 'Platonic Solid'
-  weight = 1
   abilities = []
   action_classes = [BaseAttack]
   shape = shapes.cube
@@ -147,7 +146,6 @@ class Hark(Hero):
   title = 'Dean of Arcane Studies',
   speed_base = 0.5
   influence_per_level = 0.2
-  weight = 8
   action_classes = [BrutalAttack]
   shape = shapes.bull
 
@@ -177,7 +175,6 @@ class Healer(Hero):
   name = 'healer'
   title = 'Angelic Presence'
   speed_base = 0
-  weight = 1
   abilities = []
   action_classes = [FarCaress, HealAll]
   shape = shapes.healer
@@ -187,7 +184,6 @@ class Reaper(Hero):
   name = 'Reaper'
   title = 'Diabolic Presence'
   speed_base = 0.1
-  weight = 5
   abilities = []
   action_classes = [Scythe, ComeToPapa]
   shape = shapes.krokotyuk
