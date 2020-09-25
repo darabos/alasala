@@ -201,5 +201,5 @@ class Reaper(Hero):
   speed_base = 0.1
   abilities = []
   action_classes = [Scythe, ComeToPapa]
-  shape = shapes.krokotyuk
+  shape = shapes.reaper
 

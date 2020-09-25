@@ -34,6 +34,18 @@ bull = dict(
       dict(size=[0.3, 0.6, 0.6], dir='right'),
       ])
 
+reaper = dict(
+    size=[1.2, 1.2, 0.8],
+    color='#333',
+    children=[
+      dict(size=[1.2, 1.2, 0.8], dir='up'),
+      dict(size=[0.4, 0.4, 0.4], dir='right', offset=[0, 0, 0.5], children=[
+        dict(size=[0.1, 0.1, 1.6], dir='right', offset=[0, 0, -0.1], children=[
+          dict(size=[0.8, 0.1, 0.2], dir='right', offset=[0, 0, 0.7], color='#fff'),
+        ])
+      ])
+    ])
+
 ghost = dict(
     size=[1, 1, 0.8],
     color='#339',
