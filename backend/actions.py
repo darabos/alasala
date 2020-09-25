@@ -80,7 +80,9 @@ class SimpleAttack(Action):
     return 0
 
   def apply_effect(self):
-    self.target.loyalty += copysign(self.damage, self.subject.loyalty)
+    self.target.loyalty += copysign(
+      self.damage * self.subject.influence,
+      self.subject.loyalty)
 
   def get_info(self):
     return {**super().get_info(),
