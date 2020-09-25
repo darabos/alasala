@@ -86,9 +86,6 @@ class Hero:
   def step(self, state, step_number):
     self.before_step()
 
-    if (step_number % 10) == 0:
-      self.inspiration += 1
-
     self.actions_in_turn = []
     cool_actions = [a for a in self.actions if a.is_cool()]
     for action in cool_actions:
@@ -226,9 +223,11 @@ class CrocodileMan(Hero):
   name = 'CrocodileMan'
   title = 'Smelly Reptile'
   abilities = []
-  action_classes = [FlipWeekest, PushBackAttack]
+  action_classes = [FlipWeakest, PushBackAttack]
   shape = shapes.krokotyuk
-  def before_step(self):
-    normal_influance = self.influence_base + self.level * self.influence_per_level
-    self.influence = normal_influance * (
-      (self.max_loyalty - abs(self.loyalty)) / self.max_loyalty + 1)
+  anger = 0
+  def hit(self, amount):
+    super().hit(amount)
+    self.anger += amount
+    normal_influence = self.influence_base + self.level * self.influence_per_level
+    self.influence = normal_influence * (self.anger / self.max_loyalty + 1)

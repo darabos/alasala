@@ -150,7 +150,7 @@ class ComeToPapa(Action):
   default_hankering = 10
   pull_range = 1
   cooldown = 5
-  inspiration = 1
+  inspiration = 3
 
   def prepare(self, state):
     self.targets = [hero for hero in state if not self.subject.teammate(hero)]
@@ -168,10 +168,10 @@ class ComeToPapa(Action):
     return {**super().get_info(),
             'pull_range': self.pull_range}
 
-class FlipWeekest(Action):
+class FlipWeakest(Action):
   default_hankering = 10
   cooldown = 10
-  inspiration = 1
+  inspiration = 3
 
   def prepare(self, state):
     enemies = [hero for hero in state if not self.subject.teammate(hero)]
