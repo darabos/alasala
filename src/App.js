@@ -827,11 +827,13 @@ const HeroBodyPart = React.forwardRef(
       pos.x += position[0];
       pos.y += position[1];
     }
+    const unoffset = pos.clone();
     const offset = new THREE.Vector3(...(shape.offset || [0, 0, 0]));
+    pos.add(offset);
     const [, api] = useBox(
       () => ({
         mass: shape.mass || (shape.size[0] * shape.size[1] * shape.size[2]),
-        position: pos.clone().add(offset).toArray(),
+        position: pos.toArray(),
         args: shape.size,
       }),
       ref
@@ -844,9 +846,9 @@ const HeroBodyPart = React.forwardRef(
     if (parent) {
       useConeTwistConstraint(parent.ref, ref, {
         pivotA: joint.clone().sub(parent.pos).add(offset).toArray(),
-        pivotB: joint.clone().sub(pos).toArray(),
+        pivotB: joint.clone().sub(unoffset).toArray(),
         axisA: joint.clone().sub(parent.pos).normalize().toArray(),
-        axisB: joint.clone().sub(pos).normalize().negate().toArray(),
+        axisB: joint.clone().sub(unoffset).normalize().negate().toArray(),
         twistAngle: 0,
         angle: 0,
       });
@@ -875,10 +877,10 @@ function HeroDiorama({ hero, effects }) {
   useFrame(({ camera, clock }) => {
     const t = clock.getElapsedTime();
     camera.up.set(0, 0, 1);
-    camera.position.x = -2 + 0.2 * Math.cos(0.19 * t);
-    camera.position.y = -2 + 0.1 * Math.sin(0.2 * t);
+    camera.position.x = -2 + 0.2 * Math.cos(t);
+    camera.position.y = -2 + 0.1 * Math.sin(1.3 * t);
     camera.position.z = 2;
-    camera.lookAt(0, 0, 1);
+    camera.lookAt(0, 0, 0.5);
   });
   return (
     <>
