@@ -1,5 +1,8 @@
 from math import sqrt, copysign
 
+def sign(x):
+  return copysign(1, x)
+
 class Action:
   # How much cooldown it needs.
   cooldown = 0
@@ -22,7 +25,7 @@ class Action:
 
   # Heros can only use this above the below level.
   min_level = 1
-  
+
   def __init__(self, subject):
     self.subject = subject
     self.cooldown_progress = 0
@@ -41,7 +44,7 @@ class Action:
   # whether and who it can target, etc.
   def prepare(self, state):
     pass
-    
+
   # How much the hero wants to do this. =0 if not usable. Cooldown will
   # be handled by hero.
   def hankering(self):
@@ -56,7 +59,7 @@ class Action:
   def consume_resources(self, resources):
     for (resource, need) in self.resource_needs.items():
       resources[resource] -= need
-  
+
   # Do what you have to do...
   def apply_effect(self):
     pass
@@ -67,7 +70,7 @@ class Action:
 
   def get_info(self):
     return {'animation_name': self.animation_name}
-  
+
 
 class SimpleAttack(Action):
   damage = None
@@ -217,3 +220,55 @@ class InspiredByTime(Action):
 
   def hankering(self):
     return 1
+
+class DiversityAttack(BaseAttack):
+  last_target = None
+
+  def consume_resources(self, resources):
+    super().consume_resources(resources)
+    if self.target != self.last_target:
+      resources['inspiration'] += 1
+    self.last_target = self.target
+
+
+class EngageInConversation(SimpleAttack):
+  default_hankering = 99
+  inspiration = 4
+  orig_cooldown = 10
+  cooldown = orig_cooldown
+  range = 3
+  damage = 0
+  in_conversation_with = None
+  animation_name = 'conversation'
+  over = False
+
+  def prepare(self, state):
+    if self.in_conversation_with is not None:
+      self.target = self.in_conversation_with
+    else:
+      self.target = self.subject.find_closest_opponent(state)
+
+  def apply_effect(self):
+    if self.subject.in_conversation_with is None:
+      # Start conversation.
+      self.subject.in_conversation_with = self.target
+      self.target.num_conversations += 1
+      self.cooldown = 0
+    # Do conversation
+    self.damage += 0.5
+    talking_heroes = [self.subject.in_conversation_with, self.subject]
+    for hittingHero, hitHero in zip(talking_heroes, reversed(talking_heroes)):
+      prev_loyalty_sign = sign(hitHero.loyalty)
+      hitHero.hit(self.damage * hittingHero.influence)
+      current_loyalty_sign = sign(hitHero.loyalty)
+      if prev_loyalty_sign != current_loyalty_sign:
+        self.over = True
+    if self.over:
+      self.back_to_init()
+
+  def back_to_init(self):
+    self.damage = 0
+    self.over = False
+    self.target.num_conversations -= 1
+    self.subject.in_conversation_with = None
+    self.cooldown = self.orig_cooldown
