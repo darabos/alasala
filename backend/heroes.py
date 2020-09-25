@@ -322,7 +322,7 @@ opponent, his inspiration increases.''',
     {
       'name': "Aumann's agreement theorem",
       'description':
-      '''When Derek meets another rationalist, they argue until one of them changes his oppinion.'''
+      '''When Derek meets another rationalist, they argue until one of them changes his opinion.'''
     }
 
     ]
