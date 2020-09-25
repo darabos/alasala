@@ -102,6 +102,8 @@ const HeroBox = React.forwardRef((props, heroRef) => {
             current={current.loyalty}
             change={current.loyalty - last.loyalty}
           />
+          <InspirationBar value={current.inspiration} />
+          {current.status.map((s) => s.type).join(', ')}
         </Html>
       ) : undefined}
     </HeroBodyPart>
@@ -129,6 +131,16 @@ function LoyaltyBar({ max, current, change }) {
     <div className={baseClass}>
       <div className="LoyaltyBarInside" style={{ width: base + '%' }} />
       <div className={changeClass} style={{ width: change + '%' }} />
+    </div>
+  );
+}
+
+function InspirationBar({ value }) {
+  return (
+    <div className="InspirationBar">
+      {new Array(value).fill().map((_, i) => (
+        <div key={i} className="InspirationMark" />
+      ))}
     </div>
   );
 }

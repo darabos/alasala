@@ -306,3 +306,17 @@ button:hover:enabled {
   padding: 5px 10px;
   border: 2px solid #0004;
 }
+
+.InspirationMark::after {
+  content: '★';
+  color: white;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+    1px 1px 0 #000;
+}
+.InspirationMark {
+  font-size: 10px;
+  display: inline-block;
+}
+.InspirationBar {
+  margin: -10px;
+}
