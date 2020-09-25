@@ -45,7 +45,7 @@ const HeroBox = React.forwardRef((props, heroRef) => {
   const keelZ = -3;
   const turn = props.turn;
   const initial = props.trajectory[0];
-  const height = initial.height || 1.5;
+  const height = meta.shape.size[2];
   const current = props.trajectory[turn];
   const last = props.trajectory[turn - 1] || current;
   const next = props.trajectory[turn + 1] || current;
@@ -65,13 +65,13 @@ const HeroBox = React.forwardRef((props, heroRef) => {
     restLength: 0,
     stiffness: 12 * weight,
     damping: 2,
-    localAnchorA: [0.9, 0, 0],
+    localAnchorA: [0, props.leashPos || -0.9, 0],
   });
   useSpring(heroRef, keelRef, {
     restLength: 0,
     stiffness: 3 * weight,
     damping: 0,
-    localAnchorA: [0, 0, -height],
+    localAnchorA: [0, 0, -height / 2 - 2],
   });
 
   useFrame(() => {
@@ -94,13 +94,15 @@ const HeroBox = React.forwardRef((props, heroRef) => {
       ref={heroRef}
       position={[initial.x, initial.y]}
     >
-      <Html center position-z={2}>
-        <LoyaltyBar
-          max={current.max_loyalty || Math.abs(initial.loyalty)}
-          current={current.loyalty}
-          change={current.loyalty - last.loyalty}
-        />
-      </Html>
+      {current.loyalty && (
+        <Html center position-z={2}>
+          <LoyaltyBar
+            max={current.max_loyalty || Math.abs(initial.loyalty)}
+            current={current.loyalty}
+            change={current.loyalty - last.loyalty}
+          />
+        </Html>
+      )}
     </HeroBodyPart>
   );
 });
@@ -832,7 +834,7 @@ const HeroBodyPart = React.forwardRef(
     pos.add(offset);
     const [, api] = useBox(
       () => ({
-        mass: shape.mass || (shape.size[0] * shape.size[1] * shape.size[2]),
+        mass: shape.mass || shape.size[0] * shape.size[1] * shape.size[2],
         position: pos.toArray(),
         args: shape.size,
       }),
@@ -882,9 +884,17 @@ function HeroDiorama({ hero, effects }) {
     camera.position.z = 2;
     camera.lookAt(0, 0, 0.5);
   });
+  const ref = createRef();
   return (
     <>
-      <HeroBodyPart shape={hero.shape} />
+      <HeroBox
+        meta={hero}
+        ref={ref}
+        trajectory={[{ x: 0, y: 0 }]}
+        turn={0}
+        turnClock={{ phase: 0 }}
+        leashPos={0.0001}
+      />
       <BasePlane />
     </>
   );
