@@ -226,7 +226,7 @@ class DiversityAttack(BaseAttack):
 
   def consume_resources(self, resources):
     super().consume_resources(resources)
-    if self.target == self.last_target:
+    if self.target != self.last_target:
       resources['inspiration'] += 1
     self.last_target = self.target
 

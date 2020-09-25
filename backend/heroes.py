@@ -3,10 +3,6 @@ import random
 import backend.shapes as shapes
 from backend.actions import *
 
-def sign(x):
-  return math.copysign(1, x)
-
-
 class Hero:
   hero_classes = {}
   story = []
