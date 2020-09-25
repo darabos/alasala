@@ -22,7 +22,7 @@ class Action:
 
   # Heros can only use this above the below level.
   min_level = 1
-  
+
   def __init__(self, subject):
     self.subject = subject
     self.cooldown_progress = 0
@@ -41,7 +41,7 @@ class Action:
   # whether and who it can target, etc.
   def prepare(self, state):
     pass
-    
+
   # How much the hero wants to do this. =0 if not usable. Cooldown will
   # be handled by hero.
   def hankering(self):
@@ -56,7 +56,7 @@ class Action:
   def consume_resources(self, resources):
     for (resource, need) in self.resource_needs.items():
       resources[resource] -= need
-  
+
   # Do what you have to do...
   def apply_effect(self):
     pass
@@ -67,7 +67,7 @@ class Action:
 
   def get_info(self):
     return {'animation_name': self.animation_name}
-  
+
 
 class SimpleAttack(Action):
   damage = None
@@ -193,3 +193,63 @@ class FlipWeekest(Action):
   def get_info(self):
     return {**super().get_info(),
             'target_hero': self.target}
+
+class MemorableAttack(BaseAttack):
+  last_target = None
+  def apply_effect(self):
+    super().apply_effect()
+    if self.target != self.last_target:
+      self.inspiration += 1
+    self.last_target = self.target
+
+class StartConversation(SimpleAttack):
+  default_hankering = 10
+  inspiration = 1
+  cooldown = 10
+  range = 3
+
+  animation_name = 'start_conversation'
+
+  def is_cool(self):
+    if self.subject.in_conversation_with is not None:
+      return False
+    else:
+      return super().is_cool()
+
+  def apply_effect(self):
+    print('starting_conversation!')
+    self.subject.in_conversation_with = self.target
+    self.target.num_conversations += 1
+    self.subject.num_conversations += 1
+
+
+class ContinueConversation(SimpleAttack):
+  default_hankering = 10
+  damage = 0
+  over = False
+  animation_name = 'mutual_simple_attack'
+
+  def is_cool(self):
+    return self.subject.in_conversation_with is not None
+
+  def prepare(self, stage):
+    self.target = self.subject.in_conversation_with
+
+  def apply_effect(self):
+    print('ContinueConversation')
+    self.damage += 0.5
+    for hero in [self.target, self.subject]:
+      prev_loyalty_sign = copysign(1, hero.loyalty)
+      hero.loyalty += copysign(self.damage * self.subject.influence, hero.loyalty)
+      current_loyalty_sign = copysign(1, hero.loyalty)
+      if prev_loyalty_sign != current_loyalty_sign:
+        self.over = True
+    if self.over:
+      self.back_to_init()
+
+  def back_to_init(self):
+    self.damage = 0
+    self.over = False
+    self.target.num_conversations -= 1
+    self.subject.num_conversations -= 1
+    self.subject.in_conversation_with = None

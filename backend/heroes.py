@@ -14,6 +14,7 @@ class Hero:
   influence_per_level = 0
   # This hero can only be found on the beach after this stage.
   min_stage = 0
+  num_conversations = 0
 
   def __init__(self, level, id, owner, x, y):
     self.level = level
@@ -22,7 +23,7 @@ class Hero:
       self.max_loyalty_base + level * self.max_loyalty_per_level)
     self.speed = self.speed_base + level * self.speed_per_level
     self.influence = self.influence_base + level * self.influence_per_level
-    
+
     self.id = id
     self.x = x
     self.y = y
@@ -60,13 +61,19 @@ class Hero:
       }
       for (name, cls) in Hero.hero_classes.items()}
 
+  def is_frozen(self):
+    return self.num_conversations == 0
+
   def before_step(self):
     pass
 
   def after_step(self):
     pass
-  
+
   def step(self, state, step_number):
+    # if self.is_frozen():
+      # return
+
     self.before_step()
 
     if (step_number % 10) == 0:
@@ -77,6 +84,8 @@ class Hero:
     for action in cool_actions:
       action.prepare(state)
     cool_actions.sort(reverse=True, key=lambda a: a.hankering())
+    if self.id == 8:
+      print(cool_actions)
     resources = {
       'attention': 1,
       'inspiration': self.inspiration
@@ -90,7 +99,7 @@ class Hero:
         self.actions_in_turn.append(action.get_info())
 
     self.inspiration = resources['inspiration']
-        
+
     for action in self.actions:
       action.cool()
 
@@ -233,7 +242,7 @@ class Monkey(Hero):
         if random.random() < 0.6:
           self.loyalty = self.prev_loyalty
     self.prev_loyalty = self.loyalty
-  
+
   def move(self, state):
     if not hasattr(self,'target'):
       self.target = None
@@ -252,3 +261,24 @@ class Monkey(Hero):
         self.x += direction_x * step_size
         self.y += direction_y * step_size
 
+class Scientist(Hero):
+  name = 'Derek'
+  title = 'Head of Thoughtworm Research'
+  shape = shapes.scientist
+  in_conversation_with = None
+  abilities = [
+    {
+      'name': 'Teacher',
+      'description':
+      '''Derek gains inspiration from teaching. Every time he attacks a different
+opponent, he learns somehing new.''',
+      'unlockLevel': 1,
+    },
+    {
+      'name': "Aumann's agreement theorem",
+      'description':
+      '''When Derek meets another rationalist, one of them needs to  '''
+    }
+
+    ]
+  action_classes = [MemorableAttack, StartConversation, ContinueConversation]
