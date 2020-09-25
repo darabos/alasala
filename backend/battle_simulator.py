@@ -13,7 +13,7 @@ def get_player_state(heroes):
   id=hero['id'],
   owner='player',
   x=-STARTX[i],
-  y=STARTY[i]) for (i, hero) in enumerate(heroes)]
+  y=STARTY[i]) for (i, hero) in enumerate(heroes) if hero is not None]
 
 
 def get_enemy_state(stage):
