@@ -69,6 +69,34 @@ class Action:
     return {'animation_name': self.animation_name}
   
 
+class ConcentratingAction(Action):
+  concentrating_turns = 3
+  concentrating = False
+  attention = 1
+  def apply_effect(self):
+    if self.concentrating:
+      if not self.subject.concentrating: # Interrupted.
+        self.concentrating = False
+        self.cooldown = self.saved_cooldown
+        self.inspiration = self.saved_inspiration
+        return
+      self.concentrating += 1
+      if self.concentrating == self.concentrating_turns:
+        self.concentrating = False
+        self.cooldown = self.saved_cooldown
+        self.inspiration = self.saved_inspiration
+        self.final_effect()
+    else:
+      self.saved_cooldown = self.cooldown
+      self.cooldown = 0
+      self.saved_inspiration = self.inspiration
+      self.inspiration = 0
+      self.concentrating = 1
+      self.subject.concentrating = True
+  def hankering(self):
+    return 99
+
+
 class SimpleAttack(Action):
   damage = None
   default_hankering = 1
@@ -97,6 +125,15 @@ class BaseAttack(SimpleAttack):
   range = 3
   damage = 1
   cooldown = 7
+
+class InspiringAttack(SimpleAttack):
+  range = 3
+  damage = 1
+  cooldown = 7
+  def apply_effect(self):
+    super().apply_effect()
+    if random.random() < 0.1 * self.subject.level:
+      self.subject.inspiration += 1
 
 class BrutalAttack(SimpleAttack):
   range = 10
@@ -162,10 +199,22 @@ class SafetyCollar(Action):
   def hankering(self):
     return 4 if self.target else 0
   def prepare(self, state):
-    self.target = self.subject.find_closest_opponent(state)
+    self.target = self.subject.find_closest_ally(state)
   def apply_effect(self):
-    if target:
-      target.status.append({'type': 'SafetyCollar', 'damage': self.subject.influence * 5})
+    if self.target:
+      self.target.status.append({'type': 'SafetyCollar', 'damage': self.subject.influence * 5})
+
+
+class SuperiorOrganism(ConcentratingAction):
+  cooldown = 3
+  inspiration = 3
+  def hankering(self):
+    return super().hankering() if self.target else 0
+  def prepare(self, state):
+    self.target = self.subject.find_closest_opponent(state)
+  def final_effect(self):
+    if self.target and self.subject.teammate(self.target):
+      self.target.status.append({'type': 'Mushroom', 'damage': self.subject.influence * 0.2})
 
 
 class ComeToPapa(Action):
