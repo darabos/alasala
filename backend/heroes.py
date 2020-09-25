@@ -9,6 +9,8 @@ class Hero:
   speed_per_level = 0
   influence_base = 1
   influence_per_level = 0
+  # This hero can only be found on the beach after this stage.
+  min_stage = 0
 
   def __init__(self, level, id, owner, x, y):
     self.level = level
@@ -48,7 +50,8 @@ class Hero:
         'speed_per_level': cls.speed_per_level,
         'influence_base': cls.influence_base,
         'influence_per_level': cls.influence_per_level,
-        'weight': shapes.weightOf(cls.shape)
+        'weight': shapes.weightOf(cls.shape),
+        'min_stage': cls.min_stage
       }
       for (name, cls) in Hero.hero_classes.items()}
 
@@ -183,6 +186,7 @@ class Healer(Hero):
 class Reaper(Hero):
   name = 'Reaper'
   title = 'Diabolic Presence'
+  min_stage = 3
   speed_base = 0.1
   abilities = []
   action_classes = [Scythe, ComeToPapa]
