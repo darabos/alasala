@@ -3,10 +3,6 @@ import random
 import backend.shapes as shapes
 from backend.actions import *
 
-def sign(x):
-  return math.copysign(1, x)
-
-
 class Hero:
   hero_classes = {}
   story = []
@@ -18,6 +14,7 @@ class Hero:
   influence_per_level = 0
   # This hero can only be found on the beach after this stage.
   min_stage = 0
+  num_conversations = 0
 
   def __init__(self, level, id, owner, x, y):
     self.level = level
@@ -73,6 +70,9 @@ class Hero:
   def add_status(self, stype):
     self.status.append({'type': stype})
 
+  def is_frozen(self):
+    return self.num_conversations != 0
+
   def hit(self, amount):
     self.remove_status('concentrating') # Concentrating spells are interrupted by hits.
     amount = math.copysign(amount, self.loyalty)
@@ -94,6 +94,9 @@ class Hero:
     pass
 
   def step(self, state, step_number):
+    if self.is_frozen():
+      return
+
     self.before_step()
 
     self.apply_status_effects(state)
@@ -103,6 +106,7 @@ class Hero:
     for action in cool_actions:
       action.prepare(state)
     cool_actions.sort(reverse=True, key=lambda a: a.hankering())
+
     resources = {
       'attention': 1,
       'inspiration': self.inspiration
@@ -358,3 +362,31 @@ class Monkey(Hero):
           0, min(self.speed, distance + self.target.speed - 1))
         self.x += direction_x * step_size
         self.y += direction_y * step_size
+
+class Scientist(Hero):
+  name = 'Derek'
+  title = 'Head of Thoughtworm Research'
+  shape = shapes.scientist
+  in_conversation_with = None
+  influence_per_level = 0.2
+
+  abilities = [
+    {
+      'name': 'Teacher',
+      'description':
+      '''Derek gains inspiration from teaching. Every time he attacks a different
+opponent, his inspiration increases.''',
+      'unlockLevel': 1,
+    },
+    {
+      'name': "Aumann's agreement theorem",
+      'description':
+      '''When Derek gains enough inspiration, he starts an engaging conversation
+      with an opponent. They are both unable to move or act and lose health at
+      an increasing rate until one of them is converted.
+''',
+      'unlockLevel': 1,
+    }
+
+    ]
+  action_classes = [DiversityAttack, EngageInConversation]
