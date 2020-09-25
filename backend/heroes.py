@@ -322,7 +322,11 @@ opponent, his inspiration increases.''',
     {
       'name': "Aumann's agreement theorem",
       'description':
-      '''When Derek meets another rationalist, they argue until one of them changes his opinion.'''
+      '''When Derek gains enough inspiration, he starts an engaging conversation
+      with an opponent. They are both unable to move or act and lose health at
+      an increasing rate until one of them is converted.
+''',
+      'unlockLevel': 1,
     }
 
     ]
