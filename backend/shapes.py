@@ -88,6 +88,27 @@ wizard = dict(
       dict(size=[0.1, 0.1, 0.2], dir='up')])])])]),
     ])
 
+giantparrot = dict(
+    size=[1, 1, 1],
+    color='#090',
+    children=[
+      dict(size=[0.8, 0.8, 0.8], color='#900', dir='up', children=[
+        dict(size=[0.1, 0.1, 0.1], color='#fff', dir='left'),
+        dict(size=[0.1, 0.1, 0.1], color='#fff', dir='right'),
+        dict(size=[0.1, 0.2, 0.2], color='#ff0', dir='front'),
+      ]),
+      dict(size=[0.3, 0.8, 0.2], color='#900', dir='right', offset=[0, 0, 0.4], children=[
+        dict(size=[0.2, 0.7, 0.1], color='#009', dir='right', children=[
+          dict(size=[0.2, 0.6, 0.1], color='#990', dir='right'),
+        ]),
+      ]),
+      dict(size=[0.3, 0.8, 0.2], color='#900', dir='left', offset=[0, 0, 0.4], children=[
+        dict(size=[0.2, 0.7, 0.1], color='#009', dir='left', children=[
+          dict(size=[0.2, 0.6, 0.1], color='#990', dir='left'),
+        ]),
+      ]),
+    ])
+
 steelking = dict(
     size=[1, 1, 1],
     color='#aaa',
