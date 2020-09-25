@@ -77,8 +77,8 @@ class Hero:
         self.status.remove(s)
         self.hit(s['damage'])
 
-  def heal(self, dmg):
-    amount = math.copysign(dmg, self.loyalty)
+  def heal(self, amount):
+    amount = math.copysign(amount, self.loyalty)
     self.loyalty += amount
 
   def before_step(self):
@@ -103,6 +103,8 @@ class Hero:
       'attention': 1,
       'inspiration': self.inspiration
     }
+    self.inspiration = 0
+
     for action in cool_actions:
       if action.hankering() <= 0:
         break
@@ -111,8 +113,13 @@ class Hero:
         action.do()
         self.actions_in_turn.append(action.get_info())
 
+<<<<<<< HEAD
     self.inspiration = resources['inspiration']
 
+=======
+    self.inspiration = min(3, self.inspiration + resources['inspiration'])
+
+>>>>>>> master
     for action in self.actions:
       action.cool()
 
@@ -255,7 +262,7 @@ class Reaper(Hero):
   min_stage = 3
   speed_base = 0.1
   abilities = []
-  action_classes = [Scythe, ComeToPapa]
+  action_classes = [Scythe, ComeToPapa, InspiredByTime]
   shape = shapes.reaper
 
 class CrocodileMan(Hero):

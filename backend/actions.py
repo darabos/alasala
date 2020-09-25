@@ -211,6 +211,16 @@ class FlipWeakest(Action):
     return {**super().get_info(),
             'target_hero': self.target}
 
+class InspiredByTime(Action):
+  cooldown = 8
+  attention = 0
+  animation_name = 'inspired_by_time'
+  def apply_effect(self):
+    self.subject.inspiration += 1
+
+  def hankering(self):
+    return 1
+
 class MemorableAttack(BaseAttack):
   last_target = None
 
