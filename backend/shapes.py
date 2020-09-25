@@ -167,3 +167,43 @@ krokotyuk = {
       },
     ],
   }
+
+lady = {
+    'size': [0.9, 0.9, 0.15],
+    'color': '#301',
+    'mass': 1,
+    'children': [
+      {
+        'size': [0.7, 0.7, 0.15],
+        'dir': 'up',
+        'color': '#512',
+        'children': [
+          {
+            'size': [0.5, 0.5, 0.15],
+            'dir': 'up',
+            'color': '#623',
+            'children': [
+            {
+              'size': [0.3, 0.3, 0.5],
+              'color': '#734',
+              'dir': 'up',
+              'children': [
+              {
+                'size': [0.7, 0.7, 0.1],
+                'mass': 0.0001,
+                'color': '#301',
+                'dir': 'up',
+                'children': [
+                {
+                  'size': [0.2, 0.2, 0.2],
+                  'mass': 0.0001,
+                  'dir': 'up'
+                }
+                ]
+              }
+              ] }],
+          },
+        ],
+      },
+    ],
+  }
