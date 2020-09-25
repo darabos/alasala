@@ -243,7 +243,6 @@ function BattleRenderer(props) {
   const result =
     props.winner === 1 ? 'Victory!' : props.winner === 0 ? 'Draw!' : 'Defeat!';
   const [battleIsOver, setBattleIsOver] = useState(false);
-  props.setShowButtons(battleIsOver);
   const heroStories = [];
   const actionEntries = [];
   console.log('journal', journal);
@@ -282,7 +281,7 @@ function BattleRenderer(props) {
   return (
     <div className="CombatCanvas">
       {battleIsOver && (
-        <div class="overlay">
+        <div className="overlay">
           <div id="result">{result}</div>
         </div>
       )}
@@ -292,7 +291,10 @@ function BattleRenderer(props) {
           journal={journal}
           heroStories={heroStories}
           actionEntries={actionEntries}
-          battleOverCallback={() => setBattleIsOver(true)}
+          battleOverCallback={() => {
+            setBattleIsOver(true);
+            props.setShowButtons(true);
+          }}
         />
       </CombatCanvas>
     </div>
@@ -409,10 +411,15 @@ function Combat({ data, setShowButtons }) {
 
   function startCombat(party) {
     setState('simulate');
-    fetch(`/computecombat?user=test&stage=${data.stage}&party=${party.join()}`)
+    post('/computecombat', {
+      user: 'test',
+      stage: data.progress.stage,
+      party: party,
+    })
       .then((res) => res.json())
       .then((res) => {
         setState('renderBattle');
+        setShowButtons(false);
         setJournal(res.log);
         setWinner(res.winner);
       });
@@ -751,10 +758,9 @@ function HeroListItem({ showLevel, hero, onClick }) {
   );
 }
 
-function HeroCard({ hero, reportFlipped }) {
+function HeroCard({ hero, onFlipped }) {
   const config = { tension: 100 };
   const [flipped, setFlipped] = useState(false);
-  reportFlipped(flipped);
   const flip = useReactSpring({
     config,
     transform: `rotate3d(0, 1, 0, ${flipped ? 0 : 180}deg)`,
@@ -770,7 +776,10 @@ function HeroCard({ hero, reportFlipped }) {
       <animated.div
         style={backflip}
         className="CardBack Clickable"
-        onClick={() => setFlipped(true)}
+        onClick={() => {
+          setFlipped(true);
+          onFlipped();
+        }}
       />
       <animated.div style={flip} className="HeroCard">
         <div className="CardBackground" />
@@ -879,22 +888,22 @@ function HeroDiorama({ hero, effects }) {
   );
 }
 
+function post(url, params) {
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+}
+
 function HeroPage({ id, data, update }) {
   const hero = data.heroes.find((h) => h.id === id);
   const heroMeta = data.index[hero.name];
   function dissolve() {
-    fetch('/dissolve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user: 'test', hero: hero.id }),
-    }).then(() => update());
+    post('/dissolve', { user: 'test', hero: hero.id }).then(update);
   }
   function fuse() {
-    fetch('/fuse', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user: 'test', hero: hero.id }),
-    }).then(() => update());
+    post('/fuse', { user: 'test', hero: hero.id }).then(update);
   }
   const canFuse =
     data.heroes.filter((h) => h.name === hero.name).length > 1 &&
@@ -960,7 +969,7 @@ function Searched(props) {
   return (
     <div className="Searched">
       <HeroCard
-        reportFlipped={props.setShowButtons}
+        onFlipped={() => props.setShowButtons(true)}
         hero={props.data.just_found}
       ></HeroCard>
     </div>
@@ -984,16 +993,13 @@ function App() {
   const [showButtons, setShowButtons] = useState(true);
   useEffect(() => fetchData(setData, setError), []);
   function searchBeach() {
-    fetch('/searchbeach', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user: 'test' }),
-    })
+    post('/searchbeach', { user: 'test' })
       .then((res) => res.json())
       .then(
         (res) => {
           setData(res);
           setPage('searched');
+          setShowButtons(false);
         },
         (error) => setError(error)
       );
