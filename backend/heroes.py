@@ -66,10 +66,10 @@ class Hero:
 
   def hit(self, amount):
     amount = math.copysign(amount, self.loyalty)
-    switched = abs(amount) > abs(self.loyalty)
+    self.switched = abs(amount) > abs(self.loyalty) # Only valid in hit() overrides.
     self.loyalty -= amount
     for s in self.status[:]:
-      if s['type'] == 'SafetyCollar' and switched:
+      if s['type'] == 'SafetyCollar' and self.switched:
         self.status.remove(s)
         self.hit(s['damage'])
 
@@ -209,6 +209,36 @@ class Healer(Hero):
   action_classes = [FarCaress, HealAll]
   shape = shapes.healer
 
+
+class Chicken(Hero):
+  name = 'Amangelica'
+  title = 'Graduate Student in Biology'
+  speed_base = 1
+  abilities = [
+    { 'name': 'Edible wildlife',
+      'description': 'Amangelica often finds small bugs or roots that allow her to regain some health. And have interesting flavors.',
+      'unlockLevel': 1 },
+    { 'name': 'Inspiring Conversion',
+      'description': 'Amangelica gains 1 inspiration each time she is converted.',
+      'unlockLevel': 2 },
+    { 'name': 'Safety Collar',
+      'description': 'Amangelica puts a nice collar on the closest ally. The collar will stab the ally if they convert, hopefully converting them back. Takes 3 inspiration.',
+      'unlockLevel': 2 },
+    { 'name': 'Spontaneous Inspiration',
+      'description': 'Amangelica gains inspiration at random times. Sometimes while brushing her beak!',
+      'unlockLevel': 3 },
+    ]
+  action_classes = [BaseAttack, EdibleWildlife, SafetyCollar]
+  shape = shapes.chicken
+  def before_step(self):
+    # Spontaneous Inspiration
+    if self.level >= 3 and random.random() < 0.01 * self.level and self.inspiration < 3:
+      self.inspiration += 1
+
+  def hit(self, amount):
+    super().hit(amount)
+    if self.level >= 2 and self.switched and self.inspiration < 3:
+      self.inspiration += 1
 
 class Reaper(Hero):
   name = 'Reaper'

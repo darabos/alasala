@@ -146,6 +146,21 @@ class HealAll(Action):
             'heal': self.heal}
 
 
+class EdibleWildlife(Action):
+  def apply_effect(self):
+    self.subject.heal(0.01 * self.subject.influence)
+
+class SafetyCollar(Action):
+  inspiration = 3
+  def hankering(self):
+    return 4 if self.target else 0
+  def prepare(self, state):
+    self.target = self.subject.find_closest_opponent(state)
+  def apply_effect(self):
+    if target:
+      target.status.append({'type': 'SafetyCollar', 'damage': self.subject.influence * 5})
+
+
 class ComeToPapa(Action):
   default_hankering = 10
   pull_range = 1
