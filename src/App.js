@@ -194,7 +194,9 @@ function renderAction(
 }
 
 function PartySelector({ data, party, setParty, startCombat }) {
-  const partyNames = party.filter(id => id !== undefined).map(id => data.heroes.find(h => h.id === id).name);
+  const partyNames = party
+    .filter((id) => id !== undefined)
+    .map((id) => data.heroes.find((h) => h.id === id).name);
   function removeHero(i) {
     const p = [...party];
     p[i] = undefined;
@@ -750,14 +752,22 @@ function heroPortrait(hero) {
 function HeroListItem({ showLevel, hero, onClick }) {
   return (
     <>
-      <div className={'HeroCard Clickable Level' + hero.level} onClick={onClick}>
+      <div
+        className={'HeroCard Clickable Level' + hero.level}
+        onClick={onClick}
+      >
         <div className="CardBackground" />
         <div
           className="CardPortrait"
           style={{ backgroundImage: heroPortrait(hero) }}
         />
         <div className="CardName"> {hero.name} </div>
-        {showLevel && <div className="CardLevel"> level <b>{hero.level}</b> </div>}
+        {showLevel && (
+          <div className="CardLevel">
+            {' '}
+            level <b>{hero.level}</b>{' '}
+          </div>
+        )}
       </div>
     </>
   );
@@ -837,7 +847,7 @@ const HeroBodyPart = React.forwardRef(
     pos.add(offset);
     const [, api] = useBox(
       () => ({
-        mass: shape.mass || shape.size[0] * shape.size[1] * shape.size[2],
+        mass: 5 * (shape.mass || shape.size[0] * shape.size[1] * shape.size[2]),
         position: pos.toArray(),
         args: shape.size,
       }),
