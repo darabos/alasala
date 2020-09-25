@@ -93,9 +93,13 @@ def getuserdata():
 @app.route('/searchbeach', methods=['POST'])
 def searchbeach():
   user = flask.request.get_json()['user']
-  hero_name = random.choice(list(Hero.get_index().keys()))
-  hero = {'name': hero_name, 'level': 1}
   c = db()
+  progress = query(c, 'select * from users where email = ?', (user,))[0]
+  stage = progress['stage']
+  hero_name = random.choice(list(
+    name for name, meta in Hero.get_index().items()
+    if meta['min_stage'] <= stage))
+  hero = {'name': hero_name, 'level': 1}  
   c.execute('update users set day = day + 1 where email = ?', (user,))
   c.execute('insert into heroes values (?, ?, ?)', (hero['name'], hero['level'], user))
   data = getdata(c, user)
