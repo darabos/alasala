@@ -230,7 +230,45 @@ wizardshape = dict(
       dict(size=[0.4, 0.4, 0.1], dir='up', color='#ca3', children=[
       dict(size=[0.2, 0.2, 0.2], dir='up', color='#728', children=[
       dict(size=[0.1, 0.1, 0.2], dir='up')])])])]),
+    ])
+
+steelkingshape = dict(
+    size=[1, 1, 1],
+    color='#aaa',
+    children=[
+      dict(size=[1, 1, 0.1], dir='up', color='#336', children=[
+        dict(size=[0.1, 0.1, 0.6], dir='up', offset=[-0.4, -0.4, 0]),
+        dict(size=[0.1, 0.1, 0.6], dir='up', offset=[-0.4, 0.4, 0]),
+        dict(size=[0.1, 0.1, 0.6], dir='up', offset=[0.4, -0.4, 0]),
+        dict(size=[0.1, 0.1, 0.6], dir='up', offset=[0.4, 0.4, 0]),
+      ]),
+      dict(size=[0.1, 0.1, 0.4], dir='right', color='#336', children=[
+        dict(size=[0.1, 0.2, 0.1], dir='back', mass=0.0001),
+        dict(size=[0.1, 0.7, 0.1], dir='front', mass=0.0001),
       ])
+    ])
+
+scientistshape = dict(
+    size=[0.9, 0.8, 1],
+    color='#765',
+    children=[
+      dict(size=[1, 1, 0.1], dir='up', color='#432', children=[
+        dict(size=[0.6, 0.6, 0.6], dir='up')]),
+      dict(size=[0.4, 0.1, 0.4], dir='front', offset=[0.3, -0.1, 0.2], color='#fff'),
+      dict(size=[0.4, 0.1, 0.4], dir='front', offset=[-0.3, -0.1, 0.2], color='#fff'),
+    ])
+
+monkeyshape = dict(
+    size=[0.2, 0.2, 0.5],
+    mass=1,
+    color='#987',
+    children=[
+      dict(size=[0.6, 0.5, 0.7], dir='up', offset=[0.3, 0, 0], children=[
+        dict(size=[0.2, 0.2, 0.5], dir='down', offset=[0.3, 0, 0]),
+        dict(size=[0.5, 0.2, 0.2], dir='left', offset=[0, 0, 0.2]),
+        dict(size=[0.5, 0.2, 0.2], dir='right', offset=[0, 0, 0.2]),
+      ]),
+    ])
 
 class Hark(Hero):
   name = 'Professor Hark'
