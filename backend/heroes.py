@@ -26,7 +26,8 @@ class Hero:
     self.loyalty = self.max_loyalty * (-1 if owner == 'enemy' else 1)
     self.actions_in_turn = []
     self.status = []
-    self.actions = [a(self) for a in self.action_classes]
+    self.actions = [
+      a(self) for a in self.action_classes if self.level >= a.min_level]
     self.inspiration = 0
 
   @classmethod
