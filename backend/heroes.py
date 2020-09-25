@@ -180,6 +180,58 @@ ghostshape = dict(
       ])
     ])
 
+ratsshape = dict(
+      size=[0.2, 0.3, 0.2],
+      color='#665',
+      children=[
+        dict(size=[0.1, 0.3, 0.1], dir='back', color='#333'),
+        dict(size=[0.1, 0.1, 0.1], dir='front'),
+  dict(
+    dir='left',
+    offset=[0.6, 0.2, 0],
+      size=[0.2, 0.3, 0.2],
+      color='#665',
+      children=[
+        dict(size=[0.1, 0.3, 0.1], dir='back', color='#333'),
+        dict(size=[0.1, 0.1, 0.1], dir='front'),
+      ]),
+  dict(
+    dir='right',
+    offset=[-0.6, 0.3, 0],
+      size=[0.2, 0.3, 0.2],
+      color='#665',
+      children=[
+        dict(size=[0.1, 0.3, 0.1], dir='back', color='#333'),
+        dict(size=[0.1, 0.1, 0.1], dir='front'),
+      ])
+      ])
+
+knightshape = dict(
+    size=[0.9, 0.9, 0.9],
+    color='#888',
+    children=[
+      dict(size=[0.5, 0.5, 0.6], dir='up', children=[
+        dict(size=[0.1, 0.1, 0.6], dir='up', color='#900')]),
+      dict(size=[0.5, 0.5, 0.5], dir='left', offset=[0, -0.2, 0.4], children=[
+        dict(size=[0.8, 0.1, 0.8], dir='front', color='#03d')]),
+      dict(size=[0.5, 0.5, 0.5], dir='right', offset=[0, 0, 0.4], children=[
+        dict(size=[0.1, 1, 0.1], dir='down', offset=[0, -0.5, 0], color='#fff')]),
+      ])
+
+wizardshape = dict(
+    size=[0.8, 0.8, 0.7],
+    color='#728',
+    children=[
+      # Staff.
+      dict(size=[0.1, 0.1, 1.6], dir='right', offset=[-0.4, 0, 0.45], color='#874'),
+      # Hat.
+      dict(size=[1.2, 1.2, 0.1], dir='up', children=[
+      dict(size=[0.8, 0.8, 0.1], dir='up', children=[
+      dict(size=[0.4, 0.4, 0.1], dir='up', color='#ca3', children=[
+      dict(size=[0.2, 0.2, 0.2], dir='up', color='#728', children=[
+      dict(size=[0.1, 0.1, 0.2], dir='up')])])])]),
+      ])
+
 class Hark(Hero):
   name = 'Professor Hark'
   title = 'Dean of Arcane Studies',
