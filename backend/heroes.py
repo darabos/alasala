@@ -37,9 +37,6 @@ class Hero:
       }
       for (name, cls) in Hero.hero_classes.items()}
 
-  def speak(self):
-    return 'hero'
-
   def increase_loyalty(self):
     if self.loyalty >= 0:
       self.loyalty += self.loyalty_factor
@@ -141,9 +138,6 @@ class Cube(Hero):
   action_classes = [BaseAttack]
   shape = shapes.cube
 
-  def speak(self):
-    return 'cube'
-
 class Hark(Hero):
   name = 'Professor Hark'
   title = 'Dean of Arcane Studies',
@@ -174,9 +168,6 @@ class Hark(Hero):
     }
   ]
 
-  def speak(self):
-    return 'Hark!Hark!'
-
 
 class Healer(Hero):
   name = 'healer'
@@ -189,9 +180,6 @@ class Healer(Hero):
   shape = shapes.healer
 
 
-  def speak(self):
-    return 'cube'
-
 class Reaper(Hero):
   name = 'Reaper'
   title = 'Diabolic Presence'
@@ -202,5 +190,3 @@ class Reaper(Hero):
   action_classes = [Scythe, ComeToPapa]
   shape = shapes.krokotyuk
 
-  def speak(self):
-    return 'cube'
