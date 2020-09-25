@@ -1,5 +1,8 @@
 from math import sqrt, copysign
 
+def sign(x):
+  return copysign(1, x)
+
 class Action:
   # How much cooldown it needs.
   cooldown = 0
@@ -210,52 +213,46 @@ class FlipWeakest(Action):
 
 class MemorableAttack(BaseAttack):
   last_target = None
-  def apply_effect(self):
-    super().apply_effect()
-    if self.target != self.last_target:
-      self.inspiration += 1
+
+  def consume_resources(self, resources):
+    super().consume_resources(resources)
+    if self.target == self.last_target:
+      resources['inspiration'] += 1
     self.last_target = self.target
 
-class StartConversation(SimpleAttack):
-  default_hankering = 10
+
+class EngageInConversation(SimpleAttack):
+  default_hankering = 99
   inspiration = 1
-  cooldown = 10
+  orig_cooldown = 10
+  cooldown = orig_cooldown
   range = 3
-
-  animation_name = 'start_conversation'
-
-  def is_cool(self):
-    if self.subject.in_conversation_with is not None:
-      return False
-    else:
-      return super().is_cool()
-
-  def apply_effect(self):
-    print('starting_conversation!')
-    self.subject.in_conversation_with = self.target
-    self.target.num_conversations += 1
-    self.subject.num_conversations += 1
-
-
-class ContinueConversation(SimpleAttack):
-  default_hankering = 10
   damage = 0
+  in_conversation_with = None
+  animation_name = 'conversation'
   over = False
-  animation_name = 'mutual_simple_attack'
 
-  def is_cool(self):
-    return self.subject.in_conversation_with is not None
-
-  def prepare(self, stage):
-    self.target = self.subject.in_conversation_with
+  def prepare(self, state):
+    if self.in_conversation_with is not None:
+      self.target = self.in_conversation_with
+    else:
+      self.target = self.subject.find_closest_opponent(state)
 
   def apply_effect(self):
-    print('ContinueConversation')
+    if self.subject.in_conversation_with is None:
+      # Start conversation.
+      print('starting_conversation!')
+      self.subject.in_conversation_with = self.target
+      self.target.num_conversations += 1
+      self.cooldown = 0
+    # Do conversation
     self.damage += 0.5
-    for hero in [self.target, self.subject]:
-      prev_loyalty_sign = copysign(1, hero.loyalty)
-      hero.loyalty += copysign(self.damage * self.subject.influence, hero.loyalty)
-      current_loyalty_sign = copysign(1, hero.loyalty)
+    print('ContinueConversation')
+    talking_heroes = [self.subject.in_conversation_with, self.subject]
+    for hittingHero, hitHero in zip(talking_heroes, reversed(talking_heroes)):
+      prev_loyalty_sign = sign(hitHero.loyalty)
+      hitHero.hit(self.damage * hittingHero.influence)
+      current_loyalty_sign = sign(hitHero.loyalty)
       if prev_loyalty_sign != current_loyalty_sign:
         self.over = True
     if self.over:
@@ -265,5 +262,5 @@ class ContinueConversation(SimpleAttack):
     self.damage = 0
     self.over = False
     self.target.num_conversations -= 1
-    self.subject.num_conversations -= 1
     self.subject.in_conversation_with = None
+    self.cooldown = self.orig_cooldown

@@ -65,10 +65,9 @@ class Hero:
       }
       for (name, cls) in Hero.hero_classes.items()}
 
-<<<<<<< HEAD
   def is_frozen(self):
-    return self.num_conversations == 0
-=======
+    return self.num_conversations != 0
+
   def hit(self, amount):
     amount = math.copysign(amount, self.loyalty)
     self.switched = abs(amount) > abs(self.loyalty) # Only valid in hit() overrides.
@@ -78,10 +77,9 @@ class Hero:
         self.status.remove(s)
         self.hit(s['damage'])
 
-  def heal(self, amount):
+  def heal(self, dmg):
     amount = math.copysign(dmg, self.loyalty)
     self.loyalty += amount
->>>>>>> master
 
   def before_step(self):
     pass
@@ -90,8 +88,8 @@ class Hero:
     pass
 
   def step(self, state, step_number):
-    # if self.is_frozen():
-      # return
+    if self.is_frozen():
+      return
 
     self.before_step()
 
@@ -100,8 +98,7 @@ class Hero:
     for action in cool_actions:
       action.prepare(state)
     cool_actions.sort(reverse=True, key=lambda a: a.hankering())
-    if self.id == 8:
-      print(cool_actions)
+
     resources = {
       'attention': 1,
       'inspiration': self.inspiration
@@ -319,14 +316,14 @@ class Scientist(Hero):
       'name': 'Teacher',
       'description':
       '''Derek gains inspiration from teaching. Every time he attacks a different
-opponent, he learns somehing new.''',
+opponent, his inspiration increases.''',
       'unlockLevel': 1,
     },
     {
       'name': "Aumann's agreement theorem",
       'description':
-      '''When Derek meets another rationalist, one of them needs to  '''
+      '''When Derek meets another rationalist, they argue until one of them changes his oppinion.'''
     }
 
     ]
-  action_classes = [MemorableAttack, StartConversation, ContinueConversation]
+  action_classes = [MemorableAttack, EngageInConversation]
