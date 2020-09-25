@@ -20,6 +20,9 @@ class Action:
   # is found in the journal.
   animation_name = "Override me you dummy!"
 
+  # Heros can only use this above the below level.
+  min_level = 1
+  
   def __init__(self, subject):
     self.subject = subject
     self.cooldown_progress = 0
@@ -80,7 +83,9 @@ class SimpleAttack(Action):
     return 0
 
   def apply_effect(self):
-    self.target.loyalty += copysign(self.damage, self.subject.loyalty)
+    self.target.loyalty += copysign(
+      self.damage * self.subject.influence,
+      self.subject.loyalty)
 
   def get_info(self):
     return {**super().get_info(),
@@ -90,24 +95,25 @@ class SimpleAttack(Action):
 
 
 class BaseAttack(SimpleAttack):
-  range=3
-  damage=1
-  cooldown=7
+  range = 3
+  damage = 1
+  cooldown = 7
 
 class BrutalAttack(SimpleAttack):
-  range=10
-  damage=3
-  cooldown=10
+  range = 10
+  damage = 3
+  cooldown = 10
 
 class FarCaress(SimpleAttack):
-  range=7
-  damage=0.1
-  cooldown=1
+  range = 7
+  damage = 0.1
+  cooldown = 1
 
 class Scythe(SimpleAttack):
-  range=1.5
-  damage=8
-  cooldown=10
+  range = 1.5
+  damage = 8
+  cooldown = 10
+  min_level = 2
 
 class HealAll(Action):
   default_hankering = 10

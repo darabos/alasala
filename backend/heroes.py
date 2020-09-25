@@ -3,18 +3,32 @@ from backend.actions import *
 
 class Hero:
   hero_classes = {}
-  max_loyalty = 8
   story = []
+  max_loyalty_base = 7
+  max_loyalty_per_level = 1
+  speed_base = 1
+  speed_per_level = 0
+  influence_base = 1
+  influence_per_level = 0
+  # This hero can only be found on the beach after this stage.
+  min_stage = 0
 
   def __init__(self, level, id, owner, x, y):
     self.level = level
+
+    self.max_loyalty = (
+      self.max_loyalty_base + level * self.max_loyalty_per_level)
+    self.speed = self.speed_base + level * self.speed_per_level
+    self.influence = self.influence_base + level * self.influence_per_level
+    
     self.id = id
     self.x = x
     self.y = y
     self.loyalty = self.max_loyalty * (-1 if owner == 'enemy' else 1)
     self.actions_in_turn = []
     self.status = []
-    self.actions = [a(self) for a in self.action_classes]
+    self.actions = [
+      a(self) for a in self.action_classes if self.level >= a.min_level]
     self.inspiration = 0
 
   @classmethod
@@ -33,19 +47,16 @@ class Hero:
         'abilities': cls.abilities,
         'story': cls.story,
         'shape': cls.shape,
-        'speed': cls.speed,
-        'loyalty_factor': cls.loyalty_factor,
-        'weight': cls.weight
+        'max_loyalty_base': cls.max_loyalty_base,
+        'max_loyalty_per_level': cls.max_loyalty_per_level,
+        'speed_base': cls.speed_base,
+        'speed_per_level': cls.speed_per_level,
+        'influence_base': cls.influence_base,
+        'influence_per_level': cls.influence_per_level,
+        'weight': shapes.weightOf(cls.shape),
+        'min_stage': cls.min_stage
       }
       for (name, cls) in Hero.hero_classes.items()}
-
-  def increase_loyalty(self):
-    if self.loyalty >= 0:
-      self.loyalty += self.loyalty_factor
-      self.loyalty = min(self.max_loyalty, self.loyalty)
-    else:
-      self.loyalty -= self.loyalty_factor
-      self.loyalty = max(-self.max_loyalty, self.loyalty)
 
   def before_step(self):
     pass
@@ -60,7 +71,6 @@ class Hero:
       self.inspiration += 1
 
     self.actions_in_turn = []
-    self.increase_loyalty()
     cool_actions = [a for a in self.actions if a.is_cool()]
     for action in cool_actions:
       action.prepare(state)
@@ -133,9 +143,6 @@ class Hero:
 class Cube(Hero):
   name = 'cube'
   title = 'Platonic Solid'
-  speed = 1
-  weight = 1
-  loyalty_factor = 0.1
   abilities = []
   action_classes = [BaseAttack]
   shape = shapes.cube
@@ -143,9 +150,8 @@ class Cube(Hero):
 class Hark(Hero):
   name = 'Professor Hark'
   title = 'Dean of Arcane Studies',
-  speed = 0.5
-  loyalty_factor = 0.2
-  weight = 8
+  speed_base = 0.5
+  influence_per_level = 0.2
   action_classes = [BrutalAttack]
   shape = shapes.bull
 
@@ -182,9 +188,7 @@ class Hark(Hero):
 class Healer(Hero):
   name = 'healer'
   title = 'Angelic Presence'
-  speed = 0
-  weight = 1
-  loyalty_factor = 0.1
+  speed_base = 0
   abilities = []
   action_classes = [FarCaress, HealAll]
   shape = shapes.healer
@@ -193,9 +197,8 @@ class Healer(Hero):
 class Reaper(Hero):
   name = 'Reaper'
   title = 'Diabolic Presence'
-  speed = 0.1
-  weight = 5
-  loyalty_factor = 0.1
+  min_stage = 3
+  speed_base = 0.1
   abilities = []
   action_classes = [Scythe, ComeToPapa]
   shape = shapes.krokotyuk

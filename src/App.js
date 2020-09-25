@@ -95,7 +95,7 @@ const HeroBox = React.forwardRef((props, heroRef) => {
       ref={heroRef}
       position={[initial.x, initial.y]}
     >
-      {current.loyalty && (
+      {
         <Html center position-z={2}>
           <LoyaltyBar
             max={current.max_loyalty || Math.abs(initial.loyalty)}
@@ -103,7 +103,7 @@ const HeroBox = React.forwardRef((props, heroRef) => {
             change={current.loyalty - last.loyalty}
           />
         </Html>
-      )}
+      }
     </HeroBodyPart>
   );
 });
@@ -932,6 +932,10 @@ function HeroPage({ id, data, update }) {
     sound.play();
   }
 
+  function atLevelScaled(base, per_level, scale = 100) {
+    return Math.round(scale * (base + hero.level * per_level));
+  }
+
   return (
     <div className="HeroPage">
       <div className="HeroCanvas">
@@ -944,9 +948,28 @@ function HeroPage({ id, data, update }) {
         <div className="HeroStats">
           <span>{heroMeta.title}</span>
           <span>Level {hero.level}</span>
-          <span>Speed: {Math.round(100 * heroMeta.speed)}</span>
-          <span>Weight: {Math.round(10 * heroMeta.weight)}</span>
-          <span>Stubbornness: {Math.round(100 * heroMeta.loyalty_factor)}</span>
+          <span>
+            Max loyalty:
+            {atLevelScaled(
+              heroMeta.max_loyalty_base,
+              heroMeta.max_loyalty_per_level
+            )}
+          </span>
+          <span>
+            Weight:
+            {Math.round(50 * heroMeta.weight)}
+          </span>
+          <span>
+            Speed:
+            {atLevelScaled(heroMeta.speed_base, heroMeta.speed_per_level)}
+          </span>
+          <span>
+            Influence:
+            {atLevelScaled(
+              heroMeta.influence_base,
+              heroMeta.influence_per_level
+            )}
+          </span>
         </div>
         <div className="HeroPageButtons">
           <div className="HeroPageButton">

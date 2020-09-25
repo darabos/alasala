@@ -1,3 +1,14 @@
+import math
+
+def weightOf(shape):
+    weight = shape.get(
+        'mass',
+        shape['size'][0] * shape['size'][1] * shape['size'][2])
+    if 'children' in shape:
+        for c in shape['children']:
+            weight += weightOf(c)
+    return weight
+
 cube = {'size': [1, 1, 1], 'color': '#fff'}
 
 chicken = dict(
@@ -88,6 +99,27 @@ wizard = dict(
       dict(size=[0.1, 0.1, 0.2], dir='up')])])])]),
     ])
 
+giantparrot = dict(
+    size=[1, 1, 1],
+    color='#090',
+    children=[
+      dict(size=[0.8, 0.8, 0.8], color='#900', dir='up', children=[
+        dict(size=[0.1, 0.1, 0.1], color='#fff', dir='left'),
+        dict(size=[0.1, 0.1, 0.1], color='#fff', dir='right'),
+        dict(size=[0.1, 0.2, 0.2], color='#ff0', dir='front'),
+      ]),
+      dict(size=[0.3, 0.8, 0.2], color='#900', dir='right', offset=[0, 0, 0.4], children=[
+        dict(size=[0.2, 0.7, 0.1], color='#009', dir='right', children=[
+          dict(size=[0.2, 0.6, 0.1], color='#990', dir='right'),
+        ]),
+      ]),
+      dict(size=[0.3, 0.8, 0.2], color='#900', dir='left', offset=[0, 0, 0.4], children=[
+        dict(size=[0.2, 0.7, 0.1], color='#009', dir='left', children=[
+          dict(size=[0.2, 0.6, 0.1], color='#990', dir='left'),
+        ]),
+      ]),
+    ])
+
 steelking = dict(
     size=[1, 1, 1],
     color='#aaa',
@@ -167,3 +199,57 @@ krokotyuk = {
       },
     ],
   }
+
+lady = {
+    'size': [0.9, 0.9, 0.15],
+    'color': '#301',
+    'mass': 1,
+    'children': [
+      {
+        'size': [0.7, 0.7, 0.15],
+        'dir': 'up',
+        'color': '#512',
+        'children': [
+          {
+            'size': [0.5, 0.5, 0.15],
+            'dir': 'up',
+            'color': '#623',
+            'children': [
+            {
+              'size': [0.3, 0.3, 0.5],
+              'color': '#734',
+              'dir': 'up',
+              'children': [
+              {
+                'size': [0.7, 0.7, 0.1],
+                'mass': 0.0001,
+                'color': '#301',
+                'dir': 'up',
+                'children': [
+                {
+                  'size': [0.2, 0.2, 0.2],
+                  'mass': 0.0001,
+                  'dir': 'up'
+                }
+                ]
+              }
+              ] }],
+          },
+        ],
+      },
+    ],
+  }
+
+snake = dict(
+      mass=10,
+      size=[0.2, 0.2, 0.2],
+      color='#c30',
+      children=[
+        dict(size=[0.18, 0.18, 0.18], dir='back', color='#fe0', offset=[0.08, 0, 0.05], mass=1, children=[
+        dict(size=[0.18, 0.18, 0.18], dir='back', color='#af0', offset=[0.08, 0.05, 0], mass=1, children=[
+        dict(size=[0.18, 0.18, 0.18], dir='back', color='#0f5', offset=[-0.05, 0.05, 0], mass=1, children=[
+        dict(size=[0.16, 0.16, 0.16], dir='back', color='#07f', mass=1, offset=[-0.05, 0.05, 0], children=[
+        dict(size=[0.14, 0.14, 0.14], dir='back', color='#80f', mass=1, offset=[-0.05, 0.05, 0], children=[
+        dict(size=[0.12, 0.12, 0.12], dir='back', color='#f0c', mass=1, offset=[-0.05, 0.05, 0], children=[
+        dict(size=[0.10, 0.10, 0.10], dir='back', color='#fff', mass=1)
+      ])])])])])])])
