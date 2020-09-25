@@ -194,6 +194,7 @@ function renderAction(
 }
 
 function PartySelector({ data, party, setParty, startCombat }) {
+  const partyNames = party.filter(id => id !== undefined).map(id => data.heroes.find(h => h.id === id).name);
   function removeHero(i) {
     const p = [...party];
     p[i] = undefined;
@@ -224,7 +225,7 @@ function PartySelector({ data, party, setParty, startCombat }) {
       </div>
       <p className="Hint Center">
         {party.length} heroes can join this fight. Choose them from your roster
-        below.
+        below. You can only use one copy of each hero.
       </p>
       <button
         disabled={party.filter((h) => h === undefined).length === party.length}
@@ -233,7 +234,7 @@ function PartySelector({ data, party, setParty, startCombat }) {
         Fight!
       </button>
       <HeroList
-        heroes={data.heroes.filter((h) => !party.includes(h.id))}
+        heroes={data.heroes.filter((h) => !partyNames.includes(h.name))}
         onClick={(h) => addHero(h)}
       />
     </>
@@ -726,6 +727,7 @@ function MapDiorama({ effects, stage }) {
 function HeroList(props) {
   const heroes = [...props.heroes];
   heroes.sort((a, b) => (a.name > b.name ? 1 : -1));
+  heroes.sort((a, b) => (a.level < b.level ? 1 : -1));
   return (
     <div className="HeroList">
       {heroes.map((h) => (
