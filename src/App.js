@@ -940,6 +940,9 @@ function HeroPage({ id, data, update }) {
           <span>Max loyalty:
       {atLevelScaled(heroMeta.max_loyalty_base, heroMeta.max_loyalty_per_level)}
       </span>
+          <span>Weight:
+      {Math.round(50 * heroMeta.weight)}
+      </span>
           <span>Speed:
       {atLevelScaled(heroMeta.speed_base, heroMeta.speed_per_level)}
       </span>
