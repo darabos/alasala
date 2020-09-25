@@ -837,7 +837,7 @@ const HeroBodyPart = React.forwardRef(
     pos.add(offset);
     const [, api] = useBox(
       () => ({
-        mass: shape.mass || shape.size[0] * shape.size[1] * shape.size[2],
+          mass: 5 * (shape.mass || shape.size[0] * shape.size[1] * shape.size[2]),
         position: pos.toArray(),
         args: shape.size,
       }),

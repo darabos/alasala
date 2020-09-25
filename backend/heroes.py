@@ -224,7 +224,7 @@ class Monkey(Hero):
   action_classes = [Scratch]
   speed_base = 2
   speed_per_level = 0.5
-  shape = shapes.cube
+  shape = shapes.monkey
 
   def before_step(self):
     if hasattr(self, 'prev_loyalty'):
