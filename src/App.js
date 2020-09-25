@@ -1000,10 +1000,10 @@ function HeroPage({ id, data, update }) {
           {heroMeta.abilities.map((a) => (
             <div
               key={a.name}
-              className={'HeroAbility ' + (a.unlocked ? 'Unlocked' : 'Locked')}
+              className={'HeroAbility ' + (a.unlockLevel <= hero.level ? 'Unlocked' : 'Locked')}
             >
               <h1>{a.name}</h1>
-              <p>{a.description}</p>
+              <p>{a.description} Unlocked at level {a.unlockLevel}.</p>
             </div>
           ))}
         </div>
