@@ -3,6 +3,10 @@ import random
 import backend.shapes as shapes
 from backend.actions import *
 
+def sign(x):
+  return math.copysign(1, x)
+
+
 class Hero:
   hero_classes = {}
   story = []
@@ -61,8 +65,23 @@ class Hero:
       }
       for (name, cls) in Hero.hero_classes.items()}
 
+<<<<<<< HEAD
   def is_frozen(self):
     return self.num_conversations == 0
+=======
+  def hit(self, amount):
+    amount = math.copysign(amount, self.loyalty)
+    self.switched = abs(amount) > abs(self.loyalty) # Only valid in hit() overrides.
+    self.loyalty -= amount
+    for s in self.status[:]:
+      if s['type'] == 'SafetyCollar' and self.switched:
+        self.status.remove(s)
+        self.hit(s['damage'])
+
+  def heal(self, amount):
+    amount = math.copysign(dmg, self.loyalty)
+    self.loyalty += amount
+>>>>>>> master
 
   def before_step(self):
     pass
@@ -75,9 +94,6 @@ class Hero:
       # return
 
     self.before_step()
-
-    if (step_number % 10) == 0:
-      self.inspiration += 1
 
     self.actions_in_turn = []
     cool_actions = [a for a in self.actions if a.is_cool()]
@@ -206,6 +222,36 @@ class Healer(Hero):
   shape = shapes.healer
 
 
+class Chicken(Hero):
+  name = 'Amangelica'
+  title = 'Graduate Student in Biology'
+  speed_base = 1
+  abilities = [
+    { 'name': 'Edible wildlife',
+      'description': 'Amangelica often finds small bugs or roots that allow her to regain some health. And have interesting flavors.',
+      'unlockLevel': 1 },
+    { 'name': 'Inspiring Conversion',
+      'description': 'Amangelica gains 1 inspiration each time she is converted.',
+      'unlockLevel': 2 },
+    { 'name': 'Safety Collar',
+      'description': 'Amangelica puts a nice collar on the closest ally. The collar will stab the ally if they convert, hopefully converting them back. Takes 3 inspiration.',
+      'unlockLevel': 2 },
+    { 'name': 'Spontaneous Inspiration',
+      'description': 'Amangelica gains inspiration at random times. Sometimes while brushing her beak!',
+      'unlockLevel': 3 },
+    ]
+  action_classes = [BaseAttack, EdibleWildlife, SafetyCollar]
+  shape = shapes.chicken
+  def before_step(self):
+    # Spontaneous Inspiration
+    if self.level >= 3 and random.random() < 0.01 * self.level and self.inspiration < 3:
+      self.inspiration += 1
+
+  def hit(self, amount):
+    super().hit(amount)
+    if self.level >= 2 and self.switched and self.inspiration < 3:
+      self.inspiration += 1
+
 class Reaper(Hero):
   name = 'Reaper'
   title = 'Diabolic Presence'
@@ -219,12 +265,14 @@ class CrocodileMan(Hero):
   name = 'CrocodileMan'
   title = 'Smelly Reptile'
   abilities = []
-  action_classes = [FlipWeekest, PushBackAttack]
+  action_classes = [FlipWeakest, PushBackAttack]
   shape = shapes.krokotyuk
-  def before_step(self):
-    normal_influance = self.influence_base + self.level * self.influence_per_level
-    self.influence = normal_influance * (
-      (self.max_loyalty - abs(self.loyalty)) / self.max_loyalty + 1)
+  anger = 0
+  def hit(self, amount):
+    super().hit(amount)
+    self.anger += amount
+    normal_influence = self.influence_base + self.level * self.influence_per_level
+    self.influence = normal_influence * (self.anger / self.max_loyalty + 1)
 
 class Monkey(Hero):
   name = 'Crazy Monkey'

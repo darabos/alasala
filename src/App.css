@@ -14,9 +14,12 @@ body {
   box-shadow: #0009 0px 10px 20px;
   height: 80vh;
 }
+.CombatCanvas,
+.HeroCanvas {
+  background: #3b570a;
+}
 .HeroCanvas {
   width: 300px;
-  background: #3b570a;
 }
 h1,
 h2,

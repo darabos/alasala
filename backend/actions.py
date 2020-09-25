@@ -83,9 +83,8 @@ class SimpleAttack(Action):
     return 0
 
   def apply_effect(self):
-    self.target.loyalty += copysign(
-      self.damage * self.subject.influence,
-      self.subject.loyalty)
+    self.target.hit(
+      self.damage * self.subject.influence)
 
   def get_info(self):
     return {**super().get_info(),
@@ -147,18 +146,33 @@ class HealAll(Action):
 
   def apply_effect(self):
     for target in self.targets:
-      target.loyalty += copysign(self.heal, self.subject.loyalty)
+      target.heal(self.heal * self.subject.level)
 
   def get_info(self):
     return {**super().get_info(),
             'heal': self.heal}
 
 
+class EdibleWildlife(Action):
+  def apply_effect(self):
+    self.subject.heal(0.01 * self.subject.influence)
+
+class SafetyCollar(Action):
+  inspiration = 3
+  def hankering(self):
+    return 4 if self.target else 0
+  def prepare(self, state):
+    self.target = self.subject.find_closest_opponent(state)
+  def apply_effect(self):
+    if target:
+      target.status.append({'type': 'SafetyCollar', 'damage': self.subject.influence * 5})
+
+
 class ComeToPapa(Action):
   default_hankering = 10
   pull_range = 1
   cooldown = 5
-  inspiration = 1
+  inspiration = 3
 
   def prepare(self, state):
     self.targets = [hero for hero in state if not self.subject.teammate(hero)]
@@ -176,10 +190,10 @@ class ComeToPapa(Action):
     return {**super().get_info(),
             'pull_range': self.pull_range}
 
-class FlipWeekest(Action):
+class FlipWeakest(Action):
   default_hankering = 10
   cooldown = 10
-  inspiration = 1
+  inspiration = 3
 
   def prepare(self, state):
     enemies = [hero for hero in state if not self.subject.teammate(hero)]
@@ -188,7 +202,7 @@ class FlipWeekest(Action):
       self.target = min(enemies, key = lambda h: abs(h.loyalty))
 
   def apply_effect(self):
-    self.target.loyalty = -self.target.loyalty
+    self.target.hit(2 * self.target.loyalty)
 
   def get_info(self):
     return {**super().get_info(),
