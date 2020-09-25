@@ -203,3 +203,13 @@ class Reaper(Hero):
   action_classes = [Scythe, ComeToPapa]
   shape = shapes.reaper
 
+class CrocodileMan(Hero):
+  name = 'CrocodileMan'
+  title = 'Smelly Reptile'
+  abilities = []
+  action_classes = [FlipWeekest, PushBackAttack]
+  shape = shapes.krokotyuk
+  def before_step(self):
+    normal_influance = self.influence_base + self.level * self.influence_per_level
+    self.influence = normal_influance * (
+      (self.max_loyalty - abs(self.loyalty)) / self.max_loyalty + 1)

@@ -115,6 +115,18 @@ class Scythe(SimpleAttack):
   cooldown = 10
   min_level = 2
 
+class PushBackAttack(SimpleAttack):
+  range = 3
+  damage = 1
+  cooldown = 7
+  push_back = 2
+
+  def apply_effect(self):
+    super().apply_effect()
+    direction_x, direction_y = self.subject.direction_to_hero(self.target)
+    self.target.x += direction_x * self.push_back
+    self.target.y += direction_y * self.push_back
+
 class HealAll(Action):
   default_hankering = 10
   heal = 3
@@ -156,3 +168,21 @@ class ComeToPapa(Action):
   def get_info(self):
     return {**super().get_info(),
             'pull_range': self.pull_range}
+
+class FlipWeekest(Action):
+  default_hankering = 10
+  cooldown = 10
+  inspiration = 1
+
+  def prepare(self, state):
+    enemies = [hero for hero in state if not self.subject.teammate(hero)]
+    self.target = None
+    if enemies:
+      self.target = min(enemies, key = lambda h: abs(h.loyalty))
+
+  def apply_effect(self):
+    self.target.loyalty = -self.target.loyalty
+
+  def get_info(self):
+    return {**super().get_info(),
+            'target_hero': self.target}
