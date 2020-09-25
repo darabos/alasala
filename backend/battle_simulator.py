@@ -43,9 +43,11 @@ def get_winner(turn):
 
 def simulate_battle(heroes, stage):
   state = get_player_state(heroes) + get_enemy_state(stage)
+  livestate = state
   turns = [{hero.id: hero.get_log_entry() for hero in state}]
   while not battle_is_over(turns[-1]) and len(turns) < 120 * FPS / TURNFRAMES:
-    for hero in state:
-      hero.step(state, len(turns))
+    for hero in livestate:
+      hero.step(livestate, len(turns))
+    livestate = [h for h in state if not getattr(h, 'remove', False)]
     turns.append({hero.id: hero.get_log_entry() for hero in state})
   return turns

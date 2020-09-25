@@ -61,10 +61,20 @@ class Hero:
       }
       for (name, cls) in Hero.hero_classes.items()}
 
+  def has_status(self, stype):
+    return bool([s for s in self.status if getattr(s, 'type', None) == stype])
+
+  def remove_status(self, stype):
+    self.status = [s for s in self.status if getattr(s, 'type', None) != stype]
+
+  def add_status(self, stype):
+    self.status.append({'type': stype})
+
   def is_frozen(self):
     return self.num_conversations != 0
 
   def hit(self, amount):
+    self.remove_status('concentrating') # Concentrating spells are interrupted by hits.
     amount = math.copysign(amount, self.loyalty)
     self.switched = abs(amount) > abs(self.loyalty) # Only valid in hit() overrides.
     self.loyalty -= amount
@@ -88,6 +98,8 @@ class Hero:
       return
 
     self.before_step()
+
+    self.apply_status_effects(state)
 
     self.actions_in_turn = []
     cool_actions = [a for a in self.actions if a.is_cool()]
@@ -118,6 +130,16 @@ class Hero:
       self.move(state)
 
     self.after_step()
+
+  def apply_status_effects(self, state):
+    for s in self.status[:]:
+      if s['type'] == 'Mushroom':
+        for h in self.allies_within(state, 10):
+          h.hit(s['damage'])
+      if 'duration' in s:
+        s['duration'] -= 1
+        if s['duration'] <= 0:
+          self.status.remove(s)
 
   def move(self, state):
     target = self.find_closest_opponent(state)
@@ -156,8 +178,25 @@ class Hero:
   def sq_distance(self, other):
     return (other.x - self.x)**2 + (other.y - self.y)**2
 
+  def opponents_within(self, state, radius):
+    for h in state:
+      if not self.teammate(h) and self.sq_distance(h) <= radius * radius:
+        yield h
+
+  def allies_within(self, state, radius):
+    for h in state:
+      if h is not self and self.teammate(h) and self.sq_distance(h) <= radius * radius:
+        yield h
+
   def find_closest_opponent(self, state):
     opponents = list(filter(lambda h: not self.teammate(h), state))
+    if opponents:
+      return min(opponents, key=lambda h: self.sq_distance(h))
+    else:
+      return None
+
+  def find_closest_ally(self, state):
+    opponents = list(filter(lambda h: h is not self and self.teammate(h), state))
     if opponents:
       return min(opponents, key=lambda h: self.sq_distance(h))
     else:
@@ -246,6 +285,26 @@ class Chicken(Hero):
     super().hit(amount)
     if self.level >= 2 and self.switched and self.inspiration < 3:
       self.inspiration += 1
+
+
+class Wizard(Hero):
+  name = 'Gumdorfin'
+  title = 'Alchemist of the Second Order'
+  speed_base = 1
+  abilities = [
+    { 'name': 'Superior Organism',
+      'description': 'Gumdorfin casts a spell to transform an enemy into a mushroom. Mushrooms continuously damage their nearby allies.',
+      'unlockLevel': 2 },
+    { 'name': 'Astral Boar',
+      'description': 'Gumdorfin summons an invisible boar that eats all mushrooms. Takes 5 inspiration.',
+      'unlockLevel': 3 },
+    { 'name': 'Aggressive Inspiration',
+      'description': 'Gumdorfin often gains inspiration when attacking someone.',
+      'unlockLevel': 3 },
+    ]
+  action_classes = [InspiringAttack, SuperiorOrganism, AstralBear]
+  shape = shapes.wizard
+
 
 class Reaper(Hero):
   name = 'Reaper'
