@@ -330,4 +330,4 @@ opponent, his inspiration increases.''',
     }
 
     ]
-  action_classes = [MemorableAttack, EngageInConversation]
+  action_classes = [DiversityAttack, EngageInConversation]

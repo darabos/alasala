@@ -221,7 +221,7 @@ class InspiredByTime(Action):
   def hankering(self):
     return 1
 
-class MemorableAttack(BaseAttack):
+class DiversityAttack(BaseAttack):
   last_target = None
 
   def consume_resources(self, resources):
