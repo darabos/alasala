@@ -199,8 +199,7 @@ function renderAction(
   };
   if (
     action.animation_name === 'simple_attack' &&
-    attackTurn >= -1 &&
-    attackTurn <= 0
+    attackTurn === 0
   ) {
     return (
       <SimpleAttack
