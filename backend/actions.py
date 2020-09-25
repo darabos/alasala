@@ -114,6 +114,13 @@ class Scythe(SimpleAttack):
   cooldown = 10
   min_level = 2
 
+class Scratch(SimpleAttack):
+  attention = 0
+  range = 2
+  damage = 0.3
+  cooldown = 3
+
+
 class PushBackAttack(SimpleAttack):
   range = 3
   damage = 1
