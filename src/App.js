@@ -350,17 +350,30 @@ function BattleSimulation({
   function heroRef(id) {
     return heroRefs[id] || (heroRefs[id] = createRef());
   }
+  function findMidpoint() {
+    const min = new THREE.Vector3();
+    const max = new THREE.Vector3();
+    for (const h of heroStories) {
+      min.min(heroRef(h.id).current.position);
+      max.max(heroRef(h.id).current.position);
+    }
+    return min.lerp(max, 0.5);
+  }
 
   const [turn, setTurn] = useState(0);
-  const turnClock = useRef({ time: 0, turn: -1 }).current;
+  const turnClock = useRef({ time: 0, turn: -1, midpoint: new THREE.Vector3() })
+    .current;
   useFrame(({ camera, clock }) => {
     if (journal) {
       const t = clock.getElapsedTime();
       camera.up.set(0, 0, 1);
-      camera.position.x = Math.cos(0.19 * t);
-      camera.position.y = Math.sin(0.2 * t) - 10;
-      camera.position.z = 5;
-      camera.lookAt(0, 0, 0);
+      camera.fov = 40;
+      camera.updateProjectionMatrix();
+      camera.position.x = 3 * Math.cos(0.19 * t);
+      camera.position.y = 3 * Math.sin(0.2 * t) - 40;
+      camera.position.z = 15;
+      turnClock.midpoint.lerp(findMidpoint(), 0.1);
+      camera.lookAt(turnClock.midpoint);
       if (turnClock.turn !== turn) {
         turnClock.turn = turn;
         turnClock.time = 0;
@@ -1010,10 +1023,15 @@ function HeroPage({ id, data, update }) {
           {heroMeta.abilities.map((a) => (
             <div
               key={a.name}
-              className={'HeroAbility ' + (a.unlockLevel <= hero.level ? 'Unlocked' : 'Locked')}
+              className={
+                'HeroAbility ' +
+                (a.unlockLevel <= hero.level ? 'Unlocked' : 'Locked')
+              }
             >
               <h1>{a.name}</h1>
-              <p>{a.description} Unlocked at level {a.unlockLevel}.</p>
+              <p>
+                {a.description} Unlocked at level {a.unlockLevel}.
+              </p>
             </div>
           ))}
         </div>

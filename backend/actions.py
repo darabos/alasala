@@ -256,3 +256,13 @@ class FlipWeakest(Action):
   def get_info(self):
     return {**super().get_info(),
             'target_hero': self.target}
+
+class InspiredByTime(Action):
+  cooldown = 8
+  attention = 0
+  animation_name = 'inspired_by_time'
+  def apply_effect(self):
+    self.subject.inspiration += 1
+
+  def hankering(self):
+    return 1
