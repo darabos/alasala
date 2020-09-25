@@ -75,17 +75,19 @@ def progress(user):
   c = db()
   c.execute('update users set stage = stage + 1 where email = ?', (user,))
 
-@app.route('/getuserdata')
-def getuserdata():
-  user = flask.request.args['user']
-  c = db()
+def getdata(c, user):
   progress = query(c, 'select * from users where email = ?', (user,))[0]
   heroes = get_heroes_of_user(c, user)
-  return flask.jsonify({
+  return {
     'progress': progress,
     'heroes': heroes,
     'index': Hero.get_index()
-  })
+  }
+
+@app.route('/getuserdata')
+def getuserdata():
+  user = flask.request.args['user']
+  return flask.jsonify(getdata(db(), user))
 
 @app.route('/searchbeach', methods=['POST'])
 def searchbeach():
@@ -95,9 +97,9 @@ def searchbeach():
   c = db()
   c.execute('update users set day = day + 1 where email = ?', (user,))
   c.execute('insert into heroes values (?, ?, ?)', (hero['name'], hero['level'], user))
-  progress = query(c, 'select * from users where email = ?', (user,))[0]
-  heroes = query(c, 'select rowid as id, * from heroes where user = ?', (user,))
-  return flask.jsonify({'progress': progress, 'heroes': heroes, 'just_found': hero})
+  data = getdata(c, user)
+  data['just_found'] = hero
+  return flask.jsonify(data)
 
 @app.route('/dissolve', methods=['POST'])
 def dissolve():

@@ -878,22 +878,22 @@ function HeroDiorama({ hero, effects }) {
   );
 }
 
+function post(url, params) {
+  return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
+    });
+}
+
 function HeroPage({ id, data, update }) {
   const hero = data.heroes.find((h) => h.id === id);
   const heroMeta = data.index[hero.name];
   function dissolve() {
-    fetch('/dissolve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user: 'test', hero: hero.id }),
-    }).then(() => update());
+    post('/dissolve', { user: 'test', hero: hero.id }).then(update);
   }
   function fuse() {
-    fetch('/fuse', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user: 'test', hero: hero.id }),
-    }).then(() => update());
+    post('/fuse', { user: 'test', hero: hero.id }).then(update);
   }
   const canFuse =
     data.heroes.filter((h) => h.name === hero.name).length > 1 &&
@@ -983,11 +983,7 @@ function App() {
   const [showButtons, setShowButtons] = useState(true);
   useEffect(() => fetchData(setData, setError), []);
   function searchBeach() {
-    fetch('/searchbeach', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user: 'test' }),
-    })
+    post('/searchbeach', { user: 'test' })
       .then((res) => res.json())
       .then(
         (res) => {
