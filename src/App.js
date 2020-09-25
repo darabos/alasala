@@ -1010,10 +1010,13 @@ function HeroPage({ id, data, update }) {
           {heroMeta.story.map((a, i) => (
             <button
               key={i}
+              disabled={i >= hero.level}
               className="HeroStoryButton"
               onClick={() => showStory(i)}
             >
-              Diary {i + 1} {heroMeta.story[i].voice && '🔊'}
+              {i >= hero.level
+                ? `Unlocked at level ${i + 1}`
+                : `Diary ${i + 1} ${heroMeta.story[i].voice ? '🔊' : ''}`}
             </button>
           ))}
           {story >= 0 && (
