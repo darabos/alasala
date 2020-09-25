@@ -86,6 +86,18 @@ button:hover:enabled {
   transition: background-color 0.2s ease, box-shadow 0.6s ease-in;
   box-shadow: #0006 0px 2px 6px;
 }
+.HeroCard.Level1 {
+  background: radial-gradient(#888, #ca9);
+}
+.HeroCard.Level2 {
+  background: radial-gradient(#9ad, #abe);
+}
+.HeroCard.Level3 {
+  background: radial-gradient(#9a9, #ada);
+}
+.HeroCard.Level4 {
+  background: radial-gradient(#aa1, #dd3);
+}
 
 .CardBackground {
   position: absolute;
@@ -124,6 +136,7 @@ button:hover:enabled {
   top: 10%;
   width: 80%;
   text-align: right;
+  font-weight: normal;
 }
 
 .HeroPage {

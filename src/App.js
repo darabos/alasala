@@ -750,14 +750,14 @@ function heroPortrait(hero) {
 function HeroListItem({ showLevel, hero, onClick }) {
   return (
     <>
-      <div className="HeroCard Clickable" onClick={onClick}>
+      <div className={'HeroCard Clickable Level' + hero.level} onClick={onClick}>
         <div className="CardBackground" />
         <div
           className="CardPortrait"
           style={{ backgroundImage: heroPortrait(hero) }}
         />
         <div className="CardName"> {hero.name} </div>
-        {showLevel && <div className="CardLevel"> {hero.level} </div>}
+        {showLevel && <div className="CardLevel"> level <b>{hero.level}</b> </div>}
       </div>
     </>
   );
