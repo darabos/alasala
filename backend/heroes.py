@@ -62,10 +62,10 @@ class Hero:
       for (name, cls) in Hero.hero_classes.items()}
 
   def has_status(self, stype):
-    return bool([s for s in self.status if getattr(s, 'type', None) == stype])
+    return bool([s for s in self.status if s['type'] == stype])
 
   def remove_status(self, stype):
-    self.status = [s for s in self.status if getattr(s, 'type', None) != stype]
+    self.status = [s for s in self.status if s['type'] != stype]
 
   def add_status(self, stype):
     self.status.append({'type': stype})
@@ -74,12 +74,12 @@ class Hero:
     return self.num_conversations != 0
 
   def hit(self, amount):
-    self.remove_status('concentrating') # Concentrating spells are interrupted by hits.
+    self.remove_status('Concentrating') # Concentrating spells are interrupted by hits.
     amount = math.copysign(amount, self.loyalty)
     self.switched = abs(amount) > abs(self.loyalty) # Only valid in hit() overrides.
     self.loyalty -= amount
     for s in self.status[:]:
-      if s['type'] == 'SafetyCollar' and self.switched:
+      if s['type'] == 'Safety Collar' and self.switched:
         self.status.remove(s)
         self.hit(s['damage'])
 

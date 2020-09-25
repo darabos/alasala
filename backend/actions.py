@@ -79,14 +79,14 @@ class ConcentratingAction(Action):
   attention = 1
   def apply_effect(self):
     if self.concentrating:
-      if not self.subject.has_status('concentrating'): # Interrupted.
+      if not self.subject.has_status('Concentrating'): # Interrupted.
         self.concentrating = False
         self.cooldown = self.saved_cooldown
         self.inspiration = self.saved_inspiration
         return
       self.concentrating += 1
       if self.concentrating == self.concentrating_turns:
-        self.subject.remove_status('concentrating')
+        self.subject.remove_status('Concentrating')
         self.concentrating = False
         self.cooldown = self.saved_cooldown
         self.inspiration = self.saved_inspiration
@@ -97,7 +97,7 @@ class ConcentratingAction(Action):
       self.saved_inspiration = self.inspiration
       self.inspiration = 0
       self.concentrating = 1
-      self.subject.add_status('concentrating')
+      self.subject.add_status('Concentrating')
   def hankering(self):
     return 99
 
@@ -207,18 +207,17 @@ class SafetyCollar(Action):
     self.target = self.subject.find_closest_ally(state)
   def apply_effect(self):
     if self.target:
-      self.target.status.append({'type': 'SafetyCollar', 'damage': self.subject.influence * 5})
+      self.target.status.append({'type': 'Safety Collar', 'damage': self.subject.influence * 5})
 
 
 class SuperiorOrganism(ConcentratingAction):
-  cooldown = 3
-  inspiration = 3
+  cooldown = 10
   def hankering(self):
     return super().hankering() if self.target else 0
   def prepare(self, state):
-    self.target = self.subject.find_closest_opponent(state)
+    self.target = self.subject.find_closest_opponent([h for h in state if not h.has_status('Mushroom')])
   def final_effect(self):
-    if self.target and self.subject.teammate(self.target):
+    if self.target and not self.subject.teammate(self.target) and not self.target.has_status('Mushroom'):
       self.target.status.append({'type': 'Mushroom', 'damage': self.subject.influence * 0.2, 'duration': 10})
 
 class AstralBear(Action):

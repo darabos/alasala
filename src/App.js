@@ -76,6 +76,7 @@ const HeroBox = React.forwardRef((props, heroRef) => {
   });
 
   useFrame(() => {
+    if (!heroRef.current) return;
     const phase = props.turnClock.phase;
     const aX = current.x * (1 - phase) + next.x * phase;
     const aY = current.y * (1 - phase) + next.y * phase;
@@ -88,6 +89,9 @@ const HeroBox = React.forwardRef((props, heroRef) => {
     );
     keelApi.velocity.set(0, 0, 0);
   });
+  if (current.status.find(s => s.type === 'Removed')) {
+    return;
+  }
 
   return (
     <HeroBodyPart
@@ -151,6 +155,9 @@ function SimpleAttack(props) {
   useFrame(() => {
     const sourceHero = props.sourceHero.current;
     const targetHero = props.targetHero.current;
+    if (!sourceHero || !targetHero) {
+      return;
+    }
     const phase = props.turnClock.phase;
     const src = sourceHero.position;
     const dst = targetHero.position;
@@ -192,8 +199,7 @@ function renderAction(
   };
   if (
     action.animation_name === 'simple_attack' &&
-    attackTurn >= -1 &&
-    attackTurn <= 0
+    attackTurn === 0
   ) {
     return (
       <SimpleAttack
@@ -366,8 +372,11 @@ function BattleSimulation({
     const min = new THREE.Vector3();
     const max = new THREE.Vector3();
     for (const h of heroStories) {
-      min.min(heroRef(h.id).current.position);
-      max.max(heroRef(h.id).current.position);
+      const c = heroRef(h.id).current;
+      if (c) {
+        min.min(c.position);
+        max.max(c.position);
+      }
     }
     return min.lerp(max, 0.5);
   }
