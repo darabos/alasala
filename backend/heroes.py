@@ -143,6 +143,43 @@ class Cube(Hero):
   def speak(self):
     return 'cube'
 
+
+chickenshape = dict(
+    size=[1, 1, 0.9],
+    color='#eee',
+    children=[
+      dict(size=[0.2, 0.2, 0.2], dir='front', color='#dd3'),
+      dict(size=[0.2, 0.6, 0.4], dir='up', color='#900'),
+      dict(size=[0.7, 0.7, 0.2], dir='left'),
+      dict(size=[0.7, 0.7, 0.2], dir='right'),
+      ])
+
+bullshape = dict(
+    size=[1, 1, 1.8],
+    color='#333',
+    children=[
+      dict(size=[1, 0.2, 0.2], dir='front', offset=[0, 0, 0.5]),
+      dict(size=[0.2, 0.2, 0.2], dir='front', offset=[0.3, 0, 0.3], color='#990'),
+      dict(size=[0.2, 0.2, 0.2], dir='front', offset=[-0.3, 0, 0.3], color='#990'),
+      dict(size=[0.5, 0.3, 0.3], dir='left', offset=[0, 0, 0.8], color='#999'),
+      dict(size=[0.5, 0.3, 0.3], dir='right', offset=[0, 0, 0.8], color='#999'),
+      dict(size=[0.3, 0.6, 0.6], dir='left'),
+      dict(size=[0.3, 0.6, 0.6], dir='right'),
+      ])
+
+ghostshape = dict(
+    size=[1, 1, 0.8],
+    color='#339',
+    children=[
+      dict(size=[0.1, 0.1, 0.1], dir='front', offset=[0.2, 0, 0], color='#fff'),
+      dict(size=[0.1, 0.1, 0.1], dir='front', offset=[-0.2, 0, 0], color='#fff'),
+      dict(size=[0.3, 0.3, 0.2], dir='up', children=[
+        dict(size=[0.1, 0.1, 0.2], dir='up', children=[
+          dict(size=[0.3, 0.3, 0.3], dir='up', color='#fff', mass=0.001)
+        ])
+      ])
+    ])
+
 class Hark(Hero):
   name = 'Professor Hark'
   title = 'Dean of Arcane Studies',

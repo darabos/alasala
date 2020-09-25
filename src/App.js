@@ -830,7 +830,7 @@ const HeroBodyPart = React.forwardRef(
     const offset = new THREE.Vector3(...(shape.offset || [0, 0, 0]));
     const [, api] = useBox(
       () => ({
-        mass: shape.size[0] * shape.size[1] * shape.size[2],
+        mass: shape.mass || (shape.size[0] * shape.size[1] * shape.size[2]),
         position: pos.clone().add(offset).toArray(),
         args: shape.size,
       }),
@@ -847,8 +847,8 @@ const HeroBodyPart = React.forwardRef(
         pivotB: joint.clone().sub(pos).toArray(),
         axisA: joint.clone().sub(parent.pos).normalize().toArray(),
         axisB: joint.clone().sub(pos).normalize().negate().toArray(),
-        twistAngle: Math.PI / 8,
-        angle: Math.PI / 8,
+        twistAngle: 0,
+        angle: 0,
       });
     }
     const color = shape.color || parent.color;
