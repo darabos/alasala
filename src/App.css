@@ -166,6 +166,7 @@ button:hover:enabled {
   margin-top: 0;
 }
 .HeroPage .HeroAbilities {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
 }
@@ -175,6 +176,7 @@ button:hover:enabled {
 
 .PanelHeader {
   position: absolute;
+  top: 0;
   border-bottom: 1px solid black;
 }
 
@@ -275,4 +277,16 @@ button:hover:enabled {
   left: 51%;
   transform: translate(-50%, 0);
   z-index: 100000000000000000;
+}
+
+.HeroStory {
+  position: relative;
+  padding-top: 50px;
+}
+.HeroPage .HeroStoryText {
+  font-style: italic;
+  border-radius: 4px;
+  margin-top: 20px;
+  padding: 5px 10px;
+  border: 2px solid #0004;
 }

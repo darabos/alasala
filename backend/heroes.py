@@ -3,6 +3,7 @@ from backend.actions import *
 
 class Hero:
   hero_classes = {}
+  story = []
   max_loyalty_base = 7
   max_loyalty_per_level = 1
   speed_base = 1
@@ -44,6 +45,7 @@ class Hero:
       name: {
         'title': cls.title,
         'abilities': cls.abilities,
+        'story': cls.story,
         'shape': cls.shape,
         'max_loyalty_base': cls.max_loyalty_base,
         'max_loyalty_per_level': cls.max_loyalty_per_level,
@@ -172,6 +174,14 @@ class Hark(Hero):
       'description': 'Passive. Hark never misses. Unlocked at level 10.',
       'unlockLevel': 10,
     }
+  ]
+  story = [
+      dict(voice='hark1.m4a', text='''I have studied the ancient legends about the island of Alasala. They say it is cursed.
+  The only way to reach it is by a shipwreck. The curse engulfs the castaways and keeps them on the island,
+  forever. This brings us to our question...'''),
+      dict(voice='hark2.m4a', text='''Namely, how shall we capture this curse? How will we transport it back to England to study in my laboratory?'''),
+      dict(voice='hark3.m4a', text='''Do you have an imaginative mind? Can you fathom the knowledge we could extract from such an experiment?'''),
+      dict(voice='hark4.m4a', text='''We must learn more. No matter the cost. I will lead this group to the heart of Alasala and do what I must.'''),
   ]
 
 
