@@ -291,7 +291,10 @@ function BattleRenderer(props) {
           journal={journal}
           heroStories={heroStories}
           actionEntries={actionEntries}
-          battleOverCallback={() => { setBattleIsOver(true); props.setShowButtons(true); }}
+          battleOverCallback={() => {
+            setBattleIsOver(true);
+            props.setShowButtons(true);
+          }}
         />
       </CombatCanvas>
     </div>
@@ -408,7 +411,11 @@ function Combat({ data, setShowButtons }) {
 
   function startCombat(party) {
     setState('simulate');
-    post('/computecombat', { user: 'test', stage: data.progress.stage, party: party })
+    post('/computecombat', {
+      user: 'test',
+      stage: data.progress.stage,
+      party: party,
+    })
       .then((res) => res.json())
       .then((res) => {
         setState('renderBattle');
@@ -769,7 +776,10 @@ function HeroCard({ hero, onFlipped }) {
       <animated.div
         style={backflip}
         className="CardBack Clickable"
-        onClick={() => { setFlipped(true); onFlipped(); }}
+        onClick={() => {
+          setFlipped(true);
+          onFlipped();
+        }}
       />
       <animated.div style={flip} className="HeroCard">
         <div className="CardBackground" />
@@ -880,10 +890,10 @@ function HeroDiorama({ hero, effects }) {
 
 function post(url, params) {
   return fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params),
-    });
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
 }
 
 function HeroPage({ id, data, update }) {
