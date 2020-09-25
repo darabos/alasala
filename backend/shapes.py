@@ -188,3 +188,57 @@ krokotyuk = {
       },
     ],
   }
+
+lady = {
+    'size': [0.9, 0.9, 0.15],
+    'color': '#301',
+    'mass': 1,
+    'children': [
+      {
+        'size': [0.7, 0.7, 0.15],
+        'dir': 'up',
+        'color': '#512',
+        'children': [
+          {
+            'size': [0.5, 0.5, 0.15],
+            'dir': 'up',
+            'color': '#623',
+            'children': [
+            {
+              'size': [0.3, 0.3, 0.5],
+              'color': '#734',
+              'dir': 'up',
+              'children': [
+              {
+                'size': [0.7, 0.7, 0.1],
+                'mass': 0.0001,
+                'color': '#301',
+                'dir': 'up',
+                'children': [
+                {
+                  'size': [0.2, 0.2, 0.2],
+                  'mass': 0.0001,
+                  'dir': 'up'
+                }
+                ]
+              }
+              ] }],
+          },
+        ],
+      },
+    ],
+  }
+
+snake = dict(
+      mass=10,
+      size=[0.2, 0.2, 0.2],
+      color='#c30',
+      children=[
+        dict(size=[0.18, 0.18, 0.18], dir='back', color='#fe0', offset=[0.08, 0, 0.05], mass=1, children=[
+        dict(size=[0.18, 0.18, 0.18], dir='back', color='#af0', offset=[0.08, 0.05, 0], mass=1, children=[
+        dict(size=[0.18, 0.18, 0.18], dir='back', color='#0f5', offset=[-0.05, 0.05, 0], mass=1, children=[
+        dict(size=[0.16, 0.16, 0.16], dir='back', color='#07f', mass=1, offset=[-0.05, 0.05, 0], children=[
+        dict(size=[0.14, 0.14, 0.14], dir='back', color='#80f', mass=1, offset=[-0.05, 0.05, 0], children=[
+        dict(size=[0.12, 0.12, 0.12], dir='back', color='#f0c', mass=1, offset=[-0.05, 0.05, 0], children=[
+        dict(size=[0.10, 0.10, 0.10], dir='back', color='#fff', mass=1)
+      ])])])])])])])
