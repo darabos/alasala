@@ -48,11 +48,12 @@ def query(cursor, q, args=()):
   res = cursor.execute(q, args)
   return [dict(zip([c[0] for c in res.description], row)) for row in res]
 
-@app.route('/computecombat')
+@app.route('/computecombat', methods=['POST'])
 def computecombat():
-  user = flask.request.args['user']
-  party = list(map(int, flask.request.args['party'].split(',')))
-  stage = flask.request.args['stage']
+  args = flask.request.get_json()
+  user = args['user']
+  party = args['party']
+  stage = args['stage']
   c = db()
   heroes = get_heroes_of_user(c, user)
 

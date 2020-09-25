@@ -408,7 +408,7 @@ function Combat({ data, setShowButtons }) {
 
   function startCombat(party) {
     setState('simulate');
-    fetch(`/computecombat?user=test&stage=${data.stage}&party=${party.join()}`)
+    post('/computecombat', { user: 'test', stage: data.progress.stage, party: party })
       .then((res) => res.json())
       .then((res) => {
         setState('renderBattle');
