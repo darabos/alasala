@@ -83,9 +83,8 @@ class SimpleAttack(Action):
     return 0
 
   def apply_effect(self):
-    self.target.loyalty += copysign(
-      self.damage * self.subject.influence,
-      self.subject.loyalty)
+    self.target.hit(
+      self.damage * self.subject.influence)
 
   def get_info(self):
     return {**super().get_info(),
@@ -140,7 +139,7 @@ class HealAll(Action):
 
   def apply_effect(self):
     for target in self.targets:
-      target.loyalty += copysign(self.heal, self.subject.loyalty)
+      target.heal(self.heal * self.subject.level)
 
   def get_info(self):
     return {**super().get_info(),
@@ -181,7 +180,7 @@ class FlipWeekest(Action):
       self.target = min(enemies, key = lambda h: abs(h.loyalty))
 
   def apply_effect(self):
-    self.target.loyalty = -self.target.loyalty
+    self.target.hit(2 * self.target.loyalty)
 
   def get_info(self):
     return {**super().get_info(),

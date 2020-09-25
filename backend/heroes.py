@@ -1,5 +1,11 @@
+import math
+import random
 import backend.shapes as shapes
 from backend.actions import *
+
+def sign(x):
+  return math.copysign(1, x)
+
 
 class Hero:
   hero_classes = {}
@@ -57,6 +63,19 @@ class Hero:
         'min_stage': cls.min_stage
       }
       for (name, cls) in Hero.hero_classes.items()}
+
+  def hit(self, amount):
+    amount = math.copysign(amount, self.loyalty)
+    switched = abs(amount) > abs(self.loyalty)
+    self.loyalty -= amount
+    for s in self.status[:]:
+      if s['type'] == 'SafetyCollar' and switched:
+        self.status.remove(s)
+        self.hit(s['damage'])
+
+  def heal(self, amount):
+    amount = math.copysign(dmg, self.loyalty)
+    self.loyalty += amount
 
   def before_step(self):
     pass
