@@ -1,4 +1,5 @@
 from math import sqrt, copysign
+import random
 
 class Action:
   # How much cooldown it needs.
@@ -75,13 +76,14 @@ class ConcentratingAction(Action):
   attention = 1
   def apply_effect(self):
     if self.concentrating:
-      if not self.subject.concentrating: # Interrupted.
+      if not self.subject.has_status('concentrating'): # Interrupted.
         self.concentrating = False
         self.cooldown = self.saved_cooldown
         self.inspiration = self.saved_inspiration
         return
       self.concentrating += 1
       if self.concentrating == self.concentrating_turns:
+        self.subject.remove_status('concentrating')
         self.concentrating = False
         self.cooldown = self.saved_cooldown
         self.inspiration = self.saved_inspiration
@@ -92,7 +94,7 @@ class ConcentratingAction(Action):
       self.saved_inspiration = self.inspiration
       self.inspiration = 0
       self.concentrating = 1
-      self.subject.concentrating = True
+      self.subject.add_status('concentrating')
   def hankering(self):
     return 99
 
@@ -214,7 +216,17 @@ class SuperiorOrganism(ConcentratingAction):
     self.target = self.subject.find_closest_opponent(state)
   def final_effect(self):
     if self.target and self.subject.teammate(self.target):
-      self.target.status.append({'type': 'Mushroom', 'damage': self.subject.influence * 0.2})
+      self.target.status.append({'type': 'Mushroom', 'damage': self.subject.influence * 0.2, 'duration': 10})
+
+class AstralBear(Action):
+  inspiration = 3
+  def hankering(self):
+    return 4 if self.targets else 0
+  def prepare(self, state):
+    self.targets = [h for h in state if any(s['type'] == 'Mushroom' for s in h.status)]
+  def apply_effect(self):
+    for t in self.targets:
+      t.remove = True
 
 
 class ComeToPapa(Action):

@@ -64,8 +64,17 @@ class Hero:
       }
       for (name, cls) in Hero.hero_classes.items()}
 
+  def has_status(self, stype):
+    return bool([s for s in self.status if getattr(s, 'type', None) == stype])
+
+  def remove_status(self, stype):
+    self.status = [s for s in self.status if getattr(s, 'type', None) != stype]
+
+  def add_status(self, stype):
+    self.status.append({'type': stype})
+
   def hit(self, amount):
-    self.concentrating = False # Concentrating spells are interrupted by hits.
+    self.remove_status('concentrating') # Concentrating spells are interrupted by hits.
     amount = math.copysign(amount, self.loyalty)
     self.switched = abs(amount) > abs(self.loyalty) # Only valid in hit() overrides.
     self.loyalty -= amount
@@ -119,10 +128,14 @@ class Hero:
     self.after_step()
 
   def apply_status_effects(self, state):
-    for s in self.status:
+    for s in self.status[:]:
       if s['type'] == 'Mushroom':
         for h in self.allies_within(state, 10):
           h.hit(s['damage'])
+      if 'duration' in s:
+        s['duration'] -= 1
+        if s['duration'] <= 0:
+          self.status.remove(s)
 
   def move(self, state):
     target = self.find_closest_opponent(state)
@@ -276,7 +289,7 @@ class Wizard(Hero):
   speed_base = 1
   abilities = [
     { 'name': 'Superior Organism',
-      'description': 'Gumdorfin casts a spell to change an enemy into a mushroom. Mushrooms have reduced attack and continuously damage their nearby allies.',
+      'description': 'Gumdorfin casts a spell to transform an enemy into a mushroom. Mushrooms continuously damage their nearby allies.',
       'unlockLevel': 2 },
     { 'name': 'Astral Boar',
       'description': 'Gumdorfin summons an invisible boar that eats all mushrooms. Takes 5 inspiration.',
