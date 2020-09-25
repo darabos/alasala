@@ -311,6 +311,8 @@ class Scientist(Hero):
   title = 'Head of Thoughtworm Research'
   shape = shapes.scientist
   in_conversation_with = None
+  influence_per_level = 0.2
+
   abilities = [
     {
       'name': 'Teacher',

@@ -241,13 +241,11 @@ class EngageInConversation(SimpleAttack):
   def apply_effect(self):
     if self.subject.in_conversation_with is None:
       # Start conversation.
-      print('starting_conversation!')
       self.subject.in_conversation_with = self.target
       self.target.num_conversations += 1
       self.cooldown = 0
     # Do conversation
     self.damage += 0.5
-    print('ContinueConversation')
     talking_heroes = [self.subject.in_conversation_with, self.subject]
     for hittingHero, hitHero in zip(talking_heroes, reversed(talking_heroes)):
       prev_loyalty_sign = sign(hitHero.loyalty)
