@@ -22,6 +22,7 @@ import { EffectComposer, DepthOfField, Bloom } from 'react-postprocessing';
 import './App.css';
 import '@openfonts/grenze-gotisch_latin';
 import '@openfonts/corben_latin';
+import { Howl, Howler } from 'howler';
 
 const turnFrames = 20;
 
@@ -920,6 +921,16 @@ function HeroPage({ id, data, update }) {
   const canFuse =
     data.heroes.filter((h) => h.name === hero.name).length > 1 &&
     data.progress.ectoplasm > 0;
+  const [story, setStory] = useState(-1);
+  useEffect(() => {
+    return () => Howler.stop();
+  }, []);
+  function showStory(n) {
+    setStory(n);
+    Howler.stop();
+    const sound = new Howl({ src: ['/sounds/' + heroMeta.story[n].voice] });
+    sound.play();
+  }
 
   return (
     <div className="HeroPage">
@@ -970,6 +981,21 @@ function HeroPage({ id, data, update }) {
               <p>{a.description}</p>
             </div>
           ))}
+        </div>
+        <div className="HeroStory">
+          <div className="PanelHeader">Story:</div>
+          {heroMeta.story.map((a, i) => (
+            <button
+              key={i}
+              className="HeroStoryButton"
+              onClick={() => showStory(i)}
+            >
+              Diary {i + 1} {heroMeta.story[i].voice && '🔊'}
+            </button>
+          ))}
+          {story >= 0 && (
+            <p className="HeroStoryText">{heroMeta.story[story].text}</p>
+          )}
         </div>
       </div>
     </div>
