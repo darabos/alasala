@@ -291,8 +291,7 @@ class InMediasRes(Action):
   used = False
   def prepare(self, state):
     t = [h for h in state if h.y == self.subject.y and not self.subject.teammate(h)]
-    if t:
-      self.target = t[0]
+    self.target = t[0] if t else None
   def hankering(self):
     return 99 if self.target and not self.used and self.subject.level >= 3 else 0
   def apply_effect(self):
