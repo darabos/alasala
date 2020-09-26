@@ -30,6 +30,7 @@ def db():
     init_table(c, 'select * from heroes where user = "test"', '''
       drop table if exists heroes
       create table heroes (name text, level int, user text)
+      insert into heroes values ("cube", 1, "test")
       ''')
     print(query(c, 'select * from users'))
     print(query(c, 'SELECT name FROM sqlite_master WHERE type="table"'))
