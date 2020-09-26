@@ -360,7 +360,19 @@ button:hover:enabled {
 .MapDiary {
   max-width: 800px;
   text-align: left;
-  margin: 0 auto;
+  margin: 30px auto;
+  margin-bottom: 0;
+  background: #fff8;
+  padding: 5px 20px;
+  min-height: 100vh;
+  box-shadow: #0009 0px 10px 20px;
+}
+.MapDiary .Credits {
+  font-family: sans-serif;
+  line-height: 1.5em;
+  margin-top: 50px;
+  border-top: 1px solid #0008;
+  padding-top: 10px;
 }
 .HeroList p {
   width: 100%;

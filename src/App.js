@@ -566,7 +566,7 @@ const DIARY = [
     `You are reading the diary of a passenger from the independent sea vessel Golden Quay.
   Our ship was caught in a fierce storm and crashed against the rocks. I had almost
   drowned myself, but the sea spat me out on these shores. Maybe I can find other survivors
-  and explore the island together.`,
+  and explore the island with them.`,
   ],
   [
     2,
@@ -598,7 +598,7 @@ const DIARY = [
   ],
   [
     6,
-    `Ectoplasm has its uses. Its texture, smell, and behavior all support the thesis that
+    `Ectoplasm has its uses. Its texture, smell, and behavior all support the thesis that it
   is a glue of a spiritual nature. I have found the same hero more than once on the beach now.
   I have formulated a theory that these copies are all fragments of one true soul.
   And I can put them back together with Ectoplasm.`,
@@ -638,6 +638,28 @@ function Map(props) {
               </i>
             </p>
           )}
+          <p className="Credits">
+            Thank you for playing Alasala. It is{' '}
+            <a href="https://pyweek.org/e/alasala/">our entry for PyWeek 30</a>.{' '}
+            You can find the source code and report issues on{' '}
+            <a href="https://github.com/darabos/alasala">GitHub</a>. Alasala was
+            created by Andras Nemeth, Daniel Darabos, Hanna Gabor, and Matyas
+            Korom. We didn't use any assets, but we depend on a number of great
+            technologies, notably Python, JavaScript,{' '}
+            <a href="https://flask.palletsprojects.com/">Flask</a>,{' '}
+            <a href="https://threejs.org/">Three.js</a>,{' '}
+            <a href="https://schteppe.github.io/cannon.js/">cannon.js</a>,{' '}
+            <a href="https://reactjs.org/">React</a>,{' '}
+            <a href="https://github.com/pmndrs/react-three-fiber">
+              react-three-fiber
+            </a>
+            , and use the{' '}
+            <a href="https://fonts.google.com/specimen/Corben">Corben</a> and{' '}
+            <a href="https://fonts.google.com/specimen/Grenze+Gotisch">
+              Grenze Gotisch
+            </a>{' '}
+            fonts.
+          </p>
         </div>
       )}
       {view === 'island' && (
