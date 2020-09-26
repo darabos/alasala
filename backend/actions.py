@@ -192,7 +192,7 @@ class Scythe(SimpleAttack):
   range = 1.5
   damage = 200
   cooldown = 10
-  min_level = 2
+  min_level = 1
 
 class Scratch(SimpleAttack):
   attention = 0
@@ -262,6 +262,7 @@ class HealAll(Action):
 
 
 class EdibleWildlife(Action):
+  attention = 0
   def apply_effect(self):
     self.subject.heal(0.1 + self.subject.influence/40)
 
@@ -356,6 +357,7 @@ class ComeToPapa(Action):
   pull_range = 1
   cooldown = 5
   inspiration = 3
+  min_level = 2
 
   def prepare(self, state):
     enemies = [hero for hero in state if not self.subject.teammate(hero)]
@@ -370,7 +372,8 @@ class ComeToPapa(Action):
 
   def get_info(self):
     return {**super().get_info(),
-            'pull_range': self.pull_range}
+            'pull_range': self.pull_range,
+            'targets': [t.id for t in self.targets]}
 
 class FlipWeakest(Action):
   default_hankering = 10
