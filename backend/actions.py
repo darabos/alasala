@@ -376,6 +376,7 @@ class FlipWeakest(Action):
   default_hankering = 10
   cooldown = 10
   inspiration = 3
+  animation_name = 'Overwhelming Terror'
 
   def prepare(self, state):
     enemies = [hero for hero in state if not self.subject.teammate(hero)]

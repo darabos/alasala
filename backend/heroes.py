@@ -279,14 +279,6 @@ class Hark(Hero):
       'unlockLevel': 10,
     }
   ]
-  story = [
-      dict(voice='hark1.m4a', text='''I have studied the ancient legends about the island of Alasala. They say it is cursed.
-  The only way to reach it is by a shipwreck. The curse engulfs the castaways and keeps them on the island,
-  forever. This brings us to our question...'''),
-      dict(voice='hark2.m4a', text='''Namely, how shall we capture this curse? How will we transport it back to England to study in my laboratory?'''),
-      dict(voice='hark3.m4a', text='''Do you have an imaginative mind? Can you fathom the knowledge we could extract from such an experiment?'''),
-      dict(voice='hark4.m4a', text='''We must learn more. No matter the cost. I will lead this group to the heart of Alasala and do what I must.'''),
-  ]
 
 
 class Healer(Hero):
@@ -304,7 +296,7 @@ class Chicken(Hero):
   title = 'Graduate Student in Biology'
   speed_base = 1
   abilities = [
-    { 'name': 'Edible wildlife',
+    { 'name': 'Edible Wildlife',
       'description': 'Amangelica often finds small bugs or roots that allow her to regain some health. And have interesting flavors.',
       'unlockLevel': 1 },
     { 'name': 'Inspiring Conversion',
@@ -479,6 +471,17 @@ class CursePrincess(Hero):
       self.heal(0.5 * self.influence)
       for h in self.opponents_within(state, 1):
         h.hit(0.5 * self.influence)
+  story = [
+      dict(text='''I love this world. Anyone who saw a caterpillar must agree it is the best world. We don't have anything like that in the world
+      of curses. I grew up there and lived there for hundreds of years. My father is the mightiest curse there,
+      the King of Wild Milk. I had everything. But no caterpillars.'''),
+      dict(text='''Humans are so friendly. They love playing with curses. This body used to be the body of a poison maker! She cursed
+      so many others. She liked playing with me so much that she gave me her body. I walk in her shoes now. And her feet.'''),
+      dict(text='''I wonder where the poison maker is now. Did she have another body? There is so much about humans that I don't know!
+      I came to this island to learn about them from an old friend who has been living in this world longer than I. Her name is Alasala.'''),
+      dict(text='''My friend Alasala is ill. I'm sure it's nothing serious! But I will try to help her get well soon.
+      I just need to make my way to her heart and make her a nice hot drink of caterpillars.'''),
+      ]
 
 
 class Reaper(Hero):
@@ -509,9 +512,9 @@ class CrocodileMan(Hero):
       'description':
         'Crocolate does not shy away from physical confontation. He makes his arguments more convincing by pushing back his foes.',
       'unlockLevel': 1 },
-    { 'name': 'Heated Argument',
+    { 'name': 'Overwhelming Terror',
       'description':
-        'Crocolate is so scary that the week tends to just agree with him out of sheer terror. Using 3 inspirations she can convert the weakest enemy to his side.',
+        'Crocolate is so scary that the weak tend to just agree with him out of sheer terror. Using 3 Inspiration he can convert the weakest enemy to his side.',
       'unlockLevel': 1 },
   ]
   action_classes = [FlipWeakest, PushBackAttack]
@@ -522,6 +525,16 @@ class CrocodileMan(Hero):
     self.anger += amount
     normal_influence = self.influence_base + self.level * self.influence_per_level
     self.influence = normal_influence * (self.anger / self.max_loyalty + 1)
+  story = [
+      dict(voice='croc1.m4a', text='''Why is a mighty warrior like me on an island like this? I will tell you why. I came here to prove that I am
+        the mightiest warrior in the world.'''),
+      dict(voice='croc2.m4a', text='''How will I prove that I am the mightiest? By slaying the most dangerous foe in the world. For a long while
+        I did not know who was the most dangerous foe in the world. I thought it was Thundarr from the Badlands. But then I spoke to Gumdorfin.'''),
+      dict(voice='croc3.m4a', text='''Gumdorfin is a very clever wizard. One day he turned Amangelica into a chicken for a short while.
+        He told me where the most dangerous foe in the world lives. It lives on the island called Alasala.'''),
+      dict(voice='croc4.m4a', text='''Gumdorfin says the most dangerous foe is the curse that is on this island. This curse breaks men's
+        souls into shards about this big. And never lets them leave the island. Very mighty curse. I will smash this curse to pieces. About this big.'''),
+  ]
 
 class Monkey(Hero):
   name = 'Ook Ook'
@@ -583,7 +596,7 @@ opponent, his inspiration increases.''',
       'unlockLevel': 1,
     },
     {
-      'name': "Aumann's agreement theorem",
+      'name': "Aumann's Agreement Theorem",
       'description':
       '''When Derek gains enough inspiration, he starts an engaging conversation
       with an opponent. They are both unable to move or act and lose health at
@@ -594,6 +607,14 @@ opponent, his inspiration increases.''',
 
     ]
   action_classes = [DiversityAttack, EngageInConversation]
+  story = [
+      dict(voice='hark1.m4a', text='''I have studied the ancient legends about the island of Alasala. They say it is cursed.
+  The only way to reach it is by a shipwreck. The curse engulfs the castaways and keeps them on the island,
+  forever. This brings us to our question...'''),
+      dict(voice='hark2.m4a', text='''Namely, how shall we capture this curse? How will we transport it back to England to study in my laboratory?'''),
+      dict(voice='hark3.m4a', text='''Do you have an imaginative mind? Can you fathom the knowledge we could extract from such an experiment?'''),
+      dict(voice='hark4.m4a', text='''We must learn more. No matter the cost. I will lead this group to the heart of Alasala and do what I must.'''),
+  ]
 
 class ThoughtWorm(Hero):
   name = 'Thoughtworm'
@@ -690,14 +711,14 @@ class Politician(Hero):
 
   abilities = [
     {
-      'name': 'Chewbacca defense',
+      'name': 'Chewbacca Defense',
       'description': '''The Chewbacca defense is so infuriating to listen to
       that all enemies are forced to attack Will while he is speaking, but Will
-      just reflects the damage back to the attacker.''',
+      just reflects the damage back to the attacker. Costs 3 Inspiration.''',
       'unlockLevel': 1
     },
     {
-      'name': 'Power of convincing',
+      'name': 'Power of Convincing',
       'description': '''Gains inspiration from attacking others.''',
       'unlockLevel' : 1
     }
