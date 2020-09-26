@@ -372,6 +372,17 @@ class InfectedSailor(Hero):
   def init(self):
     if self.level >= 2:
       self.add_status('Infectious', damage=self.influence * 0.1)
+  story = [
+      dict(voice='infec1.m4a', text='''I am a sailor. My brother is a sailor too. I hope he is well and that he takes care of our mother.
+      I may not see her again.'''),
+      dict(voice='infec2.m4a', text='''I was very thirsty and I drank some water. I know I should have boiled it before drinking. But
+      I was very thirsty. I know you can catch worms from unboiled water. But I did not know I could catch Thoughtworms.'''),
+      dict(voice='infec3.m4a', text='''I can feel the Thoughtworm move in my belly. And when it does, I can feel it move in my thoughts.
+      I feel an urge to eat planets. What do they taste like? And now for a second I felt like an expert watchmaker. Strange.'''),
+      dict(voice='infec4.m4a', text='''The Thoughtworm is getting bigger. I cannot stop thinking about bright blue shoes and symphonic
+      music played by various rodents. In my moments of clarity I strive toward the heart of the island, searching for a cure.
+      Or is this also a thought excreted by the Worm?'''),
+      ]
 
 class BullLady(Hero):
   max_loyalty_base = 14
