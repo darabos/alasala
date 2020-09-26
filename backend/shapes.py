@@ -61,7 +61,7 @@ ghost = dict(
 
 rats = dict(
       size=[0.2, 0.3, 0.2],
-      mass = 0.3,
+      mass = 1,
       color='#665',
       children=[
         dict(mass=0.3, size=[0.1, 0.3, 0.1], dir='back', color='#333'),
