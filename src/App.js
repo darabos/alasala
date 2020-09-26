@@ -603,6 +603,61 @@ const DIARY = [
   I have formulated a theory that these copies are all fragments of one true soul.
   And I can put them back together with Ectoplasm.`,
   ],
+  [
+    10,
+    `I have talked to my companions and each one tells a different story of what brought them
+  to this island. I have learned that it is called Alasala, or "Evil Forest" in Javanese.
+  No ship has so far reached this island in one piece, but we are not the first to arrive
+  as castaways. The forest indeed looks and smells evil and even the birds look on menacingly.`,
+  ],
+  [
+    20,
+    `We have started to build a raft. There are members of our company who I do not trust.
+  They are growing to like the island, and I suspect the unnatural influence of the forest
+  here is partly to blame for that. Could there really be a curse here that stops them from
+  wanting to leave? It hasn't stopped me yet.`,
+  ],
+  [
+    50,
+    `I no longer trust my own mind, and neither should you, dear reader, trust these pages.
+  What I must document here will seem like the words of a mad person and they are. There is
+  a curse here. I can talk to it in my dreams. We have made a deal. Our group will be the
+  first to ever leave this island if we can find the dreamcatcher that brought this curse
+  onto the island and place it on a monolith on the snow-covered mountain in the middle.`,
+  ],
+  [
+    60,
+    `Deep in the jungle we have found abandoned huts. They were too small to be lived in by
+  humans, but perhaps a form of elves or gnomes has inhabited the island in the past. Today,
+  only goats were there to observe our passing. In one of the huts we found two dreamcatchers,
+  but the curse tells me they are not the one it's looking for. Such is our luck.`,
+  ],
+  [
+    80,
+    `A woman in our group has discovered a way to extract dreamcatchers from the shadowy
+  opponents that we keep warring against. A specific word has to be uttered in the moments
+  when they disappear. This causes a dreamcatcher to form, seemingly out of nothing. Yet
+  we have not found the right dreamcatcher.`,
+  ],
+  [
+    100,
+    `Carrying our collection of dreamcatchers has become a curse onto itself. We have burnt
+  some of them, but fear that this may release further curses into our worlds. What else
+  can we do? Not even the goats will consume them. Yet many in the team have learned how to
+  build further dreamcatchers. What for, I asked them? We already have too many.`,
+  ],
+  [
+    120,
+    `I have learned how to make dreamcatchers myself. It is a very relaxing activity. I have not
+  felt so at peace in a long time. It is cold here, but we have built a shelter from the
+  elements out of dreamcatchers and share the space with the goats through the freezing night
+  so that their breath may warm it up.`,
+  ],
+  [
+    125,
+    `We have reached the monolith. I have placed my favorite dreamcatcher upon its top.
+  It is in the shape of Alasala. I am free at last.`,
+  ],
 ];
 
 function Map(props) {
@@ -640,12 +695,12 @@ function Map(props) {
           )}
           <p className="Credits">
             Thank you for playing Alasala. It is{' '}
-            <a href="https://pyweek.org/e/alasala/">our entry for PyWeek 30</a>.{' '}
-            You can find the source code and report issues on{' '}
-            <a href="https://github.com/darabos/alasala">GitHub</a>. Alasala was
-            created by Andras Nemeth, Daniel Darabos, Hanna Gabor, and Matyas
-            Korom. We didn't use any assets, but we depend on a number of great
-            technologies, notably Python, JavaScript,{' '}
+            <a href="https://pyweek.org/e/alasala/">our entry for PyWeek 30</a>{' '}
+            for the theme "Castaway". You can find the source code and report
+            issues on <a href="https://github.com/darabos/alasala">GitHub</a>.
+            Alasala was created by Andras Nemeth, Daniel Darabos, Hanna Gabor,
+            and Matyas Korom. We didn't use any assets, but we depend on a
+            number of great technologies, notably Python, JavaScript,{' '}
             <a href="https://flask.palletsprojects.com/">Flask</a>,{' '}
             <a href="https://threejs.org/">Three.js</a>,{' '}
             <a href="https://schteppe.github.io/cannon.js/">cannon.js</a>,{' '}
