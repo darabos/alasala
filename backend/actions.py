@@ -180,6 +180,34 @@ class PushBackAttack(SimpleAttack):
     self.target.x += direction_x * self.push_back
     self.target.y += direction_y * self.push_back
 
+class ChannelingAttack(Action):
+  damage = 1
+  default_hankering = 1
+  animation_name = 'Channeling'
+  cooldown = 8
+  range = 5
+
+  def prepare(self, state):
+    self.target = self.subject.find_closest_opponent(state)
+    self.beneficiary = self.subject.find_closest_ally(state)
+
+  def hankering(self):
+    if self.target and self.beneficiary and (sqrt(self.subject.sq_distance(self.target)) <= self.range):
+      return self.default_hankering
+    return 0
+
+  def apply_effect(self):
+    damage = self.damage * self.subject.influence
+    self.target.hit(damage, self.subject)
+    self.beneficiary.heal(damage)
+
+  def get_info(self):
+    return {**super().get_info(),
+            'range': self.range,
+            'damage': self.damage,
+            'target_hero': self.target.id,
+            'beneficiary_hero': self.beneficiary.id}
+
 class HealAll(Action):
   default_hankering = 10
   heal = 3

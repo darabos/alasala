@@ -155,7 +155,8 @@ function InspirationBar({ value }) {
 
 function SimpleAttack(props) {
   const mesh = useRef();
-  const damage = props.damage;
+    const damage = props.damage;
+    const color = props.color || 'black';
   useFrame(() => {
     const sourceHero = props.sourceHero.current;
     const targetHero = props.targetHero.current;
@@ -180,7 +181,7 @@ function SimpleAttack(props) {
   return (
     <mesh ref={mesh}>
       <sphereBufferGeometry attach="geometry" args={[radius, 32, 32]} />
-      <meshStandardMaterial attach="material" color="black" />
+	  <meshStandardMaterial attach="material" color={color} />
     </mesh>
   );
 }
@@ -212,6 +213,27 @@ function renderAction(
         damage={action.damage}
         {...defaultProps}
       />
+    );
+  }
+  if (
+    action.animation_name === 'Channeling' &&
+    attackTurn >= -1 &&
+    attackTurn <= 0
+  ) {
+      return (
+	  <>
+      <SimpleAttack
+        targetHero={heroRef(action.target_hero)}
+        damage={action.damage}
+        {...defaultProps}
+	      />
+      <SimpleAttack
+        targetHero={heroRef(action.beneficiary_hero)}
+          damage={action.damage}
+	  color='white'
+        {...defaultProps}
+	      />
+	      </>
     );
   }
 }
@@ -1152,7 +1174,7 @@ function App() {
 
   function presetCombat() {
     setPage('combat');
-    setData({ ...data, preset: [1, 3, 16] });
+    setData({ ...data, preset: [1, 30, 12] });
   }
   return (
     <div>

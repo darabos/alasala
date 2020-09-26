@@ -436,3 +436,13 @@ opponent, his inspiration increases.''',
 
     ]
   action_classes = [DiversityAttack, EngageInConversation]
+
+class ThoughtWorm(Hero):
+  name = 'ThoughtWorm'
+  title = 'Predator of Memes'
+  shape = shapes.snake
+  influence_per_level = 0.2
+
+  abilities = []
+
+  action_classes = [ChannelingAttack]
