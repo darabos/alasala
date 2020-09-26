@@ -160,6 +160,20 @@ class InspiringRangedAttack(SimpleAttack):
     if random.random() < 0.1 * self.subject.level:
       self.subject.inspiration += 1
 
+class RandomInspiringAttack(SimpleAttack):
+  range = 3
+  base_damage = 0.8
+  cooldown = 7
+
+  def apply_effect(self):
+    random_damage = random.random() * 0.2
+    self.damage = self.base_damage + random_damage
+    if random_damage + 0.05 * self.subject.level > 0.15:
+      self.subject.inspiration += 3
+    if random_damage + 0.05 * self.subject.level > 0.45:
+      self.subject.inspiration += 1
+    super().apply_effect()
+
 class BrutalAttack(SimpleAttack):
   range = 10
   damage = 3
@@ -457,7 +471,7 @@ class Rescue(Action):
     if self.target:
       return self.default_hankering
     return 0
-  
+
   def eligible(self, hero):
     return self.subject.teammate(hero) and hero.id != self.subject.id
 
@@ -495,3 +509,11 @@ class LookingForTrouble(Action):
   range = 1
   def hankering(self):
     return 0
+
+class ChewbaccaDefense(Action):
+  default_hankering = 99
+  cooldown = 0
+  inspiration = 3
+
+  def apply_effect(self):
+    self.subject.is_chewbacca = True

@@ -16,7 +16,9 @@ class Hero:
   # This hero can only be found on the beach after this stage.
   min_stage = 0
   num_conversations = 0
+  is_chewbacca = False
   npc = False
+
 
   def __init__(self, level, id, owner, x, y):
     self.level = level
@@ -70,7 +72,7 @@ class Hero:
       for (name, cls) in Hero.hero_classes.items()}
 
   def has_status(self, stype):
-    return bool([s for s in self.status if s['type'] == stype])
+    return any(s['type'] == stype for s in self.status)
 
   def remove_status(self, stype):
     self.status = [s for s in self.status if s['type'] != stype]
@@ -127,6 +129,8 @@ class Hero:
     self.apply_status_effects(state)
 
     if self.has_status('Anaesthesia'):
+      if random.random() + self.influence / 20 >= 0.1:
+        self.remove_status('Anaesthesia')
       return
 
     cool_actions = [a for a in self.actions if a.is_cool()]
@@ -221,7 +225,11 @@ class Hero:
   def find_closest_opponent(self, state):
     opponents = list(filter(lambda h: not self.teammate(h), state))
     if opponents:
-      return min(opponents, key=lambda h: self.sq_distance(h))
+      chewbaccas = list(filter(lambda o: o.is_chewbacca, opponents))
+      if chewbaccas:
+        return chewbaccas[0]
+      else:
+        return min(opponents, key=lambda h: self.sq_distance(h))
     else:
       return None
 
@@ -581,7 +589,7 @@ class Rats(Hero):
   name = 'Rats'
   title = 'A Pack of Rodents'
   speed = 2
-  
+
   abilities = []
   action_classes = [Scratch]
   shape = shapes.rats
@@ -592,7 +600,7 @@ class SteelKing(Hero):
   name = 'Oreus of Iron the Second'
   title = 'King of the Minerals'
   speed = 1
-  
+
   abilities = []
   action_classes = [BrutalAttack]
   shape = shapes.steelking
@@ -603,7 +611,45 @@ class Lady(Hero):
   name = 'Lady Why (Not)'
   title = 'Muse of the Stoic'
   speed = 1
-  
+
   abilities = []
   action_classes = [FarCaress]
   shape = shapes.lady
+
+class Politician(Hero):
+  name = 'Will'
+  title = 'Aspiring Politician'
+  shape = shapes.politician
+  chewbacca_reflected = 0
+  action_classes = [RandomInspiringAttack, ChewbaccaDefense]
+
+  @property
+  def max_chewbacca_reflected(self):
+    return 2.5 * self.influence
+
+  abilities = [
+    {
+      'name': 'Chewbacca defense',
+      'description': '''The Chewbacca defense is so infuriating to listen to
+      that all enemies are forced to attack Will while he is speaking, but Will
+      just reflects the damage back to the attacker.''',
+      'unlockLevel': 1
+    },
+    {
+      'name': 'Power of convincing',
+      'description': '''Gains inspiration from attacking others.''',
+      'unlockLevel' : 1
+    }
+  ]
+
+  def hit(self, amount, by=None):
+    effective_amount = amount
+    if self.is_chewbacca and by is not None:
+      reflected = min(self.max_chewbacca_reflected - self.chewbacca_reflected, amount)
+      self.chewbacca_reflected += reflected
+      if self.chewbacca_reflected >= self.max_chewbacca_reflected:
+        self.is_chewbacca = False
+        self.chewbacca_reflected = 0
+      effective_amount = amount - reflected
+      by.hit(reflected, self)
+    super().hit(effective_amount, by)
