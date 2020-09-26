@@ -449,7 +449,7 @@ class CursePrincess(Hero):
       'unlockLevel': 4 },
     ]
   action_classes = [InspiringRangedAttack, UnpredictableJourney, CurseFlight]
-  shape = shapes.knight
+  shape = shapes.ghost
   def hit(self, amount, by=None):
     if not self.has_status('Curse Flight'):
       super().hit(amount, by)
@@ -570,3 +570,33 @@ class RescueParrot(Hero):
   abilities = []
 
   action_classes = [Rescue, EnemyRescue, LookingForTrouble]
+
+class Rats(Hero):
+  min_stage = 1000 # NPC
+  name = 'Rats'
+  title = 'A Pack of Rodents'
+  speed = 2
+  
+  abilities = []
+  action_classes = [Scratch]
+  shape = shapes.rats
+
+class SteelKing(Hero):
+  min_stage = 1000 # NPC
+  name = 'Oreus of Iron the Second'
+  title = 'King of the Minerals'
+  speed = 1
+  
+  abilities = []
+  action_classes = [BrutalAttack]
+  shape = shapes.steelking
+
+class Lady(Hero):
+  min_stage = 1000 # NPC
+  name = 'Lady Why (Not)'
+  title = 'Muse of the Stoic'
+  speed = 1
+  
+  abilities = []
+  action_classes = [FarCaress]
+  shape = shapes.lady
