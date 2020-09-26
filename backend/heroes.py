@@ -8,11 +8,11 @@ class Hero:
   hero_classes = {}
   story = []
   max_loyalty_base = 7
-  max_loyalty_per_level = 1
+  max_loyalty_per_level = 3
   speed_base = 1
   speed_per_level = 0
   influence_base = 1
-  influence_per_level = 0
+  influence_per_level = 0.3
   # This hero can only be found on the beach after this stage.
   min_stage = 0
   num_conversations = 0
