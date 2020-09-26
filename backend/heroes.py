@@ -124,20 +124,14 @@ class Hero:
   def init(self):
     pass
 
-  def step(self, state, step_number):
+  def act(self):
     self.actions_in_turn = []
-    if self.is_frozen():
-      return
-
-    self.before_step(state)
-
-    self.apply_status_effects(state)
-
     if self.has_status('Anaesthesia'):
       if random.random() + self.influence / 20 >= 0.1:
         self.remove_status('Anaesthesia')
       return
-
+    if self.is_frozen():
+      return
     cool_actions = [a for a in self.actions if a.is_cool()]
     for action in cool_actions:
       action.prepare(state)
@@ -159,12 +153,15 @@ class Hero:
 
     self.inspiration = min(3, self.inspiration + resources['inspiration'])
 
-    for action in self.actions:
-      action.cool()
-
     if resources['attention']:
       self.move(state)
 
+  def step(self, state, step_number):
+    self.before_step(state)
+    self.apply_status_effects(state)
+    self.act()
+    for action in self.actions:
+      action.cool()
     self.after_step(state)
 
   def apply_status_effects(self, state):
