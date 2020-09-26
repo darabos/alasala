@@ -469,6 +469,7 @@ function Combat({ data, setShowButtons }) {
 
   function startCombat(party) {
     setState('simulate');
+    console.log('Starting battle with party: ', party);
     post('/computecombat', {
       user: 'test',
       stage: data.progress.stage,
@@ -481,6 +482,10 @@ function Combat({ data, setShowButtons }) {
         setJournal(res.log);
         setWinner(res.winner);
       });
+  }
+
+  if (data.preset && state === 'selectParty') {
+    startCombat(data.preset);
   }
 
   return (
@@ -1145,6 +1150,10 @@ function App() {
     }, setError);
   }
 
+  function presetCombat() {
+    setPage('combat');
+    setData({ ...data, preset: [1, 3, 16] });
+  }
   return (
     <div>
       {error && <div>{error}</div>}
@@ -1192,6 +1201,7 @@ function App() {
           >
             Map
           </button>
+          <button onClick={presetCombat}>Preset Combat</button>
         </div>
       )}
     </div>

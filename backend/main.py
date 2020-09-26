@@ -106,6 +106,14 @@ def searchbeach():
   data['just_found'] = hero
   return flask.jsonify(data)
 
+@app.route('/oneofeach', methods=['GET'])
+def oneofeach():
+  c = db()
+  for name, meta in Hero.get_index().items():
+    hero = {'name': name, 'level': 1}
+    c.execute('insert into heroes values (?, ?, ?)', (hero['name'], hero['level'], 'test'))
+  return "Your wish was granted"
+
 @app.route('/dissolve', methods=['POST'])
 def dissolve():
   user = flask.request.get_json()['user']
