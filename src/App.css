@@ -231,7 +231,7 @@ button:hover:enabled {
 .Enemy .HeroCard {
   height: 200px;
   width: 150px;
-  filter: hue-rotate(90deg);
+  filter: grayscale(80%);
 }
 .Enemy .CardName {
   font-size: 20px;
