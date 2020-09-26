@@ -337,7 +337,7 @@ class FlipWeakest(Action):
       self.target = min(enemies, key = lambda h: abs(h.loyalty))
 
   def apply_effect(self):
-    self.target.hit(2 * self.target.loyalty)
+    self.target.hit(abs(2 * self.target.loyalty))
 
   def get_info(self):
     return {**super().get_info(),
@@ -423,3 +423,48 @@ class Anaesthetise(Action):
     return {**super().get_info(),
             'target_hero': self.target.id}
 
+class Rescue(Action):
+  cooldown = 15
+
+  def hankering(self):
+    if self.target:
+      return self.default_hankering
+    return 0
+  
+  def eligible(self, hero):
+    return self.subject.teammate(hero) and hero.id != self.subject.id
+
+  def prepare(self, state):
+    options = [hero for hero in state if self.eligible(hero)]
+    self.target = None
+    if options:
+      self.target = max(options, key = lambda h: h.max_loyalty - abs(h.loyalty))
+
+  def apply_effect(self):
+    if not self.subject.teammate(self.target):
+      self.target.hit(abs(2 * self.target.loyalty))
+
+    self.target.x = self.target.start_x
+    self.target.y = self.target.start_y
+    amount = self.target.max_loyalty - abs(self.target.loyalty)
+    self.target.heal(amount)
+    self.subject.heal(amount / 2)
+
+  def get_info(self):
+    return {**super().get_info(),
+            'target_hero': self.target.id}
+
+
+class EnemyRescue(Rescue):
+  inspiration = 3
+  default_hankering = 15
+
+  def eligible(self, hero):
+    return not self.subject.teammate(hero)
+
+# This never happens. But draws the owner toward enemies.
+class LookingForTrouble(Action):
+  cooldown = 1000
+  range = 1
+  def hankering(self):
+    return 0
