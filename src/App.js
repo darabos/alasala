@@ -104,7 +104,7 @@ const HeroBox = React.forwardRef((props, heroRef) => {
       position={[initial.x, initial.y]}
     >
       {'loyalty' in current ? (
-        <Html center position-z={2}>
+        <Html className="CombatHeroStats" position-z={2}>
           <LoyaltyBar
             max={current.max_loyalty || Math.abs(initial.loyalty)}
             current={current.loyalty}
