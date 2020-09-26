@@ -465,6 +465,17 @@ class CursePrincess(Hero):
       self.heal(0.5 * self.influence)
       for h in self.opponents_within(state, 1):
         h.hit(0.5 * self.influence)
+  story = [
+      dict(text='''I love this world. Anyone who saw a caterpillar must agree it is the best world. We don't have anything like that in the world
+      of curses. I grew up there and lived there for hundreds of years. My father is the mightiest curse there,
+      the King of Wild Milk. I had everything. But no caterpillars.'''),
+      dict(text='''Humans are so friendly. They love playing with curses. This body used to be the body of a poison maker! She cursed
+      so many others. She liked playing with me so much that she gave me her body. I walk in her shoes now. And her feet.'''),
+      dict(text='''I wonder where the poison maker is now. Did she have another body? There is so much about humans that I don't know!
+      I came to this island to learn about them from an old friend who has been living in this world longer than I. Her name is Alasala.'''),
+      dict(text='''My friend Alasala is ill. I'm sure it's nothing serious! But I will try to help her get well soon.
+      I just need to make my way to her heart and make her a nice hot drink of caterpillars.'''),
+      ]
 
 
 class Reaper(Hero):
