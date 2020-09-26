@@ -127,8 +127,6 @@ class Hero:
   def act(self, state):
     self.actions_in_turn = []
     if self.has_status('Anaesthesia'):
-      if random.random() + self.influence / 20 >= 0.1:
-        self.remove_status('Anaesthesia')
       return
     if self.is_frozen():
       return
@@ -439,7 +437,7 @@ class BullLady(Hero):
         h.hit(self.violence * 0.1 * self.influence)
 
 class Knight(Hero):
-  max_loyalty_base = 6
+  max_loyalty_base = 18
   max_loyalty_per_level = 3
   influence_base = 1.2
   influence_per_level = 0.2
@@ -540,14 +538,17 @@ class CrocodileMan(Hero):
   abilities = [
     { 'name': 'Heated Argument',
       'description':
-        'Crocolate does not shy away from physical confontation. He makes his arguments more convincing by pushing back his foes.',
+        'Crocolate does not shy away from physical confrontation. He makes his arguments more convincing by pushing back his foes.',
+      'unlockLevel': 1 },
+    { 'name': 'Meditative Inspiration',
+      'description': 'Crocolate gets inspired over time simply by watching others fight.',
       'unlockLevel': 1 },
     { 'name': 'Overwhelming Terror',
       'description':
         'Crocolate is so scary that the weak tend to just agree with him out of sheer terror. Using 3 Inspiration he can convert the weakest enemy to his side.',
-      'unlockLevel': 1 },
+      'unlockLevel': 3 },
   ]
-  action_classes = [FlipWeakest, PushBackAttack]
+  action_classes = [FlipWeakest, PushBackAttack, InspiredByTime]
   shape = shapes.krokotyuk
   anger = 0
   def hit(self, amount, by=None):
@@ -664,7 +665,7 @@ class ThoughtWorm(Hero):
     { 'name': 'Anaesthesia',
       'description':
         'Changing your convictions can be painful. Well, unless you meet the Thoughtworm. Using 3 inspirations, he can put you under. You will not feel a thing - or be able to do a thing - until your worldview was inverted.',
-      'unlockLevel': 1 },
+      'unlockLevel': 3 },
   ]
 
   action_classes = [ChannelingAttack, Anaesthetise, InspiredByTime]
@@ -677,7 +678,7 @@ class RescueParrot(Hero):
   def hit(self, amount, by=None):
     super().hit(amount, by)
     # Painful Inspiration
-    if self.inspiration < 3 and random.random() < 0.6 * self.level:
+    if self.inspiration < 3 and random.random() < 0.06 * self.level:
       self.inspiration += 1
 
   abilities = [
@@ -691,7 +692,7 @@ class RescueParrot(Hero):
     { 'name': 'Extraction',
       'description':
         '''Why restrict rescue to allies? Parrot also wants to rescue enemies from their misguided convictions. She can pick up the weakest enemy, flip him over to Parrot's side, then take her back to the starting position. It costs 3 inspirations, though.''',
-      'unlockLevel': 1 },
+      'unlockLevel': 3 },
   ]
 
   action_classes = [Rescue, EnemyRescue, LookingForTrouble]
