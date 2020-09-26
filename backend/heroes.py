@@ -1,6 +1,7 @@
 import math
 import random
 import backend.shapes as shapes
+from copy import deepcopy
 from backend.actions import *
 
 class Hero:
@@ -33,6 +34,7 @@ class Hero:
     self.actions = [
       a(self) for a in self.action_classes if self.level >= a.min_level]
     self.inspiration = 0
+    self.init()
 
   @classmethod
   def __init_subclass__(cls):
@@ -67,21 +69,30 @@ class Hero:
   def remove_status(self, stype):
     self.status = [s for s in self.status if s['type'] != stype]
 
-  def add_status(self, stype):
-    self.status.append({'type': stype})
+  def add_status(self, stype, **kwargs):
+    self.status.append({'type': stype, **kwargs})
 
   def is_frozen(self):
     return self.num_conversations != 0
 
-  def hit(self, amount):
+  def hit(self, amount, by=None):
     self.remove_status('Concentrating') # Concentrating spells are interrupted by hits.
-    amount = math.copysign(amount, self.loyalty)
+    if self.has_status('Thoughtworm'): amount *= 1.5
     self.switched = abs(amount) > abs(self.loyalty) # Only valid in hit() overrides.
+
+    # Core logic.
+    amount = math.copysign(amount, self.loyalty)
     self.loyalty -= amount
+
     for s in self.status[:]:
       if s['type'] == 'Safety Collar' and self.switched:
         self.status.remove(s)
         self.hit(s['damage'])
+      if s['type'] == 'Thoughtworm' and self.switched:
+        self.status.remove(s)
+      if s['type'] == 'Infectious' and by:
+        by.add_status('Thoughtworm', damage=s['damage'])
+        self.status.remove(s)
 
   def heal(self, amount):
     amount = math.copysign(amount, self.loyalty)
@@ -91,6 +102,9 @@ class Hero:
     pass
 
   def after_step(self):
+    pass
+
+  def init(self):
     pass
 
   def step(self, state, step_number):
@@ -140,6 +154,8 @@ class Hero:
         s['duration'] -= 1
         if s['duration'] <= 0:
           self.status.remove(s)
+      if s['type'] == 'Thoughtworm':
+        self.hit(s['damage'])
 
   def move(self, state):
     target = self.find_closest_opponent(state)
@@ -155,7 +171,7 @@ class Hero:
 
 
   def get_log_entry(self):
-    return {
+    return deepcopy({
     'x': self.x,
     'y': self.y,
     'name': self.name,
@@ -163,8 +179,8 @@ class Hero:
     'max_loyalty': self.max_loyalty,
     'status': self.status,
     'actions': self.actions_in_turn,
-    'inspiration': self.inspiration
-    }
+    'inspiration': self.inspiration,
+    })
 
   def direction_to_hero(self, other):
     x = other.x - self.x
@@ -299,14 +315,41 @@ class Wizard(Hero):
       'description': 'Gumdorfin casts a spell to transform an enemy into a mushroom. Mushrooms continuously damage their nearby allies.',
       'unlockLevel': 2 },
     { 'name': 'Astral Boar',
-      'description': 'Gumdorfin summons an invisible boar that eats all mushrooms. Takes 5 inspiration.',
+      'description': 'Gumdorfin summons an invisible boar that eats all mushrooms. Takes 3 inspiration.',
       'unlockLevel': 3 },
     { 'name': 'Aggressive Inspiration',
       'description': 'Gumdorfin often gains inspiration when attacking someone.',
-      'unlockLevel': 3 },
+      'unlockLevel': 1 },
     ]
   action_classes = [InspiringAttack, SuperiorOrganism, AstralBear]
   shape = shapes.wizard
+
+
+class InfectedSailor(Hero):
+  max_loyalty_base = 10
+  max_loyalty_per_level = 3
+  name = 'Jonathon'
+  title = 'Bearlike Infected Sailor'
+  speed_base = 1
+  abilities = [
+    { 'name': 'Asymptomatic Carrier',
+      'description': 'Jonathon has gotten used to the effects of the Thoughtworm and now operates normally while carrying one.',
+      'unlockLevel': 1 },
+    { 'name': 'Infectious Touch',
+      'description': 'Jonathon starts the fight with a Thoughtworm in his belly. The first enemy to hit him takes on this worm. The affected enemy loses loyalty over time and is 50% more susceptible to attacks. The Thoughtworm matures and flies off as a Thoughtbutterfly when the enemy is converted.',
+      'unlockLevel': 2 },
+    { 'name': 'Aggressive Inspiration',
+      'description': 'Jonathon often gains inspiration when attacking someone.',
+      'unlockLevel': 1 },
+    { 'name': 'An Egg Hatches',
+      'description': 'When Jonathon has collected 3 Inspiration, a new Thoughtworm hatches is his belly. (Unless there is already one.)',
+      'unlockLevel': 3 },
+    ]
+  action_classes = [InspiringAttack, AnEggHatches]
+  shape = shapes.bear
+  def init(self):
+    if self.level >= 2:
+      self.add_status('Infectious', damage=self.influence * 0.1)
 
 
 class Reaper(Hero):
