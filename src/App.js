@@ -104,7 +104,7 @@ const HeroBox = React.forwardRef((props, heroRef) => {
       position={[initial.x, initial.y]}
     >
       {'loyalty' in current ? (
-        <Html center position-z={2}>
+        <Html className="CombatHeroStats" position-z={2}>
           <LoyaltyBar
             max={current.max_loyalty || Math.abs(initial.loyalty)}
             current={current.loyalty}
@@ -265,7 +265,12 @@ function PartySelector({ data, party, setParty, startCombat }) {
             return <div key={i} className="CardBack" />;
           } else {
             return (
-              <HeroListItem key={i} onClick={() => removeHero(i)} hero={h} />
+              <HeroListItem
+                key={i}
+                onClick={() => removeHero(i)}
+                hero={h}
+                data={data}
+              />
             );
           }
         })}
@@ -281,6 +286,7 @@ function PartySelector({ data, party, setParty, startCombat }) {
         Fight!
       </button>
       <HeroList
+        data={data}
         heroes={data.heroes.filter((h) => !partyNames.includes(h.name))}
         onClick={(h) => addHero(h)}
       />
@@ -300,7 +306,7 @@ function BattleRenderer(props) {
   console.log('journal', journal);
   if (journal) {
     Object.entries(journal[0]).forEach(([id, value]) => {
-      const meta = data.index[value.name];
+      const meta = data.index[value.classname];
       heroStories.push({
         id: id,
         meta: meta,
@@ -485,7 +491,7 @@ function Spinner() {
 function lastParty(data) {
   const j = JSON.parse(localStorage.getItem('last party'));
   const p = j || new Array(5).fill().map(() => null);
-  return p.map(id => data.heroes.find(h => h.id === id) ? id : null);
+  return p.map((id) => (data.heroes.find((h) => h.id === id) ? id : null));
 }
 
 function Combat({ data, setShowButtons }) {
@@ -818,6 +824,7 @@ function HeroList(props) {
         <HeroListItem
           key={h.id}
           hero={h}
+          data={props.data}
           showLevel
           onClick={() => props.onClick(h)}
         />
@@ -831,7 +838,8 @@ function heroPortrait(hero) {
   );
 }
 
-function HeroListItem({ showLevel, hero, onClick }) {
+function HeroListItem({ showLevel, hero, data, onClick }) {
+  const meta = data.index[hero.name];
   return (
     <>
       <div
@@ -843,7 +851,7 @@ function HeroListItem({ showLevel, hero, onClick }) {
           className="CardPortrait"
           style={{ backgroundImage: heroPortrait(hero) }}
         />
-        <div className="CardName"> {hero.name} </div>
+        <div className="CardName"> {meta.name} </div>
         {showLevel && (
           <div className="CardLevel">
             level <b>{hero.level}</b>
@@ -854,7 +862,7 @@ function HeroListItem({ showLevel, hero, onClick }) {
   );
 }
 
-function HeroCard({ hero, onFlipped }) {
+function HeroCard({ hero, data, onFlipped }) {
   const config = { tension: 100 };
   const [flipped, setFlipped] = useState(false);
   const flip = useReactSpring({
@@ -867,6 +875,7 @@ function HeroCard({ hero, onFlipped }) {
     transform: `rotate3d(0, 1, 0, ${flipped ? 180 : 360}deg)`,
     from: { transform: 'rotate3d(0, 1, 0, 360deg)' },
   });
+  const meta = data.index[hero.name];
   return (
     <>
       <animated.div
@@ -883,7 +892,7 @@ function HeroCard({ hero, onFlipped }) {
           className="CardPortrait"
           style={{ backgroundImage: heroPortrait(hero) }}
         />
-        <div className="CardName"> {hero.name} </div>
+        <div className="CardName"> {meta.name} </div>
       </animated.div>
     </>
   );
@@ -1037,7 +1046,7 @@ function HeroPage({ id, data, update }) {
         </CombatCanvas>
       </div>
       <div className="HeroText">
-        <div className="HeroName"> {hero.name} </div>
+        <div className="HeroName"> {heroMeta.name} </div>
         <div className="HeroStats">
           <span>{heroMeta.title}</span>
           <span>Level {hero.level}</span>
@@ -1129,6 +1138,7 @@ function Searched(props) {
     <div className="Searched">
       <HeroCard
         onFlipped={() => props.setShowButtons(true)}
+        data={props.data}
         hero={props.data.just_found}
       ></HeroCard>
     </div>
@@ -1193,6 +1203,7 @@ function App() {
           )}
           {page === 'heroes' && (
             <HeroList
+              data={data}
               heroes={data.heroes}
               onClick={(h) => {
                 setPage('hero');

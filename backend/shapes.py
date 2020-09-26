@@ -61,10 +61,11 @@ ghost = dict(
 
 rats = dict(
       size=[0.2, 0.3, 0.2],
+      mass = 0.3,
       color='#665',
       children=[
-        dict(size=[0.1, 0.3, 0.1], dir='back', color='#333'),
-        dict(size=[0.1, 0.1, 0.1], dir='front'),
+        dict(mass=0.3, size=[0.1, 0.3, 0.1], dir='back', color='#333'),
+        dict(mass=0.3, size=[0.1, 0.1, 0.1], dir='front'),
   dict(
     dir='left',
     offset=[0.6, 0.2, 0],

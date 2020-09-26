@@ -17,6 +17,8 @@ class Hero:
   min_stage = 0
   num_conversations = 0
   is_chewbacca = False
+  npc = False
+
 
   def __init__(self, level, id, owner, x, y):
     self.level = level
@@ -41,7 +43,7 @@ class Hero:
 
   @classmethod
   def __init_subclass__(cls):
-    Hero.hero_classes[cls.name] = cls
+    Hero.hero_classes[cls.__name__] = cls
 
   @staticmethod
   def create_by_name(name, level, id, owner, x, y):
@@ -52,6 +54,7 @@ class Hero:
     return {
       name: {
         'name': cls.name,
+        'classname': name,
         'title': cls.title,
         'abilities': cls.abilities,
         'story': cls.story,
@@ -64,6 +67,7 @@ class Hero:
         'influence_per_level': cls.influence_per_level,
         'weight': shapes.weightOf(cls.shape),
         'min_stage': cls.min_stage,
+        'npc': cls.npc
       }
       for (name, cls) in Hero.hero_classes.items()}
 
@@ -188,6 +192,7 @@ class Hero:
     'x': self.x,
     'y': self.y,
     'name': self.name,
+    'classname': type(self).__name__,
     'loyalty': self.loyalty,
     'max_loyalty': self.max_loyalty,
     'status': self.status,
@@ -237,7 +242,7 @@ class Hero:
 
 class Cube(Hero):
   min_stage = 1000 # Used in development.
-  name = 'cube'
+  name = 'Test Cube'
   title = 'Platonic Solid'
   abilities = []
   action_classes = [BaseAttack]
@@ -284,7 +289,7 @@ class Hark(Hero):
 
 class Healer(Hero):
   min_stage = 1000 # Used in development.
-  name = 'healer'
+  name = 'Test Healer'
   title = 'Angelic Presence'
   speed_base = 0
   abilities = []
@@ -456,7 +461,7 @@ class CursePrincess(Hero):
       'unlockLevel': 4 },
     ]
   action_classes = [InspiringRangedAttack, UnpredictableJourney, CurseFlight]
-  shape = shapes.knight
+  shape = shapes.ghost
   def hit(self, amount, by=None):
     if not self.has_status('Curse Flight'):
       super().hit(amount, by)
@@ -478,7 +483,7 @@ class Reaper(Hero):
   shape = shapes.reaper
 
 class CrocodileMan(Hero):
-  name = 'CrocodileMan'
+  name = 'Crocolate'
   title = 'Smelly Reptile'
   abilities = []
   action_classes = [FlipWeakest, PushBackAttack]
@@ -491,7 +496,7 @@ class CrocodileMan(Hero):
     self.influence = normal_influence * (self.anger / self.max_loyalty + 1)
 
 class Monkey(Hero):
-  name = 'Crazy Monkey'
+  name = 'Ook Ook'
   title = 'Itchy Fleabag'
   abilities = []
   action_classes = [Scratch]
@@ -554,7 +559,7 @@ opponent, his inspiration increases.''',
   action_classes = [DiversityAttack, EngageInConversation]
 
 class ThoughtWorm(Hero):
-  name = 'ThoughtWorm'
+  name = 'Thought Worm'
   title = 'Predator of Memes'
   shape = shapes.snake
   influence_per_level = 0.2
@@ -577,6 +582,39 @@ class RescueParrot(Hero):
   abilities = []
 
   action_classes = [Rescue, EnemyRescue, LookingForTrouble]
+
+class Rats(Hero):
+  npc = True
+  min_stage = 1
+  name = 'Rats'
+  title = 'A Pack of Rodents'
+  speed = 2
+
+  abilities = []
+  action_classes = [Scratch]
+  shape = shapes.rats
+
+class SteelKing(Hero):
+  npc = True
+  min_stage = 10
+  name = 'Oreus of Iron the Second'
+  title = 'King of the Minerals'
+  speed = 1
+
+  abilities = []
+  action_classes = [BrutalAttack]
+  shape = shapes.steelking
+
+class Lady(Hero):
+  npc = True
+  min_stage = 4
+  name = 'Lady Why (Not)'
+  title = 'Muse of the Stoic'
+  speed = 1
+
+  abilities = []
+  action_classes = [FarCaress]
+  shape = shapes.lady
 
 class Politician(Hero):
   name = 'Will'
