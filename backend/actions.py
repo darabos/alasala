@@ -28,6 +28,8 @@ class Action:
   # Heros can only use this above the below level.
   min_level = 1
 
+  default_hankering = 1
+
   def __init__(self, subject):
     self.subject = subject
     self.cooldown_progress = 0
@@ -50,7 +52,7 @@ class Action:
   # How much the hero wants to do this. =0 if not usable. Cooldown will
   # be handled by hero.
   def hankering(self):
-    return 0
+    return self.default_hankering
 
   def resources_sufficient(self, resources):
     for (resource, need) in self.resource_needs.items():
@@ -145,6 +147,19 @@ class InspiringAttack(SimpleAttack):
     if random.random() < 0.1 * self.subject.level:
       self.subject.inspiration += 1
 
+class InspiringRangedAttack(SimpleAttack):
+  range = 12
+  damage = 1
+  cooldown = 8
+  def hankering(self):
+    if self.subject.has_status('Curse Flight'):
+      return 0
+    return super().hankering()
+  def apply_effect(self):
+    super().apply_effect()
+    if random.random() < 0.1 * self.subject.level:
+      self.subject.inspiration += 1
+
 class RandomInspiringAttack(SimpleAttack):
   range = 3
   base_damage = 0.8
@@ -155,7 +170,6 @@ class RandomInspiringAttack(SimpleAttack):
     self.damage = self.base_damage + random_damage
     self.subject.inspiration += (10 + self.subject.level / 5) * random_damage
     super().apply_effect()
-
 
 class BrutalAttack(SimpleAttack):
   range = 10
@@ -191,6 +205,34 @@ class PushBackAttack(SimpleAttack):
     direction_x, direction_y = self.subject.direction_to_hero(self.target)
     self.target.x += direction_x * self.push_back
     self.target.y += direction_y * self.push_back
+
+class ChannelingAttack(Action):
+  damage = 1
+  default_hankering = 1
+  animation_name = 'Channeling'
+  cooldown = 8
+  range = 5
+
+  def prepare(self, state):
+    self.target = self.subject.find_closest_opponent(state)
+    self.beneficiary = self.subject.find_closest_ally(state)
+
+  def hankering(self):
+    if self.target and self.beneficiary and (sqrt(self.subject.sq_distance(self.target)) <= self.range):
+      return self.default_hankering
+    return 0
+
+  def apply_effect(self):
+    damage = self.damage * self.subject.influence
+    self.target.hit(damage, self.subject)
+    self.beneficiary.heal(damage)
+
+  def get_info(self):
+    return {**super().get_info(),
+            'range': self.range,
+            'damage': self.damage,
+            'target_hero': self.target.id,
+            'beneficiary_hero': self.beneficiary.id}
 
 class HealAll(Action):
   default_hankering = 10
@@ -256,6 +298,51 @@ class AnEggHatches(Action):
   def apply_effect(self):
     self.subject.add_status('Infectious', damage=0.1 * self.subject.influence)
 
+class InMediasRes(Action):
+  used = False
+  def prepare(self, state):
+    t = [h for h in state if h.y == self.subject.y and not self.subject.teammate(h)]
+    self.target = t[0] if t else None
+  def hankering(self):
+    return 99 if self.target and not self.used and self.subject.level >= 3 else 0
+  def apply_effect(self):
+    self.used = True
+    ox = self.subject.x
+    self.subject.x = self.target.x
+    self.target.x = ox
+
+class EscalatingViolence(Action):
+  inspiration = 3
+  def hankering(self):
+    return 99 if self.subject.level >= 4 else 0
+  def apply_effect(self):
+    self.subject.violence += 1
+
+class ExudeConviction(Action):
+  inspiration = 3
+  def prepare(self, state):
+    self.targets = list(self.subject.opponents_within(state, 10))
+  def hankering(self):
+    return 99 if self.targets and self.subject.level >= 3 else 0
+  def apply_effect(self):
+    for h in self.targets:
+      h.hit(3 * self.subject.influence, self)
+
+class UnpredictableJourney(Action):
+  cooldown = 27
+  def hankering(self):
+    return 1
+  def apply_effect(self):
+    self.subject.x += random.random() * 12 - 6
+    self.subject.y += random.random() * 12 - 6
+
+class CurseFlight(Action):
+  inspiration = 3
+  def hankering(self):
+    return 99 if self.subject.level >= 4 else 0
+  def apply_effect(self):
+    self.subject.add_status('Curse Flight', duration=10)
+
 
 class ComeToPapa(Action):
   default_hankering = 10
@@ -265,9 +352,6 @@ class ComeToPapa(Action):
 
   def prepare(self, state):
     self.targets = [hero for hero in state if not self.subject.teammate(hero)]
-
-  def hankering(self):
-    return self.default_hankering
 
   def apply_effect(self):
     for target in self.targets:
@@ -291,7 +375,7 @@ class FlipWeakest(Action):
       self.target = min(enemies, key = lambda h: abs(h.loyalty))
 
   def apply_effect(self):
-    self.target.hit(2 * self.target.loyalty)
+    self.target.hit(abs(2 * self.target.loyalty))
 
   def get_info(self):
     return {**super().get_info(),
@@ -358,6 +442,70 @@ class EngageInConversation(SimpleAttack):
     self.target.num_conversations -= 1
     self.subject.in_conversation_with = None
     self.cooldown = self.orig_cooldown
+
+class Anaesthetise(Action):
+  default_hankering = 10
+  cooldown = 10
+  inspiration = 3
+
+  def prepare(self, state):
+    enemies = [hero for hero in state if not self.subject.teammate(hero)]
+    self.target = None
+    if enemies:
+      self.target = max(enemies, key = lambda h: abs(h.loyalty))
+
+  def apply_effect(self):
+    self.target.add_status('Anaesthesia')
+
+  def get_info(self):
+    return {**super().get_info(),
+            'target_hero': self.target.id}
+
+class Rescue(Action):
+  cooldown = 15
+
+  def hankering(self):
+    if self.target:
+      return self.default_hankering
+    return 0
+
+  def eligible(self, hero):
+    return self.subject.teammate(hero) and hero.id != self.subject.id
+
+  def prepare(self, state):
+    options = [hero for hero in state if self.eligible(hero)]
+    self.target = None
+    if options:
+      self.target = max(options, key = lambda h: h.max_loyalty - abs(h.loyalty))
+
+  def apply_effect(self):
+    if not self.subject.teammate(self.target):
+      self.target.hit(abs(2 * self.target.loyalty))
+
+    self.target.x = self.target.start_x
+    self.target.y = self.target.start_y
+    amount = self.target.max_loyalty - abs(self.target.loyalty)
+    self.target.heal(amount)
+    self.subject.heal(amount / 2)
+
+  def get_info(self):
+    return {**super().get_info(),
+            'target_hero': self.target.id}
+
+
+class EnemyRescue(Rescue):
+  inspiration = 3
+  default_hankering = 15
+
+  def eligible(self, hero):
+    return not self.subject.teammate(hero)
+
+# This never happens. But draws the owner toward enemies.
+class LookingForTrouble(Action):
+  cooldown = 1000
+  range = 1
+  def hankering(self):
+    return 0
 
 class ChewbaccaDefense(Action):
   default_hankering = 99

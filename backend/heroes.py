@@ -8,11 +8,11 @@ class Hero:
   hero_classes = {}
   story = []
   max_loyalty_base = 7
-  max_loyalty_per_level = 1
+  max_loyalty_per_level = 3
   speed_base = 1
   speed_per_level = 0
   influence_base = 1
-  influence_per_level = 0
+  influence_per_level = 0.3
   # This hero can only be found on the beach after this stage.
   min_stage = 0
   num_conversations = 0
@@ -29,6 +29,8 @@ class Hero:
     self.id = id
     self.x = x
     self.y = y
+    self.start_x = x
+    self.start_y = y
     self.loyalty = self.max_loyalty * (-1 if owner == 'enemy' else 1)
     self.actions_in_turn = []
     self.status = []
@@ -49,6 +51,7 @@ class Hero:
   def get_index():
     return {
       name: {
+        'name': cls.name,
         'title': cls.title,
         'abilities': cls.abilities,
         'story': cls.story,
@@ -91,6 +94,8 @@ class Hero:
         self.hit(s['damage'])
       if s['type'] == 'Thoughtworm' and self.switched:
         self.status.remove(s)
+      if s['type'] == 'Anaesthesia' and self.switched:
+        self.status.remove(s)
       if s['type'] == 'Infectious' and by:
         by.add_status('Thoughtworm', damage=s['damage'])
         self.status.remove(s)
@@ -98,25 +103,30 @@ class Hero:
   def heal(self, amount):
     amount = math.copysign(amount, self.loyalty)
     self.loyalty += amount
+    if self.loyalty > self.max_loyalty:
+      self.loyalty = self.max_loyalty
 
-  def before_step(self):
+  def before_step(self, state):
     pass
 
-  def after_step(self):
+  def after_step(self, state):
     pass
 
   def init(self):
     pass
 
   def step(self, state, step_number):
+    self.actions_in_turn = []
     if self.is_frozen():
       return
 
-    self.before_step()
+    self.before_step(state)
 
     self.apply_status_effects(state)
 
-    self.actions_in_turn = []
+    if self.has_status('Anaesthesia'):
+      return
+
     cool_actions = [a for a in self.actions if a.is_cool()]
     for action in cool_actions:
       action.prepare(state)
@@ -144,7 +154,7 @@ class Hero:
     if resources['attention']:
       self.move(state)
 
-    self.after_step()
+    self.after_step(state)
 
   def apply_status_effects(self, state):
     for s in self.status[:]:
@@ -187,7 +197,7 @@ class Hero:
     x = other.x - self.x
     y = other.y - self.y
     length = sqrt(x ** 2 + y ** 2)
-    return x/length, y/length
+    return (x/length, y/length) if length else (0, 0)
 
   def teammate(self, other):
     return (self.loyalty < 0 and other.loyalty < 0) or (self.loyalty >= 0 and other.loyalty >=0)
@@ -300,13 +310,13 @@ class Chicken(Hero):
     ]
   action_classes = [BaseAttack, EdibleWildlife, SafetyCollar]
   shape = shapes.chicken
-  def before_step(self):
+  def before_step(self, state):
     # Spontaneous Inspiration
     if self.level >= 3 and random.random() < 0.01 * self.level and self.inspiration < 3:
       self.inspiration += 1
 
   def hit(self, amount, by=None):
-    super().hit(amount)
+    super().hit(amount, by)
     if self.level >= 2 and self.switched and self.inspiration < 3:
       self.inspiration += 1
 
@@ -356,6 +366,105 @@ class InfectedSailor(Hero):
     if self.level >= 2:
       self.add_status('Infectious', damage=self.influence * 0.1)
 
+class BullLady(Hero):
+  max_loyalty_base = 14
+  max_loyalty_per_level = 4
+  influence_base = 1.4
+  influence_per_level = 0.4
+  name = 'Megenona'
+  title = 'Bull Lady of the South'
+  speed_base = 1.1
+  abilities = [
+    { 'name': 'Painful Inspiration',
+      'description': 'Megenona often gains inspiration when hit.',
+      'unlockLevel': 1 },
+    { 'name': 'Violent Presence',
+      'description': 'Megenona exudes an aura of demoralization that continuously damages the loyalty of nearby enemies.',
+      'unlockLevel': 2 },
+    { 'name': 'In Medias Res',
+      'description': 'Megenona leaps into the air and grabs a foe with her whip. They land in each others\' starting places.',
+      'unlockLevel': 3 },
+    { 'name': 'Escalating Violence',
+      'description': 'When Megenona has collected 3 Inspiration she spends it to power up her Violent Presence.',
+      'unlockLevel': 4 },
+    ]
+  action_classes = [BaseAttack, InMediasRes, EscalatingViolence]
+  shape = shapes.bull
+  def hit(self, amount, by=None):
+    super().hit(amount, by)
+    # Painful Inspiration
+    if self.inspiration < 3 and random.random() < 0.05 * self.level:
+      self.inspiration += 1
+  def init(self):
+    self.violence = 1
+  def before_step(self, state):
+    # Violent Presence
+    if self.level >= 2:
+      for h in self.opponents_within(state, 10):
+        h.hit(self.violence * 0.1 * self.influence)
+
+class Knight(Hero):
+  max_loyalty_base = 6
+  max_loyalty_per_level = 3
+  influence_base = 1.2
+  influence_per_level = 0.2
+  name = 'Humbalot'
+  title = 'Member of the Holy Mackerels'
+  speed_base = 0.9
+  abilities = [
+    { 'name': 'Painful Inspiration',
+      'description': 'Humbalot often gains inspiration when hit.',
+      'unlockLevel': 1 },
+    { 'name': 'Reflective Armor',
+      'description': 'Humbalot is heavily armored. The armor reflects 10% of attacks per level.',
+      'unlockLevel': 2 },
+    { 'name': 'Exude Conviction',
+      'description': 'Humbalot can shout his conviction loudly for everyone around to hear. This erodes the loyalty of opponents nearby. Costs 3 Inspiration.',
+      'unlockLevel': 3 },
+    ]
+  action_classes = [BaseAttack, ExudeConviction]
+  shape = shapes.knight
+  def hit(self, amount, by=None):
+    # Painful Inspiration
+    if self.inspiration < 3 and random.random() < 0.05 * self.level:
+      self.inspiration += 1
+    # Reflective Armor
+    if self.level >= 2 and random.random() < 0.1 * self.level and by:
+      by.hit(amount, self)
+    else:
+      super().hit(amount, by)
+
+class CursePrincess(Hero):
+  max_loyalty_base = 6
+  max_loyalty_per_level = 3
+  influence_base = 1.2
+  influence_per_level = 0.2
+  name = 'Ykta Laq'
+  title = 'Princess of Wild Milk'
+  speed_base = 0.9
+  abilities = [
+    { 'name': 'Aggressive Inspiration',
+      'description': 'Ykta Laq often gains inspiration when attacking someone.',
+      'unlockLevel': 1 },
+    { 'name': 'Unpredictable Journey',
+      'description': 'Ykta Laq moves around on the battlefield and opponents have a hard time tracking her.',
+      'unlockLevel': 2 },
+    { 'name': 'Curse Flight',
+      'description': 'Ykta Laq is a curse in a human body. For 3 Inspiration she can leave her mortal form and move as a curse for a short while. In this form she cannot be harmed, regenerates loyalty, and harms the loyalty of opponents that she touches.',
+      'unlockLevel': 4 },
+    ]
+  action_classes = [InspiringRangedAttack, UnpredictableJourney, CurseFlight]
+  shape = shapes.knight
+  def hit(self, amount, by=None):
+    if not self.has_status('Curse Flight'):
+      super().hit(amount, by)
+  def before_step(self, state):
+    # Violent Presence
+    if self.has_status('Curse Flight'):
+      self.heal(0.5 * self.influence)
+      for h in self.opponents_within(state, 1):
+        h.hit(0.5 * self.influence)
+
 
 class Reaper(Hero):
   name = 'Reaper'
@@ -374,7 +483,7 @@ class CrocodileMan(Hero):
   shape = shapes.krokotyuk
   anger = 0
   def hit(self, amount, by=None):
-    super().hit(amount)
+    super().hit(amount, by)
     self.anger += amount
     normal_influence = self.influence_base + self.level * self.influence_per_level
     self.influence = normal_influence * (self.anger / self.max_loyalty + 1)
@@ -388,7 +497,7 @@ class Monkey(Hero):
   speed_per_level = 0.5
   shape = shapes.monkey
 
-  def before_step(self):
+  def before_step(self, state):
     if hasattr(self, 'prev_loyalty'):
       if ((abs(self.prev_loyalty) > abs(self.loyalty)) or
           (self.prev_loyalty * self.loyalty < 0)):
@@ -441,6 +550,31 @@ opponent, his inspiration increases.''',
 
     ]
   action_classes = [DiversityAttack, EngageInConversation]
+
+class ThoughtWorm(Hero):
+  name = 'ThoughtWorm'
+  title = 'Predator of Memes'
+  shape = shapes.snake
+  influence_per_level = 0.2
+
+  abilities = []
+
+  action_classes = [ChannelingAttack, Anaesthetise, InspiredByTime]
+
+class RescueParrot(Hero):
+  name = 'Rescue Parrot'
+  title = 'Avian Missionary'
+  shape = shapes.giantparrot
+
+  def hit(self, amount, by=None):
+    super().hit(amount, by)
+    # Painful Inspiration
+    if self.inspiration < 3 and random.random() < 0.6 * self.level:
+      self.inspiration += 1
+
+  abilities = []
+
+  action_classes = [Rescue, EnemyRescue, LookingForTrouble]
 
 class Politician(Hero):
   name = 'Will'
