@@ -232,6 +232,7 @@ function renderAction(
           damage={action.damage}
           color="white"
           {...defaultProps}
+          key={key + '-heal'}
         />
       </>
     );
