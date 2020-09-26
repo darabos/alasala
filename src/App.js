@@ -155,8 +155,8 @@ function InspirationBar({ value }) {
 
 function SimpleAttack(props) {
   const mesh = useRef();
-    const damage = props.damage;
-    const color = props.color || 'black';
+  const damage = props.damage;
+  const color = props.color || 'black';
   useFrame(() => {
     const sourceHero = props.sourceHero.current;
     const targetHero = props.targetHero.current;
@@ -181,7 +181,7 @@ function SimpleAttack(props) {
   return (
     <mesh ref={mesh}>
       <sphereBufferGeometry attach="geometry" args={[radius, 32, 32]} />
-	  <meshStandardMaterial attach="material" color={color} />
+      <meshStandardMaterial attach="material" color={color} />
     </mesh>
   );
 }
@@ -220,20 +220,20 @@ function renderAction(
     attackTurn >= -1 &&
     attackTurn <= 0
   ) {
-      return (
-	  <>
-      <SimpleAttack
-        targetHero={heroRef(action.target_hero)}
-        damage={action.damage}
-        {...defaultProps}
-	      />
-      <SimpleAttack
-        targetHero={heroRef(action.beneficiary_hero)}
+    return (
+      <>
+        <SimpleAttack
+          targetHero={heroRef(action.target_hero)}
           damage={action.damage}
-	  color='white'
-        {...defaultProps}
-	      />
-	      </>
+          {...defaultProps}
+        />
+        <SimpleAttack
+          targetHero={heroRef(action.beneficiary_hero)}
+          damage={action.damage}
+          color="white"
+          {...defaultProps}
+        />
+      </>
     );
   }
 }
@@ -1045,10 +1045,7 @@ function HeroPage({ id, data, update }) {
               heroMeta.max_loyalty_per_level
             )}
           </span>
-          <span>
-            Weight:{' '}
-            {Math.round(50 * heroMeta.weight)}
-          </span>
+          <span>Weight: {Math.round(50 * heroMeta.weight)}</span>
           <span>
             Speed:{' '}
             {atLevelScaled(heroMeta.speed_base, heroMeta.speed_per_level)}
