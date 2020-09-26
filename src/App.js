@@ -240,15 +240,15 @@ function renderAction(
 
 function PartySelector({ data, party, setParty, startCombat }) {
   const partyNames = party
-    .filter((id) => id !== undefined)
+    .filter((id) => id !== null)
     .map((id) => data.heroes.find((h) => h.id === id).name);
   function removeHero(i) {
     const p = [...party];
-    p[i] = undefined;
+    p[i] = null;
     setParty(p);
   }
   function addHero(h) {
-    const s = party.indexOf(undefined);
+    const s = party.indexOf(null);
     if (s !== -1) {
       const p = [...party];
       p[s] = h.id;
@@ -275,7 +275,7 @@ function PartySelector({ data, party, setParty, startCombat }) {
         below. You can only use one copy of each hero.
       </p>
       <button
-        disabled={party.filter((h) => h === undefined).length === party.length}
+        disabled={party.filter((h) => h === null).length === party.length}
         onClick={() => startCombat(party)}
       >
         Fight!
@@ -482,9 +482,16 @@ function Spinner() {
   return <div />;
 }
 
+function lastParty(data) {
+  const j = JSON.parse(localStorage.getItem('last party'));
+  const p = j || new Array(5).fill().map(() => null);
+  return p.map(id => data.heroes.find(h => h.id === id) ? id : null);
+}
+
 function Combat({ data, setShowButtons }) {
   const [state, setState] = useState('selectParty');
-  const [party, setParty] = useState(new Array(5).fill());
+  const [party, setParty] = useState(lastParty(data));
+  localStorage.setItem('last party', JSON.stringify(party));
   const [journal, setJournal] = useState();
   const [winner, setWinner] = useState();
   useEffect(() => window.scrollTo(0, 0), []);
@@ -504,10 +511,6 @@ function Combat({ data, setShowButtons }) {
         setJournal(res.log);
         setWinner(res.winner);
       });
-  }
-
-  if (data.preset && state === 'selectParty') {
-    startCombat(data.preset);
   }
 
   return (
@@ -1169,10 +1172,6 @@ function App() {
     }, setError);
   }
 
-  function presetCombat() {
-    setPage('combat');
-    setData({ ...data, preset: [2, 3, 72] });
-  }
   return (
     <div>
       {error && <div>{error}</div>}
@@ -1220,7 +1219,6 @@ function App() {
           >
             Map
           </button>
-          <button onClick={presetCombat}>Preset Combat</button>
         </div>
       )}
     </div>
