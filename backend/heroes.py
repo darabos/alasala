@@ -320,6 +320,20 @@ class Chicken(Hero):
     super().hit(amount, by)
     if self.level >= 2 and self.switched and self.inspiration < 3:
       self.inspiration += 1
+  story = [
+      dict(text='''Oh, haha! Everybody has the same question. The answer is, I'm afraid, quite disappointing. I don't know!
+      I have no idea if I have always been a chicken. I will tell you what I remember.'''),
+      dict(text='''I remember waking up on the beach. I love beaches. It was so peaceful. What surprised me though was
+      the chickens. There were a dozen chickens around me. And they behaved just like humans! They carried fruit
+      around, started building a shed, and told each other stories and laughed. Chicken laughing! Ha!'''),
+      dict(text='''I thought that was weird. Then I saw me feet. I'm a chicken too! How did this happen?!
+      Bobby says we were humans but the island turned us into chickens. Fred says it's more likely that we were
+      chickens from the ship that the island made sentient. This explains why we don't remember, he says.'''),
+      dict(text='''Everybody has a theory. I will tell you what I think. I think that we died in the shipwreck.
+      But the curse of Alasala does not let anyone leave. It put us into the bodies of the chickens that
+      somehow made it to shore. Such a sad story. It makes me so sad. Well, at least it didn't put me in the
+      body of a goat.'''),
+      ]
 
 
 class Wizard(Hero):
