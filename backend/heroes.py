@@ -16,6 +16,7 @@ class Hero:
   # This hero can only be found on the beach after this stage.
   min_stage = 0
   num_conversations = 0
+  npc = False
 
   def __init__(self, level, id, owner, x, y):
     self.level = level
@@ -64,6 +65,7 @@ class Hero:
         'influence_per_level': cls.influence_per_level,
         'weight': shapes.weightOf(cls.shape),
         'min_stage': cls.min_stage,
+        'npc': cls.npc
       }
       for (name, cls) in Hero.hero_classes.items()}
 
@@ -574,7 +576,8 @@ class RescueParrot(Hero):
   action_classes = [Rescue, EnemyRescue, LookingForTrouble]
 
 class Rats(Hero):
-  min_stage = 1000 # NPC
+  npc = True
+  min_stage = 1
   name = 'Rats'
   title = 'A Pack of Rodents'
   speed = 2
@@ -584,7 +587,8 @@ class Rats(Hero):
   shape = shapes.rats
 
 class SteelKing(Hero):
-  min_stage = 1000 # NPC
+  npc = True
+  min_stage = 10
   name = 'Oreus of Iron the Second'
   title = 'King of the Minerals'
   speed = 1
@@ -594,7 +598,8 @@ class SteelKing(Hero):
   shape = shapes.steelking
 
 class Lady(Hero):
-  min_stage = 1000 # NPC
+  npc = True
+  min_stage = 4
   name = 'Lady Why (Not)'
   title = 'Muse of the Stoic'
   speed = 1
