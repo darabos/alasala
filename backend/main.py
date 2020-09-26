@@ -5,7 +5,7 @@ import backend.battle_simulator as bs
 from backend.heroes import Hero
 from backend.stages import stages
 
-app = flask.Flask('backend')
+app = flask.Flask('', static_url_path='/somethingthatwillnevercomeup')
 
 def init_table(c, test, commands):
   try:
@@ -142,3 +142,12 @@ def fuse():
   c.execute('delete from heroes where rowid != ? and name = ? and user = ?', (rowid, name, user))
   c.execute('update heroes set level = level + 1 where rowid = ?', (rowid,))
   return 'OK'
+
+@app.route('/')
+def indexhtml():
+    return flask.send_from_directory('build', 'index.html')
+
+
+@app.route('/<path:path>')
+def static_stuff(path):
+    return flask.send_from_directory('build', path)
