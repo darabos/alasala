@@ -195,7 +195,7 @@ class Hero:
     x = other.x - self.x
     y = other.y - self.y
     length = sqrt(x ** 2 + y ** 2)
-    return x/length, y/length
+    return (x/length, y/length) if length else (0, 0)
 
   def teammate(self, other):
     return (self.loyalty < 0 and other.loyalty < 0) or (self.loyalty >= 0 and other.loyalty >=0)
