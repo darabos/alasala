@@ -119,6 +119,7 @@ button:hover:enabled {
   height: 80%;
   width: 80%;
   background-size: cover;
+  background-position: center;
 }
 
 .CardName {
@@ -214,6 +215,26 @@ button:hover:enabled {
   flex-wrap: wrap;
   justify-content: center;
   background: #8008;
+}
+
+.Enemy {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.Enemy > p {
+  display: absolute;
+  width: 100%;
+  text-align: left;
+  padding-left: 50px;
+}
+.Enemy .HeroCard {
+  height: 200px;
+  width: 150px;
+  filter: grayscale(80%);
+}
+.Enemy .CardName {
+  font-size: 20px;
 }
 
 .LoyaltyBar {
