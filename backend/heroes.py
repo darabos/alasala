@@ -528,7 +528,7 @@ class Reaper(Hero):
       'unlockLevel': 1 },
     { 'name': 'Attraction of the Void',
       'description': 'Why so many fails to avoid the Reaper? As if they are attracted to it. The Reaper can pull some oponents to the range of his Scythe, more as he levels up. It costs him 3 inspiration.',
-      'unlockLevel': 1 },
+      'unlockLevel': 2 },
   ]
   action_classes = [Scythe, ComeToPapa, InspiredByTime]
   shape = shapes.reaper
