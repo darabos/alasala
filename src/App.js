@@ -1206,24 +1206,26 @@ function HeroPage({ id, data, update }) {
             </div>
           ))}
         </div>
-        <div className="HeroStory">
-          <div className="PanelHeader">Story:</div>
-          {story >= 0 && (
-            <p className="HeroStoryText">{heroMeta.story[story].text}</p>
-          )}
-          {heroMeta.story.map((a, i) => (
-            <button
-              key={i}
-              disabled={i >= hero.level}
-              className="HeroStoryButton"
-              onClick={() => showStory(i)}
-            >
-              {i >= hero.level
-                ? `Unlocked at level ${i + 1}`
-                : `Diary ${i + 1} ${heroMeta.story[i].voice ? '🔊' : ''}`}
-            </button>
-          ))}
-        </div>
+        {heroMeta.story.length > 0 && (
+          <div className="HeroStory">
+            <div className="PanelHeader">Story:</div>
+            {story >= 0 && (
+              <p className="HeroStoryText">{heroMeta.story[story].text}</p>
+            )}
+            {heroMeta.story.map((a, i) => (
+              <button
+                key={i}
+                disabled={i >= hero.level}
+                className="HeroStoryButton"
+                onClick={() => showStory(i)}
+              >
+                {i >= hero.level
+                  ? `Unlocked at level ${i + 1}`
+                  : `Diary ${i + 1} ${heroMeta.story[i].voice ? '🔊' : ''}`}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
