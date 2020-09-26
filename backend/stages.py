@@ -15,9 +15,13 @@ if __name__ == '__main__':
   generate()
 
 stages = [
-  dict(enemies=[('RescueParrot', 1), ('CursePrincess', 1), ('ThoughtWorm', 1), ('CrocodileMan', 1), ('Knight', 1)]),
-  dict(enemies=[('Monkey', 2), ('Rats', 1), ('RescueParrot', 1), ('Knight', 1), ('CursePrincess', 1)]),
-  dict(enemies=[('Knight', 1), ('ThoughtWorm', 1), ('Chicken', 2), ('Rats', 1), ('Monkey', 2)]),
+  dict(enemies=[('Rats', 1)]),
+  dict(enemies=[('CrocodileMan', 1), ('Wizard', 1)]),
+  dict(enemies=[('InfectedSailor', 1), ('Rats', 1)]),
+  dict(enemies=[('Scientist', 1), ('Lady', 1)]),
+  dict(enemies=[('InfectedSailor', 1), ('Rats', 1), ('ThoughtWorm', 1) ]),
+  dict(enemies=[('Rats', 1), ('InfectedSailor', 1), ('Lady', 1)]),
+  dict(enemies=[('Knight', 1), ('ThoughtWorm', 1), ('Chicken', 2), ('Monkey', 2)]),
   dict(enemies=[('Wizard', 1), ('CrocodileMan', 3), ('Scientist', 1), ('RescueParrot', 1), ('InfectedSailor', 2)]),
   dict(enemies=[('ThoughtWorm', 1), ('CursePrincess', 3), ('Monkey', 1), ('Reaper', 2), ('Wizard', 2)]),
   dict(enemies=[('Wizard', 2), ('Reaper', 2), ('CursePrincess', 3), ('Lady', 1), ('Monkey', 2)]),

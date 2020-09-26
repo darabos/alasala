@@ -284,7 +284,7 @@ class SuperiorOrganism(ConcentratingAction):
     self.target = self.subject.find_closest_opponent([h for h in state if not h.has_status('Mushroom')])
   def final_effect(self):
     if self.target and not self.subject.teammate(self.target) and not self.target.has_status('Mushroom'):
-      self.target.status.append({'type': 'Mushroom', 'damage': self.subject.influence * 0.2, 'duration': 5 + level // 2})
+      self.target.status.append({'type': 'Mushroom', 'damage': self.subject.influence * 0.2, 'duration': 5 + self.subject.level // 2})
 
 class AstralBear(Action):
   inspiration = 3
