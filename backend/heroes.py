@@ -7,8 +7,8 @@ from backend.actions import *
 class Hero:
   hero_classes = {}
   story = []
-  max_loyalty_base = 7
-  max_loyalty_per_level = 3
+  max_loyalty_base = 14
+  max_loyalty_per_level = 6
   speed_base = 1
   speed_per_level = 0
   influence_base = 1
@@ -321,7 +321,7 @@ class Chicken(Hero):
   shape = shapes.chicken
   def before_step(self, state):
     # Spontaneous Inspiration
-    if self.level >= 3 and random.random() < 0.01 * self.level and self.inspiration < 3:
+    if self.level >= 3 and random.random() < 0.05 and self.inspiration < 3:
       self.inspiration += 1
 
   def hit(self, amount, by=None):
@@ -333,6 +333,8 @@ class Chicken(Hero):
 class Wizard(Hero):
   name = 'Gumdorfin'
   title = 'Alchemist of the Second Order'
+  max_loyalty_base = 7
+  max_loyalty_per_level = 3
   speed_base = 1
   abilities = [
     { 'name': 'Superior Organism',
@@ -340,13 +342,17 @@ class Wizard(Hero):
       'unlockLevel': 2 },
     { 'name': 'Astral Boar',
       'description': 'Gumdorfin summons an invisible boar that eats all mushrooms. Takes 3 inspiration.',
-      'unlockLevel': 3 },
-    { 'name': 'Aggressive Inspiration',
-      'description': 'Gumdorfin often gains inspiration when attacking someone.',
+      'unlockLevel': 6 },
+    { 'name': 'Spontaneous Inspiration',
+      'description': 'Gumdorfin gains inspiration spontaneously.',
       'unlockLevel': 1 },
     ]
-  action_classes = [InspiringAttack, SuperiorOrganism, AstralBear]
+  action_classes = [WizardAttack, SuperiorOrganism, AstralBear]
   shape = shapes.wizard
+
+  def before_step(self):
+    if random.random() < 0.05 and self.inspiration < 3:
+      self.inspiration += 1
 
 
 class InfectedSailor(Hero):
