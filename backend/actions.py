@@ -28,6 +28,8 @@ class Action:
   # Heros can only use this above the below level.
   min_level = 1
 
+  default_hankering = 1
+
   def __init__(self, subject):
     self.subject = subject
     self.cooldown_progress = 0
@@ -50,7 +52,7 @@ class Action:
   # How much the hero wants to do this. =0 if not usable. Cooldown will
   # be handled by hero.
   def hankering(self):
-    return 0
+    return self.default_hankering
 
   def resources_sufficient(self, resources):
     for (resource, need) in self.resource_needs.items():
@@ -282,9 +284,6 @@ class ComeToPapa(Action):
   def prepare(self, state):
     self.targets = [hero for hero in state if not self.subject.teammate(hero)]
 
-  def hankering(self):
-    return self.default_hankering
-
   def apply_effect(self):
     for target in self.targets:
       direction_x, direction_y = self.subject.direction_to_hero(target)
@@ -374,3 +373,22 @@ class EngageInConversation(SimpleAttack):
     self.target.num_conversations -= 1
     self.subject.in_conversation_with = None
     self.cooldown = self.orig_cooldown
+
+class Anaesthetise(Action):
+  default_hankering = 10
+  cooldown = 10
+  inspiration = 3
+
+  def prepare(self, state):
+    enemies = [hero for hero in state if not self.subject.teammate(hero)]
+    self.target = None
+    if enemies:
+      self.target = max(enemies, key = lambda h: abs(h.loyalty))
+
+  def apply_effect(self):
+    self.target.add_status('Anaesthesia')
+
+  def get_info(self):
+    return {**super().get_info(),
+            'target_hero': self.target.id}
+
