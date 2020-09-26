@@ -955,7 +955,7 @@ function HeroDiorama({ hero, effects }) {
       <HeroBox
         meta={hero}
         ref={ref}
-        trajectory={[{ x: 0, y: 0 }]}
+        trajectory={[{ x: 0, y: 0, status: [], actions: [] }]}
         turn={0}
         turnClock={{ phase: 0 }}
         leashPos={0.0001}
