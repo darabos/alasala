@@ -168,7 +168,10 @@ class RandomInspiringAttack(SimpleAttack):
   def apply_effect(self):
     random_damage = random.random() * 0.2
     self.damage = self.base_damage + random_damage
-    self.subject.inspiration += (10 + self.subject.level / 5) * random_damage
+    if random_damage + 0.05 * self.subject.level > 0.15:
+      self.subject.inspiration += 3
+    if random_damage + 0.05 * self.subject.level > 0.45:
+      self.subject.inspiration += 1
     super().apply_effect()
 
 class BrutalAttack(SimpleAttack):

@@ -268,6 +268,7 @@ snake = dict(
 
 politician = dict(
     size=[1.5, 0.6, 1.4],
+    mass=10,
     color='#000',
     children=[
       dict(size=[0.1, 0.1, 0.7], dir='front', offset=[0, 0, 0.2], color='#3232c7'),

@@ -68,7 +68,7 @@ class Hero:
       for (name, cls) in Hero.hero_classes.items()}
 
   def has_status(self, stype):
-    return bool([s for s in self.status if s['type'] == stype])
+    return any(s['type'] == stype for s in self.status)
 
   def remove_status(self, stype):
     self.status = [s for s in self.status if s['type'] != stype]
@@ -125,6 +125,8 @@ class Hero:
     self.apply_status_effects(state)
 
     if self.has_status('Anaesthesia'):
+      if random.random() + self.influence / 20 >= 0.1:
+        self.remove_status('Anaesthesia')
       return
 
     cool_actions = [a for a in self.actions if a.is_cool()]
