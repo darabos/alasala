@@ -550,25 +550,65 @@ function Combat({ data, setShowButtons }) {
   );
 }
 
+const DIARY = [
+  [
+    1,
+    `You are reading the diary of a passenger from the independent sea vessel Golden Quay.
+    Our ship was caught in a fierce storm and crashed against the rocks. I had almost
+    drowned myself, but the sea spat me out on these shores. Maybe I can find other survivors
+    and explore the island together.`,
+  ],
+  [2, `...`],
+];
+
 function Map(props) {
+  const [view, setView] = useState('island');
   useEffect(() => window.scrollTo(0, 0), []);
+  const diary = DIARY.filter(
+    ([stage]) => stage <= props.data.progress.stage + 1
+  );
   return (
     <div>
-      <div className="MapCanvas">
-        <Canvas
-          shadowMap
-          gl={{ antialias: false, alpha: false }}
-          onCreated={({ gl }) => {
-            gl.setClearColor(new THREE.Color('#fff'));
-          }}
-        >
-          <MapDiorama effects stage={props.data.progress.stage} />
-        </Canvas>
-      </div>
-      <p>
+      <div className="MapButtons">
         <button onClick={props.searchBeach}>Search the beach</button>
         <button onClick={() => props.setPage('combat')}>Next stage</button>
-      </p>
+        {view !== 'diary' && (
+          <button onClick={() => setView('diary')}>Diary</button>
+        )}
+        {view !== 'island' && (
+          <button onClick={() => setView('island')}>Island</button>
+        )}
+      </div>
+      {view === 'diary' && (
+        <div className="MapDiary">
+          {diary.map(([stage, text]) => (
+            <p key={stage}>
+              <b>Stage {stage}:</b> {text}
+            </p>
+          ))}
+          {diary.length < DIARY.length && (
+            <p>
+              <i>
+                Complete stage {DIARY[diary.length][0]} to unlock the next
+                entry.
+              </i>
+            </p>
+          )}
+        </div>
+      )}
+      {view === 'island' && (
+        <div className="MapCanvas">
+          <Canvas
+            shadowMap
+            gl={{ antialias: false, alpha: false }}
+            onCreated={({ gl }) => {
+              gl.setClearColor(new THREE.Color('#fff'));
+            }}
+          >
+            <MapDiorama effects stage={props.data.progress.stage} />
+          </Canvas>
+        </div>
+      )}
     </div>
   );
 }
@@ -721,10 +761,10 @@ function MapDiorama({ effects, stage }) {
 
   useFrame(({ camera, clock }) => {
     const t = clock.getElapsedTime();
-    camera.position.z = -140;
-    camera.position.y = 60 + 2 * Math.cos(0.19 * t);
+    camera.position.z = -130;
+    camera.position.y = 50 + 2 * Math.cos(0.19 * t);
     camera.position.x = 5 * Math.sin(0.2 * t);
-    camera.lookAt(0, 0, -50);
+    camera.lookAt(0, 0, -70);
     for (let i = 0; i < trees.length; ++i) {
       const tree = trees[i];
       const tp = tree.position;
@@ -822,6 +862,7 @@ function MapDiorama({ effects, stage }) {
 }
 
 function HeroList(props) {
+  useEffect(() => window.scrollTo(0, 0), []);
   const heroes = [...props.heroes];
   heroes.sort((a, b) => (a.name > b.name ? 1 : -1));
   heroes.sort((a, b) => (a.level < b.level ? 1 : -1));
@@ -835,6 +876,12 @@ function HeroList(props) {
           onClick={() => props.onClick(h)}
         />
       ))}
+      {heroes.length === 0 && (
+        <p>
+          You have not found any heroes yet. Try searching the beach for
+          survivors.
+        </p>
+      )}
     </div>
   );
 }
@@ -1201,6 +1248,17 @@ function App() {
             <span>Day {data.progress.day}</span>
             <span>Next stage: {data.progress.stage + 1}</span>
           </div>
+          <div className={'MainButtons ' + (showButtons ? '' : 'Invisible')}>
+            <button onClick={() => setPage('heroes')}>Heroes</button>
+            <button
+              onClick={() => {
+                update();
+                setPage('map');
+              }}
+            >
+              Map
+            </button>
+          </div>
           {page === 'combat' && (
             <Combat data={data} setShowButtons={setShowButtons} />
           )}
@@ -1223,19 +1281,6 @@ function App() {
           {page === 'searched' && (
             <Searched data={data} setShowButtons={setShowButtons} />
           )}
-        </div>
-      )}
-      {showButtons && (
-        <div>
-          <button onClick={() => setPage('heroes')}>Heroes</button>
-          <button
-            onClick={() => {
-              update();
-              setPage('map');
-            }}
-          >
-            Map
-          </button>
         </div>
       )}
     </div>
