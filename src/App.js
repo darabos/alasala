@@ -721,10 +721,10 @@ function MapDiorama({ effects, stage }) {
 
   useFrame(({ camera, clock }) => {
     const t = clock.getElapsedTime();
-    camera.position.z = -140;
-    camera.position.y = 60 + 2 * Math.cos(0.19 * t);
+    camera.position.z = -130;
+    camera.position.y = 50 + 2 * Math.cos(0.19 * t);
     camera.position.x = 5 * Math.sin(0.2 * t);
-    camera.lookAt(0, 0, -50);
+    camera.lookAt(0, 0, -70);
     for (let i = 0; i < trees.length; ++i) {
       const tree = trees[i];
       const tp = tree.position;
