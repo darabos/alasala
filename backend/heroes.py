@@ -14,7 +14,7 @@ class Hero:
   influence_base = 1
   influence_per_level = 0.3
   # This hero can only be found on the beach after this stage.
-  min_stage = 5
+  min_stage = 0
   num_conversations = 0
   is_chewbacca = False
   npc = False
@@ -292,7 +292,6 @@ class Healer(Hero):
 class Chicken(Hero):
   name = 'Amangelica'
   title = 'Graduate Student in Biology'
-  min_stage = 10
   speed_base = 1
   abilities = [
     { 'name': 'Edible Wildlife',
@@ -341,7 +340,6 @@ class Wizard(Hero):
   max_loyalty_base = 7
   max_loyalty_per_level = 3
   speed_base = 1
-  min_stage = 0
   abilities = [
     { 'name': 'Superior Organism',
       'description': 'Gumdorfin casts a spell to transform an enemy into a mushroom. Mushrooms continuously damage their nearby allies.',
@@ -367,7 +365,6 @@ class InfectedSailor(Hero):
   name = 'Jonathon'
   title = 'Bearlike Infected Sailor'
   speed_base = 1
-  min_stage = 1
   abilities = [
     { 'name': 'Asymptomatic Carrier',
       'description': 'Jonathon has gotten used to the effects of the Thoughtworm and now operates normally while carrying one.',
@@ -472,7 +469,6 @@ class CursePrincess(Hero):
   max_loyalty_per_level = 3
   influence_base = 1.2
   influence_per_level = 0.2
-  min_stage = 5
   name = 'Ykta Laq'
   title = 'Princess of Wild Milk'
   speed_base = 0.9
@@ -514,7 +510,6 @@ class CursePrincess(Hero):
 class Reaper(Hero):
   name = 'Reaper'
   title = 'Diabolic Presence'
-  min_stage = 4
   speed_base = 0.1
   abilities = [
     { 'name': 'Scythe Swing',
@@ -534,7 +529,6 @@ class Reaper(Hero):
 class CrocodileMan(Hero):
   name = 'Crocolate'
   title = 'Smelly Reptile'
-  min_stage = 0
   abilities = [
     { 'name': 'Heated Argument',
       'description':
@@ -617,7 +611,6 @@ class Scientist(Hero):
   shape = shapes.scientist
   in_conversation_with = None
   influence_per_level = 0.2
-  min_stage = 2
 
   abilities = [
     {
@@ -653,7 +646,6 @@ class ThoughtWorm(Hero):
   title = 'Predator of Memes'
   shape = shapes.snake
   influence_per_level = 0.2
-  min_stage = 4
   abilities = [
     { 'name': 'Upside Down',
       'description':
@@ -699,7 +691,6 @@ class RescueParrot(Hero):
 
 class Rats(Hero):
   npc = True
-  min_stage = 0
   name = 'Rats'
   title = 'A Pack of Rodents'
   speed = 2
@@ -721,7 +712,6 @@ class SteelKing(Hero):
 
 class Lady(Hero):
   npc = True
-  min_stage = 4
   name = 'Lady Why'
   title = 'Muse of the Stoic'
   speed = 1
