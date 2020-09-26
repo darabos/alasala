@@ -170,7 +170,7 @@ monkey = dict(
       ]),
     ])
 
-healer = {
+bear = {
     'size': [1, 1, 1.5],
     'color': '#961',
     'children': [
