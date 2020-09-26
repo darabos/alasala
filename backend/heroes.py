@@ -98,10 +98,10 @@ class Hero:
     amount = math.copysign(amount, self.loyalty)
     self.loyalty += amount
 
-  def before_step(self):
+  def before_step(self, state):
     pass
 
-  def after_step(self):
+  def after_step(self, state):
     pass
 
   def init(self):
@@ -111,7 +111,7 @@ class Hero:
     if self.is_frozen():
       return
 
-    self.before_step()
+    self.before_step(state)
 
     self.apply_status_effects(state)
 
@@ -143,7 +143,7 @@ class Hero:
     if resources['attention']:
       self.move(state)
 
-    self.after_step()
+    self.after_step(state)
 
   def apply_status_effects(self, state):
     for s in self.status[:]:
@@ -295,13 +295,13 @@ class Chicken(Hero):
     ]
   action_classes = [BaseAttack, EdibleWildlife, SafetyCollar]
   shape = shapes.chicken
-  def before_step(self):
+  def before_step(self, state):
     # Spontaneous Inspiration
     if self.level >= 3 and random.random() < 0.01 * self.level and self.inspiration < 3:
       self.inspiration += 1
 
-  def hit(self, amount):
-    super().hit(amount)
+  def hit(self, amount, by=None):
+    super().hit(amount, by)
     if self.level >= 2 and self.switched and self.inspiration < 3:
       self.inspiration += 1
 
@@ -351,6 +351,43 @@ class InfectedSailor(Hero):
     if self.level >= 2:
       self.add_status('Infectious', damage=self.influence * 0.1)
 
+class BullLady(Hero):
+  max_loyalty_base = 14
+  max_loyalty_per_level = 4
+  influence_base = 1.4
+  influence_per_level = 0.4
+  name = 'Megenona'
+  title = 'Bull Lady of the South'
+  speed_base = 1.1
+  abilities = [
+    { 'name': 'Painful Inspiration',
+      'description': 'Megenona often gains inspiration when hit.',
+      'unlockLevel': 1 },
+    { 'name': 'Violent Presence',
+      'description': 'Megenona exudes an aura of demoralization that continuously damages the loyalty of nearby enemies.',
+      'unlockLevel': 2 },
+    { 'name': 'In Medias Res',
+      'description': 'Megenona leaps into the air and grabs a foe with her whip. They land in each others\' starting places.',
+      'unlockLevel': 3 },
+    { 'name': 'Escalating Violence',
+      'description': 'When Megenona has collected 3 Inspiration she spends it to power up her Violent Presence.',
+      'unlockLevel': 4 },
+    ]
+  action_classes = [BaseAttack, InMediasRes, EscalatingViolence]
+  shape = shapes.bull
+  def hit(self, amount, by=None):
+    super().hit(amount, by)
+    # Painful Inspiration
+    if self.inspiration < 3 and random.random() < 0.05 * self.level:
+      self.inspiration += 1
+  def init(self):
+    self.violence = 1
+  def before_step(self, state):
+    # Violent Presence
+    if self.level >= 2:
+      for h in self.opponents_within(state, 10):
+        h.hit(self.violence * 0.1 * self.influence)
+
 
 class Reaper(Hero):
   name = 'Reaper'
@@ -368,8 +405,8 @@ class CrocodileMan(Hero):
   action_classes = [FlipWeakest, PushBackAttack]
   shape = shapes.krokotyuk
   anger = 0
-  def hit(self, amount):
-    super().hit(amount)
+  def hit(self, amount, by=None):
+    super().hit(amount, by)
     self.anger += amount
     normal_influence = self.influence_base + self.level * self.influence_per_level
     self.influence = normal_influence * (self.anger / self.max_loyalty + 1)
@@ -383,7 +420,7 @@ class Monkey(Hero):
   speed_per_level = 0.5
   shape = shapes.monkey
 
-  def before_step(self):
+  def before_step(self, state):
     if hasattr(self, 'prev_loyalty'):
       if ((abs(self.prev_loyalty) > abs(self.loyalty)) or
           (self.prev_loyalty * self.loyalty < 0)):
