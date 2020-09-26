@@ -1208,6 +1208,9 @@ function HeroPage({ id, data, update }) {
         </div>
         <div className="HeroStory">
           <div className="PanelHeader">Story:</div>
+          {story >= 0 && (
+            <p className="HeroStoryText">{heroMeta.story[story].text}</p>
+          )}
           {heroMeta.story.map((a, i) => (
             <button
               key={i}
@@ -1220,9 +1223,6 @@ function HeroPage({ id, data, update }) {
                 : `Diary ${i + 1} ${heroMeta.story[i].voice ? '🔊' : ''}`}
             </button>
           ))}
-          {story >= 0 && (
-            <p className="HeroStoryText">{heroMeta.story[story].text}</p>
-          )}
         </div>
       </div>
     </div>
