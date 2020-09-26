@@ -85,7 +85,7 @@ class Hero:
 
   def check_max(self):
     if abs(self.loyalty) > self.max_loyalty:
-      self.loyalty = math.copysign(self.max_loyalty, self.loyalty)   
+      self.loyalty = math.copysign(self.max_loyalty, self.loyalty)
 
   def hit(self, amount, by=None):
     self.remove_status('Concentrating') # Concentrating spells are interrupted by hits.
@@ -489,7 +489,7 @@ class Reaper(Hero):
       'description': 'The Reaper gets inspired over time simply by watching others fight.',
       'unlockLevel': 1 },
     { 'name': 'Attraction of the Void',
-      'description': 'Why so many fails to avoid the Reaper? As if they are attracted to it. The Reaper can pull oponents to the range of his Scythe, more as he levels up. It costs him 3 inspiration.',
+      'description': 'Why so many fails to avoid the Reaper? As if they are attracted to it. The Reaper can pull some oponents to the range of his Scythe, more as he levels up. It costs him 3 inspiration.',
       'unlockLevel': 1 },
   ]
   action_classes = [Scythe, ComeToPapa, InspiredByTime]
@@ -498,7 +498,16 @@ class Reaper(Hero):
 class CrocodileMan(Hero):
   name = 'Crocolate'
   title = 'Smelly Reptile'
-  abilities = []
+  abilities = [
+    { 'name': 'Heated Argument',
+      'description':
+        'Crocolate does not shy away from physical confontation. He makes his arguments more convincing by pushing back his foes.',
+      'unlockLevel': 1 },
+    { 'name': 'Heated Argument',
+      'description':
+        'Crocolate is so scary that the week tends to just agree with him out of sheer terror. Using 3 inspirations she can convert the weakest enemy to his side.',
+      'unlockLevel': 1 },
+  ]
   action_classes = [FlipWeakest, PushBackAttack]
   shape = shapes.krokotyuk
   anger = 0
@@ -511,7 +520,16 @@ class CrocodileMan(Hero):
 class Monkey(Hero):
   name = 'Ook Ook'
   title = 'Itchy Fleabag'
-  abilities = []
+  abilities = [
+    { 'name': 'Too Fast To Follow',
+      'description':
+        'Ook Ook is all over the place: both physically and in his thoughts. So it is very hard to contradict him when he already forgot what he was thinking. More often than not, attacks do no affect him.',
+      'unlockLevel': 1 },
+    { 'name': 'Quick Wit',
+      'description':
+        'As his movements and arguments are alike - totally crazy - Ook Ook can damage enemies while moving.',
+      'unlockLevel': 1 },
+  ]
   action_classes = [Scratch]
   speed_base = 2
   speed_per_level = 0.5
@@ -572,12 +590,24 @@ opponent, his inspiration increases.''',
   action_classes = [DiversityAttack, EngageInConversation]
 
 class ThoughtWorm(Hero):
-  name = 'Thought Worm'
+  name = 'Thoughtworm'
   title = 'Predator of Memes'
   shape = shapes.snake
   influence_per_level = 0.2
 
-  abilities = []
+  abilities = [
+    { 'name': 'Upside Down',
+      'description':
+        'Thoughtworm can remove an idea from a brain, pass it through his digestive system which turns the idea into its exact opposite then plant it into a second brain. In a battle of arguments, this process makes one enemy weaker and one ally stronger!',
+      'unlockLevel': 1 },
+    { 'name': 'Meditative Inspiration',
+      'description': 'Thoughworm gets inspired over time simply by watching others fight.',
+      'unlockLevel': 1 },
+    { 'name': 'Anaesthesia',
+      'description':
+        'Changing your convictions can be painful. Well, unless you meet the Thoughtworm. Using 3 inspirations, he can put you under. You will not feel a thing - or be able to do a thing - until your worldview was inverted.',
+      'unlockLevel': 1 },
+  ]
 
   action_classes = [ChannelingAttack, Anaesthetise, InspiredByTime]
 
@@ -592,7 +622,19 @@ class RescueParrot(Hero):
     if self.inspiration < 3 and random.random() < 0.6 * self.level:
       self.inspiration += 1
 
-  abilities = []
+  abilities = [
+    { 'name': 'Rescue',
+      'description':
+        'Parrot can lift the most damaged ally out of a heated argument. He takes her back right where she started, heals her, so she can give it another try! ',
+      'unlockLevel': 1 },
+    { 'name': 'Painful Inspiration',
+      'description': 'Megenona often gains inspiration when hit.',
+      'unlockLevel': 1 },
+    { 'name': 'Extraction',
+      'description':
+        '''Why restrict rescue to allies? Parrot also wants to rescue enemies from their misguided convictions. She can pick up the weakest enemy, flip him over to Parrot's side, then take her back to the starting position. It costs 3 inspirations, though.''',
+      'unlockLevel': 1 },
+  ]
 
   action_classes = [Rescue, EnemyRescue, LookingForTrouble]
 
