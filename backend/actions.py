@@ -244,6 +244,27 @@ class AnEggHatches(Action):
   def apply_effect(self):
     self.subject.add_status('Infectious', damage=0.1 * self.subject.influence)
 
+class InMediasRes(Action):
+  used = False
+  def prepare(self, state):
+    t = [h for h in state if h.y == self.subject.y and not self.subject.teammate(h)]
+    if t:
+      self.target = t[0]
+  def hankering(self):
+    return 99 if self.target and not self.used and self.subject.level >= 3 else 0
+  def apply_effect(self):
+    self.used = True
+    ox = self.subject.x
+    self.subject.x = self.target.x
+    self.target.x = ox
+
+class EscalatingViolence(Action):
+  inspiration = 3
+  def hankering(self):
+    return 99 if self.subject.level >= 4 else 0
+  def apply_effect(self):
+    self.subject.violence += 1
+
 
 class ComeToPapa(Action):
   default_hankering = 10
