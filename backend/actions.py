@@ -169,7 +169,7 @@ class RandomInspiringAttack(SimpleAttack):
     random_damage = random.random() * 0.2
     self.damage = self.base_damage + random_damage
     if random_damage + 0.05 * self.subject.level > 0.15:
-      self.subject.inspiration += 3
+      self.subject.inspiration += 1
     if random_damage + 0.05 * self.subject.level > 0.45:
       self.subject.inspiration += 1
     super().apply_effect()
