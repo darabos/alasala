@@ -1,5 +1,6 @@
 from math import sqrt, copysign
 import random
+import re
 
 def sign(x):
   return copysign(1, x)
@@ -20,9 +21,9 @@ class Action:
   # Attention is also used for walking.
   attention = 1
 
-  # Used by the UI to decide what animation to show when this action
+  # Used by the UI to decide what animation or text to show when this action
   # is found in the journal.
-  animation_name = "Override me you dummy!"
+  animation_name = ''
 
   # Heros can only use this above the below level.
   min_level = 1
@@ -70,7 +71,12 @@ class Action:
     self.cooldown_progress = self.cooldown
 
   def get_info(self):
-    return {'animation_name': self.animation_name}
+    if not self.animation_name:
+      classname = type(self).__name__
+      parts = re.findall('[A-Z][a-z]*', classname)
+      self.animation_name  = ' '.join(parts)
+    # Changing spaces to non-breaking spaces.
+    return {'animation_name': self.animation_name.replace(' ', ' ')}
 
 
 class ConcentratingAction(Action):
@@ -105,7 +111,7 @@ class ConcentratingAction(Action):
 class SimpleAttack(Action):
   damage = None
   default_hankering = 1
-  animation_name = 'simple_attack'
+  animation_name = 'Attack'
 
   def prepare(self, state):
     self.target = self.subject.find_closest_opponent(state)
@@ -274,7 +280,7 @@ class FlipWeakest(Action):
 class InspiredByTime(Action):
   cooldown = 8
   attention = 0
-  animation_name = 'inspired_by_time'
+  animation_name = 'inspired by time'
   def apply_effect(self):
     self.subject.inspiration += 1
 

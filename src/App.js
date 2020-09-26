@@ -89,9 +89,10 @@ const HeroBox = React.forwardRef((props, heroRef) => {
     );
     keelApi.velocity.set(0, 0, 0);
   });
-  if (current.status.find(s => s.type === 'Removed')) {
+  if (last.status.find(s => s.type === 'Removed')) {
     return;
   }
+  const textLabels = current.status.map((s) => s.type).concat(current.actions.map(a => a.animation_name)).join(', ');
 
   return (
     <HeroBodyPart
@@ -107,7 +108,7 @@ const HeroBox = React.forwardRef((props, heroRef) => {
             change={current.loyalty - last.loyalty}
           />
           <InspirationBar value={current.inspiration} />
-          {current.status.map((s) => s.type).join(', ')}
+          <div className="CombatLabels">{textLabels}</div>
         </Html>
       ) : undefined}
     </HeroBodyPart>
@@ -198,7 +199,7 @@ function renderAction(
     action: action,
   };
   if (
-    action.animation_name === 'simple_attack' &&
+    action.animation_name === 'Attack' &&
     attackTurn === 0
   ) {
     return (
