@@ -81,6 +81,10 @@ class Hero:
   def is_frozen(self):
     return self.num_conversations != 0
 
+  def check_max(self):
+    if abs(self.loyalty) > self.max_loyalty:
+      self.loyalty = math.copysign(self.max_loyalty, self.loyalty)   
+
   def hit(self, amount, by=None):
     self.remove_status('Concentrating') # Concentrating spells are interrupted by hits.
     if self.has_status('Thoughtworm'): amount *= 1.5
@@ -102,11 +106,12 @@ class Hero:
         by.add_status('Thoughtworm', damage=s['damage'])
         self.status.remove(s)
 
+    self.check_max()
+
   def heal(self, amount):
     amount = math.copysign(amount, self.loyalty)
     self.loyalty += amount
-    if self.loyalty > self.max_loyalty:
-      self.loyalty = self.max_loyalty
+    self.check_max()
 
   def before_step(self, state):
     pass
@@ -470,7 +475,18 @@ class Reaper(Hero):
   title = 'Diabolic Presence'
   min_stage = 3
   speed_base = 0.1
-  abilities = []
+  abilities = [
+    { 'name': 'Scythe Swing',
+      'description':
+        'No one can argue with the Reaper. Even the most stubborn will be convinced by the swing of the Scythe. Good thing it is short.',
+      'unlockLevel': 1 },
+    { 'name': 'Meditative Inspiration',
+      'description': 'The Reaper gets inspired over time simply by watching others fight.',
+      'unlockLevel': 1 },
+    { 'name': 'Attraction of the Void',
+      'description': 'Why so many fails to avoid the Reaper? As if they are attracted to it. The Reaper can pull oponents to the range of his Scythe, more as he levels up. It costs him 3 inspiration.',
+      'unlockLevel': 1 },
+  ]
   action_classes = [Scythe, ComeToPapa, InspiredByTime]
   shape = shapes.reaper
 

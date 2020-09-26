@@ -326,7 +326,7 @@ button:hover:enabled {
 }
 
 .CombatHeroStats {
-  transform: translate3d(-50%,-30px,0) !important;
+  transform: translate3d(-50%, -30px, 0) !important;
   width: 120px;
   text-align: center;
   position: relative;

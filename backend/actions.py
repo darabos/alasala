@@ -172,7 +172,7 @@ class FarCaress(SimpleAttack):
 
 class Scythe(SimpleAttack):
   range = 1.5
-  damage = 8
+  damage = 200
   cooldown = 10
   min_level = 2
 
@@ -340,7 +340,9 @@ class ComeToPapa(Action):
   inspiration = 3
 
   def prepare(self, state):
-    self.targets = [hero for hero in state if not self.subject.teammate(hero)]
+    enemies = [hero for hero in state if not self.subject.teammate(hero)]
+    self.targets = random.sample(
+      enemies, min(len(enemies), self.subject.level + 1))
 
   def apply_effect(self):
     for target in self.targets:
