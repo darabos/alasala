@@ -145,6 +145,19 @@ class InspiringAttack(SimpleAttack):
     if random.random() < 0.1 * self.subject.level:
       self.subject.inspiration += 1
 
+class InspiringRangedAttack(SimpleAttack):
+  range = 12
+  damage = 1
+  cooldown = 8
+  def hankering(self):
+    if self.subject.has_status('Curse Flight'):
+      return 0
+    return super().hankering()
+  def apply_effect(self):
+    super().apply_effect()
+    if random.random() < 0.1 * self.subject.level:
+      self.subject.inspiration += 1
+
 class BrutalAttack(SimpleAttack):
   range = 10
   damage = 3
@@ -274,6 +287,21 @@ class ExudeConviction(Action):
   def apply_effect(self):
     for h in self.targets:
       h.hit(3 * self.subject.influence, self)
+
+class UnpredictableJourney(Action):
+  cooldown = 27
+  def hankering(self):
+    return 1
+  def apply_effect(self):
+    self.subject.x += random.random() * 12 - 6
+    self.subject.y += random.random() * 12 - 6
+
+class CurseFlight(Action):
+  inspiration = 3
+  def hankering(self):
+    return 99 if self.subject.level >= 4 else 0
+  def apply_effect(self):
+    self.subject.add_status('Curse Flight', duration=10)
 
 
 class ComeToPapa(Action):

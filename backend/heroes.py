@@ -97,6 +97,8 @@ class Hero:
   def heal(self, amount):
     amount = math.copysign(amount, self.loyalty)
     self.loyalty += amount
+    if self.loyalty > self.max_loyalty:
+      self.loyalty = self.max_loyalty
 
   def before_step(self, state):
     pass
@@ -418,6 +420,37 @@ class Knight(Hero):
       by.hit(amount, self)
     else:
       super().hit(amount, by)
+
+class CursePrincess(Hero):
+  max_loyalty_base = 6
+  max_loyalty_per_level = 3
+  influence_base = 1.2
+  influence_per_level = 0.2
+  name = 'Ykta Laq'
+  title = 'Princess of Wild Milk'
+  speed_base = 0.9
+  abilities = [
+    { 'name': 'Aggressive Inspiration',
+      'description': 'Ykta Laq often gains inspiration when attacking someone.',
+      'unlockLevel': 1 },
+    { 'name': 'Unpredictable Journey',
+      'description': 'Ykta Laq moves around on the battlefield and opponents have a hard time tracking her.',
+      'unlockLevel': 2 },
+    { 'name': 'Curse Flight',
+      'description': 'Ykta Laq is a curse in a human body. For 3 Inspiration she can leave her mortal form and move as a curse for a short while. In this form she cannot be harmed, regenerates loyalty, and harms the loyalty of opponents that she touches.',
+      'unlockLevel': 4 },
+    ]
+  action_classes = [InspiringRangedAttack, UnpredictableJourney, CurseFlight]
+  shape = shapes.knight
+  def hit(self, amount, by=None):
+    if not self.has_status('Curse Flight'):
+      super().hit(amount, by)
+  def before_step(self, state):
+    # Violent Presence
+    if self.has_status('Curse Flight'):
+      self.heal(0.5 * self.influence)
+      for h in self.opponents_within(state, 1):
+        h.hit(0.5 * self.influence)
 
 
 class Reaper(Hero):
