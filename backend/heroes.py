@@ -508,6 +508,16 @@ class CrocodileMan(Hero):
     self.anger += amount
     normal_influence = self.influence_base + self.level * self.influence_per_level
     self.influence = normal_influence * (self.anger / self.max_loyalty + 1)
+  story = [
+      dict(voice='croc1.m4a', text='''Why is a mighty warrior like me on an island like this? I will tell you why. I came here to prove that I am
+        the mightiest warrior in the world.'''),
+      dict(voice='croc2.m4a', text='''How will I prove that I am the mightiest? By slaying the most dangerous foe in the world. For a long while
+        I did not know who was the most dangerous foe in the world. I thought it was Thundarr from the Badlands. But then I spoke to Gumdorfin.'''),
+      dict(voice='croc3.m4a', text='''Gumdorfin is a very clever wizard. One day he turned Amangelica into a chicken for a short while.
+        He told me where the most dangerous foe in the world lives. It lives on the island called Alasala.'''),
+      dict(voice='croc4.m4a', text='''Gumdorfin says the most dangerous foe is the curse that is on this island. This curse breaks men's
+        souls into shards about this big. And never lets them leave the island. Very mighty curse. I will smash this curse to pieces. About this big.'''),
+  ]
 
 class Monkey(Hero):
   name = 'Ook Ook'
