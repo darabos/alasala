@@ -550,25 +550,65 @@ function Combat({ data, setShowButtons }) {
   );
 }
 
+const DIARY = [
+  [
+    1,
+    `You are reading the diary of a passenger from the independent sea vessel Golden Quay.
+    Our ship was caught in a fierce storm and crashed against the rocks. I had almost
+    drowned myself, but the sea spat me out on these shores. Maybe I can find other survivors
+    and explore the island together.`,
+  ],
+  [2, `...`],
+];
+
 function Map(props) {
+  const [view, setView] = useState('island');
   useEffect(() => window.scrollTo(0, 0), []);
+  const diary = DIARY.filter(
+    ([stage]) => stage <= props.data.progress.stage + 1
+  );
   return (
     <div>
-      <p>
+      <div className="MapButtons">
         <button onClick={props.searchBeach}>Search the beach</button>
         <button onClick={() => props.setPage('combat')}>Next stage</button>
-      </p>
-      <div className="MapCanvas">
-        <Canvas
-          shadowMap
-          gl={{ antialias: false, alpha: false }}
-          onCreated={({ gl }) => {
-            gl.setClearColor(new THREE.Color('#fff'));
-          }}
-        >
-          <MapDiorama effects stage={props.data.progress.stage} />
-        </Canvas>
+        {view !== 'diary' && (
+          <button onClick={() => setView('diary')}>Diary</button>
+        )}
+        {view !== 'island' && (
+          <button onClick={() => setView('island')}>Island</button>
+        )}
       </div>
+      {view === 'diary' && (
+        <div className="MapDiary">
+          {diary.map(([stage, text]) => (
+            <p key={stage}>
+              <b>Stage {stage}:</b> {text}
+            </p>
+          ))}
+          {diary.length < DIARY.length && (
+            <p>
+              <i>
+                Complete stage {DIARY[diary.length][0]} to unlock the next
+                entry.
+              </i>
+            </p>
+          )}
+        </div>
+      )}
+      {view === 'island' && (
+        <div className="MapCanvas">
+          <Canvas
+            shadowMap
+            gl={{ antialias: false, alpha: false }}
+            onCreated={({ gl }) => {
+              gl.setClearColor(new THREE.Color('#fff'));
+            }}
+          >
+            <MapDiorama effects stage={props.data.progress.stage} />
+          </Canvas>
+        </div>
+      )}
     </div>
   );
 }
@@ -822,6 +862,7 @@ function MapDiorama({ effects, stage }) {
 }
 
 function HeroList(props) {
+  useEffect(() => window.scrollTo(0, 0), []);
   const heroes = [...props.heroes];
   heroes.sort((a, b) => (a.name > b.name ? 1 : -1));
   heroes.sort((a, b) => (a.level < b.level ? 1 : -1));
@@ -835,6 +876,12 @@ function HeroList(props) {
           onClick={() => props.onClick(h)}
         />
       ))}
+      {heroes.length === 0 && (
+        <p>
+          You have not found any heroes yet. Try searching the beach for
+          survivors.
+        </p>
+      )}
     </div>
   );
 }
