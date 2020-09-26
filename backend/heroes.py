@@ -50,6 +50,7 @@ class Hero:
   def get_index():
     return {
       name: {
+        'name': cls.name,
         'title': cls.title,
         'abilities': cls.abilities,
         'story': cls.story,
