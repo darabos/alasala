@@ -57,7 +57,7 @@ class Hero:
         'influence_base': cls.influence_base,
         'influence_per_level': cls.influence_per_level,
         'weight': shapes.weightOf(cls.shape),
-        'min_stage': cls.min_stage
+        'min_stage': cls.min_stage,
       }
       for (name, cls) in Hero.hero_classes.items()}
 
@@ -203,6 +203,7 @@ class Hero:
       return None
 
 class Cube(Hero):
+  min_stage = 1000 # Used in development.
   name = 'cube'
   title = 'Platonic Solid'
   abilities = []
@@ -210,6 +211,7 @@ class Cube(Hero):
   shape = shapes.cube
 
 class Hark(Hero):
+  min_stage = 1000 # Used in development.
   name = 'Professor Hark'
   title = 'Dean of Arcane Studies',
   speed_base = 0.5
@@ -248,12 +250,13 @@ class Hark(Hero):
 
 
 class Healer(Hero):
+  min_stage = 1000 # Used in development.
   name = 'healer'
   title = 'Angelic Presence'
   speed_base = 0
   abilities = []
   action_classes = [FarCaress, HealAll]
-  shape = shapes.healer
+  shape = shapes.bear
 
 
 class Chicken(Hero):
