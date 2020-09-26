@@ -145,6 +145,18 @@ class InspiringAttack(SimpleAttack):
     if random.random() < 0.1 * self.subject.level:
       self.subject.inspiration += 1
 
+class RandomInspiringAttack(SimpleAttack):
+  range = 3
+  base_damage = 0.8
+  cooldown = 7
+
+  def apply_effect(self):
+    random_damage = random.random() * 0.2
+    self.damage = self.base_damage + random_damage
+    self.subject.inspiration += (10 + self.subject.level / 5) * random_damage
+    super().apply_effect()
+
+
 class BrutalAttack(SimpleAttack):
   range = 10
   damage = 3
@@ -346,3 +358,11 @@ class EngageInConversation(SimpleAttack):
     self.target.num_conversations -= 1
     self.subject.in_conversation_with = None
     self.cooldown = self.orig_cooldown
+
+class ChewbaccaDefense(Action):
+  default_hankering = 99
+  cooldown = 0
+  inspiration = 3
+
+  def apply_effect(self):
+    self.subject.is_chewbacca = True

@@ -16,6 +16,7 @@ class Hero:
   # This hero can only be found on the beach after this stage.
   min_stage = 0
   num_conversations = 0
+  is_chewbacca = False
 
   def __init__(self, level, id, owner, x, y):
     self.level = level
@@ -207,7 +208,11 @@ class Hero:
   def find_closest_opponent(self, state):
     opponents = list(filter(lambda h: not self.teammate(h), state))
     if opponents:
-      return min(opponents, key=lambda h: self.sq_distance(h))
+      chewbaccas = list(filter(lambda o: o.is_chewbacca, opponents))
+      if chewbaccas:
+        return chewbaccas[0]
+      else:
+        return min(opponents, key=lambda h: self.sq_distance(h))
     else:
       return None
 
@@ -300,7 +305,7 @@ class Chicken(Hero):
     if self.level >= 3 and random.random() < 0.01 * self.level and self.inspiration < 3:
       self.inspiration += 1
 
-  def hit(self, amount):
+  def hit(self, amount, by=None):
     super().hit(amount)
     if self.level >= 2 and self.switched and self.inspiration < 3:
       self.inspiration += 1
@@ -368,7 +373,7 @@ class CrocodileMan(Hero):
   action_classes = [FlipWeakest, PushBackAttack]
   shape = shapes.krokotyuk
   anger = 0
-  def hit(self, amount):
+  def hit(self, amount, by=None):
     super().hit(amount)
     self.anger += amount
     normal_influence = self.influence_base + self.level * self.influence_per_level
@@ -440,7 +445,14 @@ opponent, his inspiration increases.''',
 class Politician(Hero):
   name = 'Will'
   title = 'Aspiring Politician'
-  shape = shape.politician
+  shape = shapes.politician
+  chewbacca_reflected = 0
+  action_classes = [RandomInspiringAttack, ChewbaccaDefense]
+
+  @property
+  def max_chewbacca_reflected(self):
+    return 2.5 * self.influence
+
   abilities = [
     {
       'name': 'Chewbacca defense',
@@ -455,3 +467,15 @@ class Politician(Hero):
       'unlockLevel' : 1
     }
   ]
+
+  def hit(self, amount, by=None):
+    effective_amount = amount
+    if self.is_chewbacca and by is not None:
+      reflected = min(self.max_chewbacca_reflected - self.chewbacca_reflected, amount)
+      self.chewbacca_reflected += reflected
+      if self.chewbacca_reflected >= self.max_chewbacca_reflected:
+        self.is_chewbacca = False
+        self.chewbacca_reflected = 0
+      effective_amount = amount - reflected
+      by.hit(reflected, self)
+    super().hit(effective_amount, by)
