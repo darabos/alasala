@@ -357,6 +357,18 @@ class Wizard(Hero):
   def before_step(self, state):
     if random.random() < 0.05 and self.inspiration < 3:
       self.inspiration += 1
+  story = [
+      dict(text='''I did not want to come on this ship. I fear the spirits of the sea. But the captain threatened to burn
+      down my house. He demanded that I escort them and protect them from supernatural attacks. He wanted to reach
+      Alasala, no matter the price. No. I wanted to reach Alasala. The fools thought they had forced their will on me.
+      But it is their will that is weak. I wanted to come on this ship. I fear nothing.'''),
+      dict(text='''Alasala is deeply cursed. Only ships broken to splinters can ever reach it and no one ever leaves.
+      Who could have wrought such a powerful curse? No matter. Even the curse of the most powerful wizard would wear out
+      over the years. Yet Alasala still has its dark power.'''),
+      dict(text='''It is the island. It is the island itself that fuels such a powerful and ancient curse through the eons.
+      I have sought it out so that I can take its power for myself. I just need to deal with the curse first.'''),
+      ]
+
 
 
 class InfectedSailor(Hero):
@@ -432,6 +444,19 @@ class BullLady(Hero):
     if self.level >= 2:
       for h in self.opponents_within(state, 10):
         h.hit(self.violence * 0.1 * self.influence)
+  story = [
+      dict(text='''I turned into a bull when I was five. I hated it. None of my dresses fit me anymore.'''),
+      dict(text='''My grandfather raised me when my parents disappeared. Did they suffer a shipwreck like
+      we have? Did they turn into mushrooms to be eaten by invisible pigs? Or did they just leave their
+      daughter behind? We will never know. But my grandfather always stood by me. Until he too disappeared
+      last year.'''),
+      dict(text='''I know Gramps didn't leave me. The whole ship he was travelling on disappeared with
+      all hands and cargo. They had the remains of a king and much of his treasure on board, so everyone
+      looked for them. Yet they found nothing. It is only I who kept searching.'''),
+      dict(text='''I searched in every port. I sailed to all the continents. He is not in any of those
+      places. And then I learned of the one place that can only be reached through the destruction of
+      the ship, and from whence there is no escape. And I came to look for my grandfather.'''),
+      ]
 
 class Knight(Hero):
   max_loyalty_base = 18
