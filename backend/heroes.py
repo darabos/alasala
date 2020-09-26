@@ -436,3 +436,22 @@ opponent, his inspiration increases.''',
 
     ]
   action_classes = [DiversityAttack, EngageInConversation]
+
+class Politician(Hero):
+  name = 'Will'
+  title = 'Aspiring Politician'
+  shape = shape.politician
+  abilities = [
+    {
+      'name': 'Chewbacca defense',
+      'description': '''The Chewbacca defense is so infuriating to listen to
+      that all enemies are forced to attack Will while he is speaking, but Will
+      just reflects the damage back to the attacker.''',
+      'unlockLevel': 1
+    },
+    {
+      'name': 'Power of convincing',
+      'description': '''Gains inspiration from attacking others.''',
+      'unlockLevel' : 1
+    }
+  ]
