@@ -90,6 +90,8 @@ class Hero:
         self.hit(s['damage'])
       if s['type'] == 'Thoughtworm' and self.switched:
         self.status.remove(s)
+      if s['type'] == 'Anaesthesia' and self.switched:
+        self.status.remove(s)
       if s['type'] == 'Infectious' and by:
         by.add_status('Thoughtworm', damage=s['damage'])
         self.status.remove(s)
@@ -108,6 +110,7 @@ class Hero:
     pass
 
   def step(self, state, step_number):
+    self.actions_in_turn = []
     if self.is_frozen():
       return
 
@@ -115,7 +118,9 @@ class Hero:
 
     self.apply_status_effects(state)
 
-    self.actions_in_turn = []
+    if self.has_status('Anaesthesia'):
+      return
+
     cool_actions = [a for a in self.actions if a.is_cool()]
     for action in cool_actions:
       action.prepare(state)
@@ -504,3 +509,13 @@ opponent, his inspiration increases.''',
 
     ]
   action_classes = [DiversityAttack, EngageInConversation]
+
+class ThoughtWorm(Hero):
+  name = 'ThoughtWorm'
+  title = 'Predator of Memes'
+  shape = shapes.snake
+  influence_per_level = 0.2
+
+  abilities = []
+
+  action_classes = [ChannelingAttack, Anaesthetise, InspiredByTime]
