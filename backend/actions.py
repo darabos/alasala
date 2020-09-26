@@ -265,6 +265,16 @@ class EscalatingViolence(Action):
   def apply_effect(self):
     self.subject.violence += 1
 
+class ExudeConviction(Action):
+  inspiration = 3
+  def prepare(self, state):
+    self.targets = list(self.subject.opponents_within(state, 10))
+  def hankering(self):
+    return 99 if self.targets and self.subject.level >= 3 else 0
+  def apply_effect(self):
+    for h in self.targets:
+      h.hit(3 * self.subject.influence, self)
+
 
 class ComeToPapa(Action):
   default_hankering = 10

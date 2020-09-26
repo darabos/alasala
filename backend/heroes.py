@@ -388,6 +388,37 @@ class BullLady(Hero):
       for h in self.opponents_within(state, 10):
         h.hit(self.violence * 0.1 * self.influence)
 
+class Knight(Hero):
+  max_loyalty_base = 6
+  max_loyalty_per_level = 3
+  influence_base = 1.2
+  influence_per_level = 0.2
+  name = 'Humbalot'
+  title = 'Member of the Holy Mackerels'
+  speed_base = 0.9
+  abilities = [
+    { 'name': 'Painful Inspiration',
+      'description': 'Humbalot often gains inspiration when hit.',
+      'unlockLevel': 1 },
+    { 'name': 'Reflective Armor',
+      'description': 'Humbalot is heavily armored. The armor reflects 10% of attacks per level.',
+      'unlockLevel': 2 },
+    { 'name': 'Exude Conviction',
+      'description': 'Humbalot can shout his conviction loudly for everyone around to hear. This erodes the loyalty of opponents nearby. Costs 3 Inspiration.',
+      'unlockLevel': 3 },
+    ]
+  action_classes = [BaseAttack, ExudeConviction]
+  shape = shapes.knight
+  def hit(self, amount, by=None):
+    # Painful Inspiration
+    if self.inspiration < 3 and random.random() < 0.05 * self.level:
+      self.inspiration += 1
+    # Reflective Armor
+    if self.level >= 2 and random.random() < 0.1 * self.level and by:
+      by.hit(amount, self)
+    else:
+      super().hit(amount, by)
+
 
 class Reaper(Hero):
   name = 'Reaper'
