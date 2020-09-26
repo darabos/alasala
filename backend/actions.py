@@ -184,6 +184,10 @@ class FarCaress(SimpleAttack):
   damage = 0.1
   cooldown = 1
 
+class WizardAttack(SimpleAttack):
+  damage = 2.5
+  cooldown = 10
+
 class Scythe(SimpleAttack):
   range = 1.5
   damage = 200
@@ -259,7 +263,7 @@ class HealAll(Action):
 
 class EdibleWildlife(Action):
   def apply_effect(self):
-    self.subject.heal(0.01 * self.subject.influence)
+    self.subject.heal(0.1 + self.subject.influence/40)
 
 class SafetyCollar(Action):
   inspiration = 3
@@ -269,7 +273,7 @@ class SafetyCollar(Action):
     self.target = self.subject.find_closest_ally(state)
   def apply_effect(self):
     if self.target:
-      self.target.status.append({'type': 'Safety Collar', 'damage': self.subject.influence * 5})
+      self.target.status.append({'type': 'Safety Collar', 'damage': sqrt(self.subject.influence * 5)})
 
 
 class SuperiorOrganism(ConcentratingAction):
@@ -280,12 +284,12 @@ class SuperiorOrganism(ConcentratingAction):
     self.target = self.subject.find_closest_opponent([h for h in state if not h.has_status('Mushroom')])
   def final_effect(self):
     if self.target and not self.subject.teammate(self.target) and not self.target.has_status('Mushroom'):
-      self.target.status.append({'type': 'Mushroom', 'damage': self.subject.influence * 0.2, 'duration': 10})
+      self.target.status.append({'type': 'Mushroom', 'damage': self.subject.influence * 0.2, 'duration': 5 + level // 2})
 
 class AstralBear(Action):
   inspiration = 3
   def hankering(self):
-    if self.subject.level < 3: return 0
+    if self.subject.level < 6: return 0
     return 4 if self.targets else 0
   def prepare(self, state):
     self.targets = [h for h in state if any(s['type'] == 'Mushroom' for s in h.status)]
