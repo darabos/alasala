@@ -299,13 +299,13 @@ class DiversityAttack(BaseAttack):
 
 class EngageInConversation(SimpleAttack):
   default_hankering = 99
-  inspiration = 4
+  inspiration = 1
   orig_cooldown = 10
   cooldown = orig_cooldown
   range = 3
   damage = 0
   in_conversation_with = None
-  animation_name = 'conversation'
+  animation_name = 'Conversation'
   over = False
 
   def prepare(self, state):
