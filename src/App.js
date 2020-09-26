@@ -554,11 +554,45 @@ const DIARY = [
   [
     1,
     `You are reading the diary of a passenger from the independent sea vessel Golden Quay.
-    Our ship was caught in a fierce storm and crashed against the rocks. I had almost
-    drowned myself, but the sea spat me out on these shores. Maybe I can find other survivors
-    and explore the island together.`,
+  Our ship was caught in a fierce storm and crashed against the rocks. I had almost
+  drowned myself, but the sea spat me out on these shores. Maybe I can find other survivors
+  and explore the island together.`,
   ],
-  [2, `...`],
+  [
+    2,
+    `I have spent a full day searching the beach until I found someone. The beach is sprawling
+  and hard to navigate. I will have to decide how much time to spend on searching for more
+  survivors. A path of stone tiles leads into the forests of the island. I am drawn to explore
+  more in that direction.`,
+  ],
+  [
+    3,
+    `As we try to push deeper into the island our expedition is met with resistance.
+  We fought both with our words and with our fists until we convinced them all of our
+  rightfulness. But then, our assailants disappeared. We could not track them at all in this
+  dense jungle.`,
+  ],
+  [
+    4,
+    `Some of the shadowy figures that attack us at every step of our path are familiar.
+  I think I have seen them on the good ship Golden Quay! And yet with every step I am more
+  convinced that they are not entirely real. They disappear not like scurrying rats, but
+  like dreams in the morning.`,
+  ],
+  [
+    5,
+    `I have discovered that the heroes I had found at the beach also share aspects of the
+  spectral nature of our assailants. They too are less than real. If I look at them a certain
+  way, I see that they start to dissolve into a substance. It looks just like how the
+  mad doctor had described Ectoplasm in his forbidden book.`,
+  ],
+  [
+    6,
+    `Ectoplasm has its uses. Its texture, smell, and behavior all support the thesis that
+  is a glue of a spiritual nature. I have found the same hero more than once on the beach now.
+  I have formulated a theory that these copies are all fragments of one true soul.
+  And I can put them back together with Ectoplasm.`,
+  ],
 ];
 
 function Map(props) {
