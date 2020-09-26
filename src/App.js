@@ -89,10 +89,13 @@ const HeroBox = React.forwardRef((props, heroRef) => {
     );
     keelApi.velocity.set(0, 0, 0);
   });
-  if (last.status.find(s => s.type === 'Removed')) {
+  if (last.status.find((s) => s.type === 'Removed')) {
     return;
   }
-  const textLabels = current.status.map((s) => s.type).concat(current.actions.map(a => a.animation_name)).join(', ');
+  const textLabels = current.status
+    .map((s) => s.type)
+    .concat(current.actions.map((a) => a.animation_name))
+    .join(', ');
 
   return (
     <HeroBodyPart
@@ -159,7 +162,7 @@ function SimpleAttack(props) {
     if (!sourceHero || !targetHero) {
       return;
     }
-    const phase = props.turnClock.phase;
+    const phase = (props.turnClock.phase + props.attackTurn + 1) / 2;
     const src = sourceHero.position;
     const dst = targetHero.position;
     mesh.current && mesh.current.position.lerpVectors(src, dst, phase);
@@ -200,7 +203,8 @@ function renderAction(
   };
   if (
     action.animation_name === 'Attack' &&
-    attackTurn === 0
+    attackTurn >= -1 &&
+    attackTurn <= 0
   ) {
     return (
       <SimpleAttack
@@ -268,6 +272,7 @@ function BattleRenderer(props) {
   const result =
     props.winner === 1 ? 'Victory!' : props.winner === 0 ? 'Draw!' : 'Defeat!';
   const [battleIsOver, setBattleIsOver] = useState(false);
+  const [replayId, setReplayId] = useState(0);
   const heroStories = [];
   const actionEntries = [];
   console.log('journal', journal);
@@ -303,15 +308,26 @@ function BattleRenderer(props) {
   console.log('actions');
   console.log(actionEntries);
 
+  function restartBattle() {
+    setReplayId(replayId + 1);
+    setBattleIsOver(false);
+    props.setShowButtons(false);
+  }
+
   return (
     <div className="CombatCanvas">
       {battleIsOver && (
         <div className="overlay">
           <div id="result">{result}</div>
+          <button onClick={restartBattle}>Replay</button>
         </div>
       )}
 
-      <CombatCanvas effects={props.effects} lightPosition={[20, 0, 5]}>
+      <CombatCanvas
+        key={'combat-canvas-' + replayId}
+        effects={props.effects}
+        lightPosition={[20, 0, 5]}
+      >
         <BattleSimulation
           journal={journal}
           heroStories={heroStories}
@@ -385,6 +401,7 @@ function BattleSimulation({
   const [turn, setTurn] = useState(0);
   const turnClock = useRef({ time: 0, turn: -1, midpoint: new THREE.Vector3() })
     .current;
+
   useFrame(({ camera, clock }) => {
     if (journal) {
       const t = clock.getElapsedTime();
