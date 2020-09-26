@@ -816,8 +816,7 @@ function HeroListItem({ showLevel, hero, onClick }) {
         <div className="CardName"> {hero.name} </div>
         {showLevel && (
           <div className="CardLevel">
-            {' '}
-            level <b>{hero.level}</b>{' '}
+            level <b>{hero.level}</b>
           </div>
         )}
       </div>
@@ -1013,22 +1012,22 @@ function HeroPage({ id, data, update }) {
           <span>{heroMeta.title}</span>
           <span>Level {hero.level}</span>
           <span>
-            Max loyalty:
+            Max loyalty:{' '}
             {atLevelScaled(
               heroMeta.max_loyalty_base,
               heroMeta.max_loyalty_per_level
             )}
           </span>
           <span>
-            Weight:
+            Weight:{' '}
             {Math.round(50 * heroMeta.weight)}
           </span>
           <span>
-            Speed:
+            Speed:{' '}
             {atLevelScaled(heroMeta.speed_base, heroMeta.speed_per_level)}
           </span>
           <span>
-            Influence:
+            Influence:{' '}
             {atLevelScaled(
               heroMeta.influence_base,
               heroMeta.influence_per_level

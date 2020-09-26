@@ -187,7 +187,8 @@ button:hover:enabled {
   flex-wrap: wrap;
 }
 .HeroPage .HeroAbility {
-  flex: 1 50%;
+  flex: 1 40%;
+  margin: 10px;
 }
 
 .PanelHeader {

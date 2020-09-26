@@ -122,8 +122,7 @@ class SimpleAttack(Action):
     return 0
 
   def apply_effect(self):
-    self.target.hit(
-      self.damage * self.subject.influence)
+    self.target.hit(self.damage * self.subject.influence, self.subject)
 
   def get_info(self):
     return {**super().get_info(),
@@ -229,12 +228,21 @@ class SuperiorOrganism(ConcentratingAction):
 class AstralBear(Action):
   inspiration = 3
   def hankering(self):
+    if self.subject.level < 3: return 0
     return 4 if self.targets else 0
   def prepare(self, state):
     self.targets = [h for h in state if any(s['type'] == 'Mushroom' for s in h.status)]
   def apply_effect(self):
     for t in self.targets:
       t.remove = True
+
+class AnEggHatches(Action):
+  inspiration = 3
+  def hankering(self):
+    if self.subject.level < 3: return 0
+    return 0 if self.subject.has_status('Infectious') else 99
+  def apply_effect(self):
+    self.subject.add_status('Infectious', damage=0.1 * self.subject.influence)
 
 
 class ComeToPapa(Action):
