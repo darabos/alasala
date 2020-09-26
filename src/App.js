@@ -420,7 +420,7 @@ function BattleSimulation({
   function heroRef(id) {
     return heroRefs[id] || (heroRefs[id] = createRef());
   }
-  function findMidpoint() {
+  function midpointAndMaxSize() {
     const min = new THREE.Vector3();
     const max = new THREE.Vector3();
     for (const h of heroStories) {
@@ -430,12 +430,16 @@ function BattleSimulation({
         max.max(c.position);
       }
     }
-    return min.lerp(max, 0.5);
+    return [min.lerp(max, 0.5), Math.max(max.x - min.x, max.y - min.y)];
   }
 
   const [turn, setTurn] = useState(0);
-  const turnClock = useRef({ time: 0, turn: -1, midpoint: new THREE.Vector3() })
-    .current;
+  const turnClock = useRef({
+    time: 0,
+    turn: -1,
+    midpoint: new THREE.Vector3(),
+    cameraPos: new THREE.Vector3(),
+  }).current;
 
   useFrame(({ camera, clock }) => {
     if (journal) {
@@ -443,10 +447,14 @@ function BattleSimulation({
       camera.up.set(0, 0, 1);
       camera.fov = 40;
       camera.updateProjectionMatrix();
-      camera.position.x = 3 * Math.cos(0.19 * t);
-      camera.position.y = 3 * Math.sin(0.2 * t) - 40;
-      camera.position.z = 15;
-      turnClock.midpoint.lerp(findMidpoint(), 0.1);
+      const [newMP, maxSize] = midpointAndMaxSize();
+      turnClock.midpoint.lerp(newMP, 0.1);
+      newMP.z = maxSize;
+      newMP.y -= (40 * maxSize) / 15;
+      turnClock.cameraPos.lerp(newMP, 0.1);
+      camera.position.x = turnClock.cameraPos.x + 3 * Math.cos(0.19 * t);
+      camera.position.y = turnClock.cameraPos.y + 3 * Math.sin(0.2 * t);
+      camera.position.z = turnClock.cameraPos.z;
       camera.lookAt(turnClock.midpoint);
       if (turnClock.turn !== turn) {
         turnClock.turn = turn;
