@@ -554,6 +554,10 @@ function Map(props) {
   useEffect(() => window.scrollTo(0, 0), []);
   return (
     <div>
+      <p>
+        <button onClick={props.searchBeach}>Search the beach</button>
+        <button onClick={() => props.setPage('combat')}>Next stage</button>
+      </p>
       <div className="MapCanvas">
         <Canvas
           shadowMap
@@ -565,10 +569,6 @@ function Map(props) {
           <MapDiorama effects stage={props.data.progress.stage} />
         </Canvas>
       </div>
-      <p>
-        <button onClick={props.searchBeach}>Search the beach</button>
-        <button onClick={() => props.setPage('combat')}>Next stage</button>
-      </p>
     </div>
   );
 }
@@ -1201,6 +1201,17 @@ function App() {
             <span>Day {data.progress.day}</span>
             <span>Next stage: {data.progress.stage + 1}</span>
           </div>
+          <div className={'MainButtons ' + (showButtons ? '' : 'Invisible')}>
+            <button onClick={() => setPage('heroes')}>Heroes</button>
+            <button
+              onClick={() => {
+                update();
+                setPage('map');
+              }}
+            >
+              Map
+            </button>
+          </div>
           {page === 'combat' && (
             <Combat data={data} setShowButtons={setShowButtons} />
           )}
@@ -1223,19 +1234,6 @@ function App() {
           {page === 'searched' && (
             <Searched data={data} setShowButtons={setShowButtons} />
           )}
-        </div>
-      )}
-      {showButtons && (
-        <div>
-          <button onClick={() => setPage('heroes')}>Heroes</button>
-          <button
-            onClick={() => {
-              update();
-              setPage('map');
-            }}
-          >
-            Map
-          </button>
         </div>
       )}
     </div>

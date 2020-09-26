@@ -12,7 +12,7 @@ body {
   border-radius: 20px;
   margin: 20px;
   box-shadow: #0009 0px 10px 20px;
-  height: 80vh;
+  height: 70vh;
 }
 .CombatCanvas,
 .HeroCanvas {
@@ -351,4 +351,8 @@ button:hover:enabled {
   width: 120px;
   text-align: center;
   position: relative;
+}
+
+.MainButtons.Invisible {
+  visibility: hidden;
 }
