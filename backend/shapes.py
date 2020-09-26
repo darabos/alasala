@@ -265,3 +265,15 @@ snake = dict(
         dict(size=[0.12, 0.12, 0.12], dir='back', color='#f0c', mass=1, offset=[-0.05, 0.05, 0], children=[
         dict(size=[0.10, 0.10, 0.10], dir='back', color='#fff', mass=1)
       ])])])])])])])
+
+politician = dict(
+    size=[1.5, 0.6, 1.4],
+    color='#000',
+    children=[
+      dict(size=[0.1, 0.1, 0.7], dir='front', offset=[0, 0, 0.2], color='#3232c7'),
+      dict(size=[0.7, 0.7, 0.5], dir='up', color='#bd894a', offset=[0, 0, 0], children=[
+      dict(size=[0.7, 0.7, 0.1], dir='up', color='#ede134'),
+      dict(size=[0.1, 0.05, 0.1], dir='front', color='#327ac7', offset=[0.2, 0, 0.1]),
+      dict(size=[0.1, 0.05, 0.1], dir='front', color='#327ac7', offset=[-0.2, 0, 0.1]),
+      ]),
+    ])
