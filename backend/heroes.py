@@ -28,6 +28,8 @@ class Hero:
     self.id = id
     self.x = x
     self.y = y
+    self.start_x = x
+    self.start_y = y
     self.loyalty = self.max_loyalty * (-1 if owner == 'enemy' else 1)
     self.actions_in_turn = []
     self.status = []
@@ -552,3 +554,18 @@ class ThoughtWorm(Hero):
   abilities = []
 
   action_classes = [ChannelingAttack, Anaesthetise, InspiredByTime]
+
+class RescueParrot(Hero):
+  name = 'Rescue Parrot'
+  title = 'Avian Missionary'
+  shape = shapes.giantparrot
+
+  def hit(self, amount, by=None):
+    super().hit(amount, by)
+    # Painful Inspiration
+    if self.inspiration < 3 and random.random() < 0.6 * self.level:
+      self.inspiration += 1
+
+  abilities = []
+
+  action_classes = [Rescue, EnemyRescue, LookingForTrouble]

@@ -1171,7 +1171,7 @@ function App() {
 
   function presetCombat() {
     setPage('combat');
-    setData({ ...data, preset: [1, 30, 12] });
+    setData({ ...data, preset: [2, 3, 72] });
   }
   return (
     <div>
