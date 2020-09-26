@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
   useEffect,
+  Fragment,
 } from 'react';
 import { useSpring as useReactSpring, animated } from 'react-spring';
 import { Canvas, useFrame } from 'react-three-fiber';
@@ -209,6 +210,7 @@ function renderAction(
   ) {
     return (
       <SimpleAttack
+        key={JSON.stringify(action)}
         targetHero={heroRef(action.target_hero)}
         damage={action.damage}
         {...defaultProps}
@@ -221,7 +223,7 @@ function renderAction(
     attackTurn <= 0
   ) {
     return (
-      <>
+      <Fragment key={JSON.stringify(action)}>
         <SimpleAttack
           targetHero={heroRef(action.target_hero)}
           damage={action.damage}
@@ -234,7 +236,7 @@ function renderAction(
           {...defaultProps}
           key={key + '-heal'}
         />
-      </>
+      </Fragment>
     );
   }
 }
