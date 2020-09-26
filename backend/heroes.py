@@ -304,7 +304,7 @@ class Chicken(Hero):
   title = 'Graduate Student in Biology'
   speed_base = 1
   abilities = [
-    { 'name': 'Edible wildlife',
+    { 'name': 'Edible Wildlife',
       'description': 'Amangelica often finds small bugs or roots that allow her to regain some health. And have interesting flavors.',
       'unlockLevel': 1 },
     { 'name': 'Inspiring Conversion',
@@ -503,9 +503,9 @@ class CrocodileMan(Hero):
       'description':
         'Crocolate does not shy away from physical confontation. He makes his arguments more convincing by pushing back his foes.',
       'unlockLevel': 1 },
-    { 'name': 'Heated Argument',
+    { 'name': 'Overwhelming Terror',
       'description':
-        'Crocolate is so scary that the week tends to just agree with him out of sheer terror. Using 3 inspirations she can convert the weakest enemy to his side.',
+        'Crocolate is so scary that the weak tend to just agree with him out of sheer terror. Using 3 Inspiration he can convert the weakest enemy to his side.',
       'unlockLevel': 1 },
   ]
   action_classes = [FlipWeakest, PushBackAttack]
@@ -577,7 +577,7 @@ opponent, his inspiration increases.''',
       'unlockLevel': 1,
     },
     {
-      'name': "Aumann's agreement theorem",
+      'name': "Aumann's Agreement Theorem",
       'description':
       '''When Derek gains enough inspiration, he starts an engaging conversation
       with an opponent. They are both unable to move or act and lose health at
@@ -684,14 +684,14 @@ class Politician(Hero):
 
   abilities = [
     {
-      'name': 'Chewbacca defense',
+      'name': 'Chewbacca Defense',
       'description': '''The Chewbacca defense is so infuriating to listen to
       that all enemies are forced to attack Will while he is speaking, but Will
-      just reflects the damage back to the attacker.''',
+      just reflects the damage back to the attacker. Costs 3 Inspiration.''',
       'unlockLevel': 1
     },
     {
-      'name': 'Power of convincing',
+      'name': 'Power of Convincing',
       'description': '''Gains inspiration from attacking others.''',
       'unlockLevel' : 1
     }
