@@ -447,7 +447,7 @@ class EngageInConversation(SimpleAttack):
       self.target.num_conversations += 1
       self.target.add_status('In conversation')
       self.cooldown = 0
-      self.inspiration = 0
+      self.resource_needs['inspiration'] = 0
     # Do conversation
     talking_heroes = [self.subject.in_conversation_with, self.subject]
     for hittingHero, hitHero in zip(talking_heroes, reversed(talking_heroes)):
@@ -468,7 +468,7 @@ class EngageInConversation(SimpleAttack):
       self.target.remove_status('In conversation')
     self.subject.in_conversation_with = None
     self.cooldown = self.orig_cooldown
-    self.inspiration = 1
+    self.resource_needs['inspiration'] = 1
 
 class Anaesthetise(Action):
   default_hankering = 10
