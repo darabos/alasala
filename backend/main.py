@@ -97,7 +97,7 @@ def searchbeach():
   stage = progress['stage']
   hero_name = random.choice(list(
     name for name, meta in Hero.get_index().items()
-    if meta['min_stage'] <= stage))
+    if meta['min_stage'] <= stage and not meta['npc']))
   hero = {'name': hero_name, 'level': 1}  
   c.execute('update users set day = day + 1 where email = ?', (user,))
   c.execute('insert into heroes values (?, ?, ?)', (hero['name'], hero['level'], user))
