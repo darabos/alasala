@@ -118,7 +118,7 @@ giantparrot = dict(
     size=[1, 1, 1],
     color='#090',
     children=[
-      dict(size=[0.8, 0.8, 0.8], color='#900', dir='up', children=[
+      dict(size=[0.8, 0.8, 0.8], mass=0.07, color='#900', dir='up', children=[
         dict(size=[0.1, 0.1, 0.1], color='#fff', dir='left'),
         dict(size=[0.1, 0.1, 0.1], color='#fff', dir='right'),
         dict(size=[0.1, 0.2, 0.2], color='#ff0', dir='front'),
@@ -156,7 +156,7 @@ scientist = dict(
     color='#765',
     children=[
       dict(size=[1, 1, 0.1], dir='up', color='#432', children=[
-        dict(size=[0.6, 0.6, 0.6], dir='up')]),
+        dict(mass=0.06, size=[0.6, 0.6, 0.6], dir='up')]),
       dict(size=[0.4, 0.1, 0.4], dir='front', offset=[0.3, -0.1, 0.2], color='#fff'),
       dict(size=[0.4, 0.1, 0.4], dir='front', offset=[-0.3, -0.1, 0.2], color='#fff'),
     ])

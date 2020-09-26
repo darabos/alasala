@@ -190,7 +190,7 @@ class WizardAttack(SimpleAttack):
 
 class Scythe(SimpleAttack):
   range = 1.5
-  damage = 200
+  damage = 10
   cooldown = 10
   min_level = 1
 
@@ -279,6 +279,7 @@ class SafetyCollar(Action):
 
 class SuperiorOrganism(ConcentratingAction):
   cooldown = 10
+  min_level = 2
   def hankering(self):
     return super().hankering() if self.target else 0
   def prepare(self, state):
@@ -289,8 +290,8 @@ class SuperiorOrganism(ConcentratingAction):
 
 class AstralBear(Action):
   inspiration = 3
+  min_level = 4
   def hankering(self):
-    if self.subject.level < 6: return 0
     return 4 if self.targets else 0
   def prepare(self, state):
     self.targets = [h for h in state if any(s['type'] == 'Mushroom' for s in h.status)]
@@ -300,8 +301,8 @@ class AstralBear(Action):
 
 class AnEggHatches(Action):
   inspiration = 3
+  min_level = 2
   def hankering(self):
-    if self.subject.level < 3: return 0
     return 0 if self.subject.has_status('Infectious') else 99
   def apply_effect(self):
     self.subject.add_status('Infectious', damage=0.1 * self.subject.influence)
@@ -321,17 +322,19 @@ class InMediasRes(Action):
 
 class EscalatingViolence(Action):
   inspiration = 3
-  def hankering(self):
-    return 99 if self.subject.level >= 4 else 0
+  default_hankering = 99
+  min_level = 3
+
   def apply_effect(self):
     self.subject.violence += 1
 
 class ExudeConviction(Action):
   inspiration = 3
+  min_level = 3
   def prepare(self, state):
     self.targets = list(self.subject.opponents_within(state, 10))
   def hankering(self):
-    return 99 if self.targets and self.subject.level >= 3 else 0
+    return 99 if self.targets else 0
   def apply_effect(self):
     for h in self.targets:
       h.hit(3 * self.subject.influence, self)
@@ -346,8 +349,9 @@ class UnpredictableJourney(Action):
 
 class CurseFlight(Action):
   inspiration = 3
-  def hankering(self):
-    return 99 if self.subject.level >= 4 else 0
+  min_level = 4
+  default_hankering = 99
+
   def apply_effect(self):
     self.subject.add_status('Curse Flight', duration=10)
 
@@ -380,6 +384,11 @@ class FlipWeakest(Action):
   cooldown = 10
   inspiration = 3
   animation_name = 'Overwhelming Terror'
+  min_level = 3
+
+
+  def hankering(self):
+    return self.default_hankering if self.target else 0
 
   def prepare(self, state):
     enemies = [hero for hero in state if not self.subject.teammate(hero)]
@@ -392,7 +401,7 @@ class FlipWeakest(Action):
 
   def get_info(self):
     return {**super().get_info(),
-            'target_hero': self.target}
+            'target_hero': self.target.id}
 
 class InspiredByTime(Action):
   cooldown = 8
@@ -436,9 +445,10 @@ class EngageInConversation(SimpleAttack):
       # Start conversation.
       self.subject.in_conversation_with = self.target
       self.target.num_conversations += 1
+      self.target.add_status('In conversation')
       self.cooldown = 0
+      self.inspiration = 0
     # Do conversation
-    self.damage += 0.5
     talking_heroes = [self.subject.in_conversation_with, self.subject]
     for hittingHero, hitHero in zip(talking_heroes, reversed(talking_heroes)):
       prev_loyalty_sign = sign(hitHero.loyalty)
@@ -446,6 +456,7 @@ class EngageInConversation(SimpleAttack):
       current_loyalty_sign = sign(hitHero.loyalty)
       if prev_loyalty_sign != current_loyalty_sign:
         self.over = True
+      self.damage += 0.5
     if self.over:
       self.back_to_init()
 
@@ -453,13 +464,17 @@ class EngageInConversation(SimpleAttack):
     self.damage = 0
     self.over = False
     self.target.num_conversations -= 1
+    if self.target.num_conversations == 0:
+      self.target.remove_status('In conversation')
     self.subject.in_conversation_with = None
     self.cooldown = self.orig_cooldown
+    self.inspiration = 1
 
 class Anaesthetise(Action):
   default_hankering = 10
   cooldown = 10
   inspiration = 3
+  min_level = 3
 
   def prepare(self, state):
     enemies = [hero for hero in state if not self.subject.teammate(hero)]
@@ -499,7 +514,8 @@ class Rescue(Action):
     self.target.y = self.target.start_y
     amount = self.target.max_loyalty - abs(self.target.loyalty)
     self.target.heal(amount)
-    self.subject.heal(amount / 2)
+    self.subject.x = self.target.start_x + copysign(0.1, self.subject.loyalty)
+    self.subject.y = self.target.start_y
 
   def get_info(self):
     return {**super().get_info(),
@@ -509,6 +525,7 @@ class Rescue(Action):
 class EnemyRescue(Rescue):
   inspiration = 3
   default_hankering = 15
+  min_level = 4
 
   def eligible(self, hero):
     return not self.subject.teammate(hero)

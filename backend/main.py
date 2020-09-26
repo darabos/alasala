@@ -139,6 +139,8 @@ def fuse():
   count = query(c, 'select count(1) as cnt from heroes where name = ? and user = ?', (name, user))[0]['cnt']
   assert(count > 1)
   c.execute('update users set ectoplasm = ectoplasm - 1 where email = ?', (user,))
-  c.execute('delete from heroes where rowid != ? and name = ? and user = ?', (rowid, name, user))
+  to_delete = query(c, 'select rowid from heroes where rowid != ? and name = ? and user = ? limit 1', (rowid, name, user))[0]['rowid']
+
+  c.execute('delete from heroes where rowid = ? and name = ? and user = ?', (to_delete, name, user))
   c.execute('update heroes set level = level + 1 where rowid = ?', (rowid,))
   return 'OK'
