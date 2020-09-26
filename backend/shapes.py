@@ -67,6 +67,7 @@ rats = dict(
         dict(mass=0.3, size=[0.1, 0.3, 0.1], dir='back', color='#333'),
         dict(mass=0.3, size=[0.1, 0.1, 0.1], dir='front'),
   dict(
+      mass = 0.3,
     dir='left',
     offset=[0.6, 0.2, 0],
       size=[0.2, 0.3, 0.2],
@@ -76,6 +77,7 @@ rats = dict(
         dict(size=[0.1, 0.1, 0.1], dir='front'),
       ]),
   dict(
+      mass = 0.3,
     dir='right',
     offset=[-0.6, 0.3, 0],
       size=[0.2, 0.3, 0.2],
