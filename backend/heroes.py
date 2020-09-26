@@ -124,7 +124,7 @@ class Hero:
   def init(self):
     pass
 
-  def act(self):
+  def act(self, state):
     self.actions_in_turn = []
     if self.has_status('Anaesthesia'):
       if random.random() + self.influence / 20 >= 0.1:
@@ -159,7 +159,7 @@ class Hero:
   def step(self, state, step_number):
     self.before_step(state)
     self.apply_status_effects(state)
-    self.act()
+    self.act(state)
     for action in self.actions:
       action.cool()
     self.after_step(state)
