@@ -440,7 +440,7 @@ function BattleSimulation({
     time: 0,
     turn: -1,
     midpoint: new THREE.Vector3(),
-    cameraPos: new THREE.Vector3(),
+    cameraPos: new THREE.Vector3(0, -100, 0),
   }).current;
 
   useFrame(({ camera, clock }) => {
@@ -452,7 +452,7 @@ function BattleSimulation({
       const [newMP, maxSize] = midpointAndMaxSize();
       turnClock.midpoint.lerp(newMP, 0.1);
       newMP.z = maxSize;
-      newMP.y -= (40 * maxSize) / 15;
+      newMP.y -= 1.5 * maxSize;
       turnClock.cameraPos.lerp(newMP, 0.1);
       camera.position.x = turnClock.cameraPos.x + 3 * Math.cos(0.19 * t);
       camera.position.y = turnClock.cameraPos.y + 3 * Math.sin(0.2 * t);
