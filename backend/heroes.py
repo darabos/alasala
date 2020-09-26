@@ -51,6 +51,7 @@ class Hero:
     return {
       name: {
         'name': cls.name,
+        'classname': name,
         'title': cls.title,
         'abilities': cls.abilities,
         'story': cls.story,
@@ -185,6 +186,7 @@ class Hero:
     'x': self.x,
     'y': self.y,
     'name': self.name,
+    'classname': type(self).__name__,
     'loyalty': self.loyalty,
     'max_loyalty': self.max_loyalty,
     'status': self.status,

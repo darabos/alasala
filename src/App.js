@@ -306,7 +306,7 @@ function BattleRenderer(props) {
   console.log('journal', journal);
   if (journal) {
     Object.entries(journal[0]).forEach(([id, value]) => {
-      const meta = data.index[value.name];
+      const meta = data.index[value.classname];
       heroStories.push({
         id: id,
         meta: meta,
@@ -1046,7 +1046,7 @@ function HeroPage({ id, data, update }) {
         </CombatCanvas>
       </div>
       <div className="HeroText">
-        <div className="HeroName"> {hero.name} </div>
+        <div className="HeroName"> {heroMeta.name} </div>
         <div className="HeroStats">
           <span>{heroMeta.title}</span>
           <span>Level {hero.level}</span>
