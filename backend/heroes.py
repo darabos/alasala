@@ -589,7 +589,7 @@ class Rats(Hero):
 class SteelKing(Hero):
   npc = True
   min_stage = 10
-  name = 'Oreus of Iron the Second'
+  name = 'Oreus'
   title = 'King of the Minerals'
   speed = 1
   
@@ -600,7 +600,7 @@ class SteelKing(Hero):
 class Lady(Hero):
   npc = True
   min_stage = 4
-  name = 'Lady Why (Not)'
+  name = 'Lady Why'
   title = 'Muse of the Stoic'
   speed = 1
   

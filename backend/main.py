@@ -3,6 +3,7 @@ import random
 import sqlite3
 import backend.battle_simulator as bs
 from backend.heroes import Hero
+from backend.stages import stages
 
 app = flask.Flask('backend')
 
@@ -81,7 +82,8 @@ def getdata(c, user):
   return {
     'progress': progress,
     'heroes': heroes,
-    'index': Hero.get_index()
+    'index': Hero.get_index(),
+    'next_stage': stages[progress['stage']],
   }
 
 @app.route('/getuserdata')

@@ -258,6 +258,12 @@ function PartySelector({ data, party, setParty, startCombat }) {
 
   return (
     <>
+      <div className="Enemy">
+        <p>The enemies defending stage {data.progress.stage + 1}:</p>
+        {data.next_stage.enemies.map(([name, level]) => (
+          <HeroListItem key={name} hero={{ name, level }} data={data} />
+        ))}
+      </div>
       <div className="Party">
         {party.map((id, i) => {
           const h = data.heroes.find((hero) => hero.id === id);
@@ -825,7 +831,6 @@ function HeroList(props) {
           key={h.id}
           hero={h}
           data={props.data}
-          showLevel
           onClick={() => props.onClick(h)}
         />
       ))}
@@ -838,12 +843,14 @@ function heroPortrait(hero) {
   );
 }
 
-function HeroListItem({ showLevel, hero, data, onClick }) {
+function HeroListItem({ hero, data, onClick }) {
   const meta = data.index[hero.name];
   return (
     <>
       <div
-        className={'HeroCard Clickable Level' + hero.level}
+        className={
+          'HeroCard Level' + hero.level + (onClick ? ' Clickable' : '')
+        }
         onClick={onClick}
       >
         <div className="CardBackground" />
@@ -852,11 +859,9 @@ function HeroListItem({ showLevel, hero, data, onClick }) {
           style={{ backgroundImage: heroPortrait(hero) }}
         />
         <div className="CardName"> {meta.name} </div>
-        {showLevel && (
-          <div className="CardLevel">
-            level <b>{hero.level}</b>
-          </div>
-        )}
+        <div className="CardLevel">
+          level <b>{hero.level}</b>
+        </div>
       </div>
     </>
   );
