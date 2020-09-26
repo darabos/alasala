@@ -13,7 +13,11 @@ pip install Flask
 ```
 
 After that, run the game with:
+```bash
 ./run_game.sh
+```
+
+To reset the game, just delete the file called `db`.
 
 Once the server is up, just direct your browser to:
 http://localhost:5000
