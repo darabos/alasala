@@ -1,4 +1,5 @@
 from backend.heroes import Hero
+from backend.stages import stages
 
 STARTX = [4, 4, 5, 5, 5]
 STARTY = [-0.5, 0.5, -1, 0, 1]
@@ -18,12 +19,12 @@ def get_player_state(heroes):
 
 def get_enemy_state(stage):
   return [Hero.create_by_name(
-  name='cube',
-  level=1,
+  name=name,
+  level=level,
   id=-(i + 1),
   owner='enemy',
-  x= STARTX[i],
-  y= STARTY[i]) for i in range(3)]
+  x=STARTX[i],
+  y=STARTY[i]) for (i, (name, level)) in enumerate(stages[stage]['enemies'])]
 
 
 def battle_is_over(turn):
