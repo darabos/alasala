@@ -1,0 +1,11 @@
+.*
+/build
+__pycache__
+db
+*.sh
+firebase.json
+node_modules
+package.json
+/public
+/src
+yarn.lock

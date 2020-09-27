@@ -1177,8 +1177,16 @@ function HeroDiorama({ hero, effects }) {
   );
 }
 
+function hostname() {
+  if (process.env.NODE_ENV === 'development') {
+    return '';
+  } else {
+    return 'https://alasala.ew.r.appspot.com/';
+  }
+}
+
 function post(url, params) {
-  return fetch(url, {
+  return fetch(hostname() + url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),
@@ -1322,7 +1330,7 @@ function Searched(props) {
 }
 
 function fetchData(setData, setError) {
-  fetch('/getuserdata?user=test')
+  fetch(hostname() + '/getuserdata?user=test')
     .then((res) => res.json())
     .then(
       (res) => setData(res),
