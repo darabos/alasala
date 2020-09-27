@@ -1,0 +1,4 @@
+runtime: python38
+entrypoint: gunicorn -b :$PORT backend.main:app
+includes:
+- secrets.yaml
