@@ -222,9 +222,12 @@ def fuse():
   return 'OK'
 
 @app.route('/')
+def root():
+    return flask.redirect(flask.url_for('indexhtml'))
+
+@app.route('/ui')
 @login_required
 def indexhtml():
-    print('this is happening', current_user.get_id())
     return flask.send_from_directory('build', 'index.html')
 
 
