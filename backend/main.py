@@ -7,8 +7,68 @@ import backend.battle_simulator as bs
 from backend.heroes import Hero
 from backend.stages import stages
 
+from flask_login import LoginManager
+from flask_login import login_user, current_user, login_required, logout_user
+from flask_dance.contrib.google import make_google_blueprint, google
+from flask_dance.consumer import oauth_authorized
+
 app = flask.Flask('', static_url_path='/somethingthatwillnevercomeup')
 flask_cors.CORS(app, origins='https://alasala-island.web.app', allow_headers='*')
+
+app.secret_key = 'not so top secret'
+class AlasalaUser:
+  def __init__(self, email):
+    self.email = email
+  @property
+  def is_active(self):
+      return True
+  @property
+  def is_authenticated(self):
+      return True
+  @property
+  def is_anonymous(self):
+      return False
+
+  def get_id(self):
+      return self.email
+
+  def __str__(self):
+      return f'User with email {self.email}'
+
+# ========== Login setup ===========================
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return AlasalaUser(user_id)
+
+secret = open("google_client_secret").read()
+
+google_blueprint = make_google_blueprint(
+    client_id='594397528159-gb303qan1ci6mna9vthin8qsohae95k8.apps.googleusercontent.com',
+    client_secret=secret,
+    scope=[
+        'openid',
+        'https://www.googleapis.com/auth/userinfo.email',
+    ]
+)
+app.register_blueprint(google_blueprint, url_prefix='/auth')
+
+@oauth_authorized.connect
+def _on_signin(blueprint, token):
+    user_json = google.get('oauth2/v1/userinfo').json()
+    print(user_json)
+    us = AlasalaUser(user_json['email'])
+    login_user(us)
+    
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('indexhtml'))
+
+
+
 
 def init_table(c, test, commands):
   try:
