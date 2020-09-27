@@ -1,16 +1,19 @@
 import flask
+import flask_cors
+import os
+import pymysql
 import random
-import sqlite3
 import backend.battle_simulator as bs
 from backend.heroes import Hero
 from backend.stages import stages
 
 app = flask.Flask('', static_url_path='/somethingthatwillnevercomeup')
+flask_cors.CORS(app, origins='https://alasala-island.web.app', allow_headers='*')
 
 def init_table(c, test, commands):
   try:
     test_success = query(c, test)
-  except sqlite3.OperationalError:
+  except Exception:
     test_success = False
   if not test_success:
     for s in commands.strip().split('\n'):
@@ -20,20 +23,22 @@ def init_table(c, test, commands):
 def db():
   db = getattr(flask.g, '_database', None)
   if db is None:
-    db = flask.g._database = sqlite3.connect('db')
+    db = pymysql.connect(
+        user='alasala', password=os.environ['SQL_PASSWORD'],
+        unix_socket='/cloudsql/alasala:europe-west1:alasala-pyweek-mysql', db='alasala',
+        cursorclass=pymysql.cursors.DictCursor)
+    flask.g._database = db
     c = db.cursor()
     init_table(c, 'select * from users where email = "test"', '''
       drop table if exists users
-      create table users (email text, stage int, day int, ectoplasm int)
-      insert into users values ("test", 0, 1, 0)
+      create table users (email text, stage int, day int, ectoplasm int, rowid mediumint not null auto_increment, primary key (rowid))
+      insert into users values ("test", 0, 1, 0, null)
       ''')
 
     init_table(c, 'select * from heroes where user = "test"', '''
       drop table if exists heroes
-      create table heroes (name text, level int, user text)
+      create table heroes (name text, level int, user text, rowid mediumint not null auto_increment, primary key (rowid))
       ''')
-    print(query(c, 'select * from users'))
-    print(query(c, 'SELECT name FROM sqlite_master WHERE type="table"'))
   return db.cursor()
 
 @app.teardown_appcontext
@@ -45,8 +50,8 @@ def close_connection(exception):
     db.close()
 
 def query(cursor, q, args=()):
-  res = cursor.execute(q, args)
-  return [dict(zip([c[0] for c in res.description], row)) for row in res]
+  cursor.execute(q, args)
+  return cursor.fetchall()
 
 @app.route('/computecombat', methods=['POST'])
 def computecombat():
@@ -70,14 +75,14 @@ def computecombat():
   return flask.jsonify({'log': log, 'winner': winner})
 
 def get_heroes_of_user(c, user):
-  return query(c, 'select rowid as id, * from heroes where user = ?', (user,))
+  return query(c, 'select *, rowid as id from heroes where user = %s', (user,))
 
 def progress(user):
   c = db()
-  c.execute('update users set stage = stage + 1 where email = ?', (user,))
+  c.execute('update users set stage = stage + 1 where email = %s', (user,))
 
 def getdata(c, user):
-  progress = query(c, 'select * from users where email = ?', (user,))[0]
+  progress = query(c, 'select * from users where email = %s', (user,))[0]
   heroes = get_heroes_of_user(c, user)
   return {
     'progress': progress,
@@ -95,14 +100,15 @@ def getuserdata():
 def searchbeach():
   user = flask.request.get_json()['user']
   c = db()
-  progress = query(c, 'select * from users where email = ?', (user,))[0]
+  progress = query(c, 'select * from users where email = %s', (user,))[0]
   stage = progress['stage']
   hero_name = random.choice(list(
     name for name, meta in Hero.get_index().items()
     if meta['min_stage'] <= stage and not meta['npc']))
   hero = {'name': hero_name, 'level': 1}  
-  c.execute('update users set day = day + 1 where email = ?', (user,))
-  c.execute('insert into heroes values (?, ?, ?)', (hero['name'], hero['level'], user))
+  c.execute('update users set day = day + 1 where email = %s', (user,))
+  print('insert into heroes values (%s, %s, %s, null)', (hero['name'], hero['level'], user))
+  c.execute('insert into heroes values (%s, %s, %s, null)', (hero['name'], hero['level'], user))
   data = getdata(c, user)
   data['just_found'] = hero
   return flask.jsonify(data)
@@ -112,7 +118,7 @@ def oneofeach():
   c = db()
   for name, meta in Hero.get_index().items():
     hero = {'name': name, 'level': 1}
-    c.execute('insert into heroes values (?, ?, ?)', (hero['name'], hero['level'], 'test'))
+    c.execute('insert into heroes values (%s, %s, %s, null)', (hero['name'], hero['level'], 'test'))
   return "Your wish was granted"
 
 @app.route('/dissolve', methods=['POST'])
@@ -120,10 +126,10 @@ def dissolve():
   user = flask.request.get_json()['user']
   rowid = flask.request.get_json()['hero']
   c = db()
-  count = query(c, 'select count(1) as cnt from heroes where rowid = ? and user = ?', (rowid, user))[0]['cnt']
+  count = query(c, 'select count(1) as cnt from heroes where rowid = %s and user = %s', (rowid, user))[0]['cnt']
   assert(count == 1)
-  c.execute('delete from heroes where rowid = ? and user = ?', (rowid, user))
-  c.execute('update users set ectoplasm = ectoplasm + 1 where email = ?', (user,))
+  c.execute('delete from heroes where rowid = %s and user = %s', (rowid, user))
+  c.execute('update users set ectoplasm = ectoplasm + 1 where email = %s', (user,))
   return 'OK'
 
 @app.route('/fuse', methods=['POST'])
@@ -131,18 +137,18 @@ def fuse():
   user = flask.request.get_json()['user']
   rowid = flask.request.get_json()['hero']
   c = db()
-  ectoplasm = query(c, 'select ectoplasm from users where email = ?', (user,))[0]['ectoplasm']
+  ectoplasm = query(c, 'select ectoplasm from users where email = %s', (user,))[0]['ectoplasm']
   assert(ectoplasm > 0)
-  names = query(c, 'select name from heroes where rowid = ? and user = ?', (rowid, user))
+  names = query(c, 'select name from heroes where rowid = %s and user = %s', (rowid, user))
   assert(len(names) == 1)
   name = names[0]['name']
-  count = query(c, 'select count(1) as cnt from heroes where name = ? and user = ?', (name, user))[0]['cnt']
+  count = query(c, 'select count(1) as cnt from heroes where name = %s and user = %s', (name, user))[0]['cnt']
   assert(count > 1)
-  c.execute('update users set ectoplasm = ectoplasm - 1 where email = ?', (user,))
-  to_delete = query(c, 'select rowid from heroes where rowid != ? and name = ? and user = ? limit 1', (rowid, name, user))[0]['rowid']
+  c.execute('update users set ectoplasm = ectoplasm - 1 where email = %s', (user,))
+  to_delete = query(c, 'select rowid from heroes where rowid != %s and name = %s and user = %s limit 1', (rowid, name, user))[0]['rowid']
 
-  c.execute('delete from heroes where rowid = ? and name = ? and user = ?', (to_delete, name, user))
-  c.execute('update heroes set level = level + 1 where rowid = ?', (rowid,))
+  c.execute('delete from heroes where rowid = %s and name = %s and user = %s', (to_delete, name, user))
+  c.execute('update heroes set level = level + 1 where rowid = %s', (rowid,))
   return 'OK'
 
 @app.route('/')
