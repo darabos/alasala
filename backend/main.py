@@ -46,7 +46,7 @@ def load_user(user_id):
 secret = open("google_client_secret").read()
 
 google_blueprint = make_google_blueprint(
-    client_id='594397528159-gb303qan1ci6mna9vthin8qsohae95k8.apps.googleusercontent.com',
+    client_id=r'965049736612-2b5brso1l4fdkek4qp13640tgrdvkh4u.apps.googleusercontent.com',
     client_secret=secret,
     scope=[
         'openid',
@@ -58,16 +58,15 @@ app.register_blueprint(google_blueprint, url_prefix='/auth')
 @oauth_authorized.connect
 def _on_signin(blueprint, token):
     user_json = google.get('oauth2/v1/userinfo').json()
-    print(user_json)
     us = AlasalaUser(user_json['email'])
     login_user(us)
     
 @app.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('indexhtml'))
+    return flask.redirect(flask.url_for('indexhtml'))
 
-
+login_manager.login_view = 'google.login'
 
 
 def init_table(c, test, commands):
@@ -114,9 +113,10 @@ def query(cursor, q, args=()):
   return cursor.fetchall()
 
 @app.route('/computecombat', methods=['POST'])
+@login_required
 def computecombat():
   args = flask.request.get_json()
-  user = args['user']
+  user = current_user.get_id()
   party = args['party']
   stage = args['stage']
   c = db()
@@ -142,7 +142,11 @@ def progress(user):
   c.execute('update users set stage = stage + 1 where email = %s', (user,))
 
 def getdata(c, user):
-  progress = query(c, 'select * from users where email = %s', (user,))[0]
+  res = query(c, 'select * from users where email = %s', (user,))
+  if not res:
+    c.execute('insert into users values (%s, 0, 1, 0, null)', (user,))
+    res = query(c, 'select * from users where email = %s', (user,))
+  progress = res[0]
   heroes = get_heroes_of_user(c, user)
   return {
     'progress': progress,
@@ -152,13 +156,15 @@ def getdata(c, user):
   }
 
 @app.route('/getuserdata')
+@login_required
 def getuserdata():
-  user = flask.request.args['user']
+  user = current_user.get_id()
   return flask.jsonify(getdata(db(), user))
 
 @app.route('/searchbeach', methods=['POST'])
+@login_required
 def searchbeach():
-  user = flask.request.get_json()['user']
+  user = current_user.get_id()
   c = db()
   progress = query(c, 'select * from users where email = %s', (user,))[0]
   stage = progress['stage']
@@ -174,16 +180,19 @@ def searchbeach():
   return flask.jsonify(data)
 
 @app.route('/oneofeach', methods=['GET'])
+@login_required
 def oneofeach():
+  user = current_user.get_id()
   c = db()
   for name, meta in Hero.get_index().items():
     hero = {'name': name, 'level': 1}
-    c.execute('insert into heroes values (%s, %s, %s, null)', (hero['name'], hero['level'], 'test'))
+    c.execute('insert into heroes values (%s, %s, %s, null)', (hero['name'], hero['level'], user))
   return "Your wish was granted"
 
 @app.route('/dissolve', methods=['POST'])
+@login_required
 def dissolve():
-  user = flask.request.get_json()['user']
+  user = current_user.get_id()
   rowid = flask.request.get_json()['hero']
   c = db()
   count = query(c, 'select count(1) as cnt from heroes where rowid = %s and user = %s', (rowid, user))[0]['cnt']
@@ -193,8 +202,9 @@ def dissolve():
   return 'OK'
 
 @app.route('/fuse', methods=['POST'])
+@login_required
 def fuse():
-  user = flask.request.get_json()['user']
+  user = current_user.get_id()
   rowid = flask.request.get_json()['hero']
   c = db()
   ectoplasm = query(c, 'select ectoplasm from users where email = %s', (user,))[0]['ectoplasm']
@@ -212,10 +222,13 @@ def fuse():
   return 'OK'
 
 @app.route('/')
+@login_required
 def indexhtml():
+    print('this is happening', current_user.get_id())
     return flask.send_from_directory('build', 'index.html')
 
 
 @app.route('/<path:path>')
+@login_required
 def static_stuff(path):
     return flask.send_from_directory('build', path)

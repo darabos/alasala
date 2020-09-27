@@ -1178,11 +1178,7 @@ function HeroDiorama({ hero, effects }) {
 }
 
 function hostname() {
-  if (process.env.NODE_ENV === 'development') {
-    return '';
-  } else {
-    return 'https://alasala.ew.r.appspot.com/';
-  }
+  return '';
 }
 
 function post(url, params) {
