@@ -15,6 +15,7 @@ pip install Flask
 ```
 
 After that, run the game with:
+
 ```bash
 ./run_game.sh
 ```
