@@ -45,7 +45,7 @@ const HeroBox = React.forwardRef((props, heroRef) => {
   heroRef = heroRef || createRef();
   const meta = props.meta;
   const weight = meta.weight;
-  const keelZ = -3;
+  const keelZ = -6;
   const turn = props.turn;
   const initial = props.trajectory[0];
   const height = meta.shape.size[2];
@@ -74,7 +74,7 @@ const HeroBox = React.forwardRef((props, heroRef) => {
     restLength: 0,
     stiffness: 3 * weight,
     damping: 0,
-    localAnchorA: [0, 0, -height / 2 - 2],
+    localAnchorA: [0, 0, -height / 2 - 5],
   });
 
   useFrame(() => {
@@ -1154,21 +1154,28 @@ const HeroBodyPart = React.forwardRef(
 );
 
 function HeroDiorama({ hero }) {
+  const turnClock = useRef({ phase: 0 }).current;
   useFrame(({ camera, clock }) => {
     const t = clock.getElapsedTime();
+    turnClock.phase = Math.sin(t / 4);
     camera.up.set(0, 0, 1);
-    camera.position.x = -2 + 0.2 * Math.cos(t);
-    camera.position.y = -2 + 0.1 * Math.sin(1.3 * t);
+    camera.position.x = -2;
+    camera.position.y = -2;
     camera.position.z = 2;
     camera.lookAt(0, 0, 0.5);
   });
+  const ref = createRef();
   return (
     <>
       <HeroBox
+        ref={ref}
         meta={hero}
-        trajectory={[{ x: 0, y: 0, status: [], actions: [] }]}
+        trajectory={[
+          { x: 0, y: 0, status: [], actions: [] },
+          { x: 5, y: 5, status: [], actions: [] },
+        ]}
         turn={0}
-        turnClock={{ phase: 0 }}
+        turnClock={turnClock}
         leashPos={0.0001}
       />
       <BasePlane />
