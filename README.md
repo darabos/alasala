@@ -6,7 +6,8 @@ In this game you suffer a shipwreck and find yourself on the mysterious
 Alasala Island. Can you escape or will you succumb to the temptation to
 stay forever?
 
-We may add small bug fixes on `master`. [Compare `master` against the `pyweek` tag.](https://github.com/darabos/alasala/compare/pyweek...master)
+We may add new things on `master`. The version submitted for PyWeek is tagged as [`pyweek`](https://github.com/darabos/alasala/tree/pyweek).
+[Compare `master` against the `pyweek` tag.](https://github.com/darabos/alasala/compare/pyweek...master)
 
 This games uses a Web UI. You need flask:
 
