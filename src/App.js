@@ -42,6 +42,7 @@ function BasePlane(props) {
 }
 
 const HeroBox = React.forwardRef((props, heroRef) => {
+  heroRef = heroRef || createRef();
   const meta = props.meta;
   const weight = meta.weight;
   const keelZ = -3;
@@ -1152,7 +1153,7 @@ const HeroBodyPart = React.forwardRef(
   }
 );
 
-function HeroDiorama({ hero, effects }) {
+function HeroDiorama({ hero }) {
   useFrame(({ camera, clock }) => {
     const t = clock.getElapsedTime();
     camera.up.set(0, 0, 1);
@@ -1161,12 +1162,10 @@ function HeroDiorama({ hero, effects }) {
     camera.position.z = 2;
     camera.lookAt(0, 0, 0.5);
   });
-  const ref = createRef();
   return (
     <>
       <HeroBox
         meta={hero}
-        ref={ref}
         trajectory={[{ x: 0, y: 0, status: [], actions: [] }]}
         turn={0}
         turnClock={{ phase: 0 }}
@@ -1316,6 +1315,54 @@ function HeroPage({ id, data, update }) {
   );
 }
 
+function GroupPhoto({ data }) {
+  const heroes = {};
+  for (const h of data.heroes) {
+    heroes[h.name] = data.index[h.name];
+  }
+  return (
+    <div className="GroupCanvas">
+      <CombatCanvas effects lightPosition={[0, -50, 25]}>
+        <GroupDiorama heroes={heroes} />
+      </CombatCanvas>
+    </div>
+  );
+}
+
+function GroupDiorama({ heroes }) {
+  const n = Object.values(heroes).length;
+  const cols = 5;
+  const rows = Math.ceil(n / cols);
+  const x = (i) =>
+    i < cols * (rows - 1)
+      ? 2 * ((i % cols) - (cols - 1) / 2)
+      : 2 * ((i % cols) - ((n % cols) - 1) / 2);
+  const y = (i) => 2 * (Math.floor(i / cols) - (rows - 3) / 2);
+  useFrame(({ camera, clock }) => {
+    camera.fov = 40;
+    camera.updateProjectionMatrix();
+    camera.up.set(0, 0, 1);
+    camera.position.x = cols;
+    camera.position.y = -3 - rows;
+    camera.position.z = n / 2;
+    camera.lookAt(0, 0, 0.5);
+  });
+  return (
+    <>
+      {Object.values(heroes).map((hero, i) => (
+        <HeroBox
+          meta={hero}
+          trajectory={[{ x: x(i), y: y(i), status: [], actions: [] }]}
+          turn={0}
+          turnClock={{ phase: 0 }}
+          leashPos={0.0001}
+        />
+      ))}
+      <BasePlane />
+    </>
+  );
+}
+
 function Searched(props) {
   useEffect(() => window.scrollTo(0, 0), []);
   return (
@@ -1397,14 +1444,19 @@ function App() {
             <Map setPage={setPage} searchBeach={searchBeach} data={data} />
           )}
           {page === 'heroes' && (
-            <HeroList
-              data={data}
-              heroes={data.heroes}
-              onClick={(h) => {
-                setPage('hero');
-                setHeroPage(h.id);
-              }}
-            />
+            <>
+              <HeroList
+                data={data}
+                heroes={data.heroes}
+                onClick={(h) => {
+                  setPage('hero');
+                  setHeroPage(h.id);
+                }}
+              />
+              <button onClick={() => setPage('group photo')}>
+                Group Photo
+              </button>
+            </>
           )}
           {page === 'hero' && (
             <HeroPage update={update} id={heroPage} data={data} />
@@ -1412,6 +1464,7 @@ function App() {
           {page === 'searched' && (
             <Searched data={data} setShowButtons={setShowButtons} />
           )}
+          {page === 'group photo' && <GroupPhoto data={data} />}
         </div>
       )}
     </div>

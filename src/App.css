@@ -6,6 +6,7 @@ body {
 }
 .CombatCanvas,
 .HeroCanvas,
+.GroupCanvas,
 .MapCanvas {
   position: relative;
   overflow: hidden;

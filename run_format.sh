@@ -1,2 +1,2 @@
 #!/bin/bash -xue
-npx prettier --write .
+npx prettier --ignore-path .gitignore --write .
