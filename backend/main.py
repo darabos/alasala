@@ -223,7 +223,11 @@ def fuse():
 
 @app.route('/')
 def root():
-    return flask.redirect(flask.url_for('indexhtml'))
+    return flask.send_from_directory('build', 'welcome.html')
+
+@app.route('/alasala-poster.jpg')
+def alasala_poster():
+    return flask.send_from_directory('build', 'alasala-poster.jpg')
 
 @app.route('/ui')
 @login_required
